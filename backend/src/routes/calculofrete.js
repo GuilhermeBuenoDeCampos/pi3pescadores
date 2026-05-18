@@ -10,6 +10,12 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'CEP de destino e lista de produtos são obrigatórios.' });
   }
 
+  // Validar formato do CEP
+  const cleanCEP = String(to_postal_code).replace(/\D/g, '');
+  if (cleanCEP.length !== 8) {
+    return res.status(400).json({ error: 'CEP deve conter exatamente 8 dígitos.' });
+  }
+
   const from_postal_code = process.env.CEP_ESTOQUE;
   if (!from_postal_code) {
     return res.status(500).json({ error: 'CEP de origem não configurado.' });

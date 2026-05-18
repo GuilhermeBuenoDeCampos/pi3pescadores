@@ -16,6 +16,8 @@ function CartPage() {
   const [shippingOptions, setShippingOptions] = useState([]);
   const [selectedShipping, setSelectedShipping] = useState(null);
   const [isLoadingShipping, setIsLoadingShipping] = useState(false);
+  const [shippingError, setShippingError] = useState('');
+  const [shippingSuccess, setShippingSuccess] = useState(false);
 
   // Usar itens do cart
   const displayItems = Array.isArray(cart.items) ? cart.items : [];
@@ -44,11 +46,29 @@ function CartPage() {
   
   const totalItems = displayItems.reduce((total, item) => total + item.quantity, 0);
 
+  const validateCEP = (cepValue) => {
+    const cleanCEP = cepValue.replace(/\D/g, '');
+    if (cleanCEP.length === 0) {
+      return { valid: false, message: '❌ Por favor, informe o CEP.' };
+    }
+    if (cleanCEP.length !== 8) {
+      return { valid: false, message: `❌ CEP deve conter 8 dígitos. (${cleanCEP.length}/8)` };
+    }
+    return { valid: true, message: '' };
+  };
+
   const handleCalculateShipping = async () => {
-    if (!cep.trim()) {
-      alert('Por favor, informe o CEP.');
+    setShippingError('');
+    setShippingSuccess(false);
+    
+    const validation = validateCEP(cep);
+    if (!validation.valid) {
+      setShippingError(validation.message);
+      setShippingOptions([]);
+      setSelectedShipping(null);
       return;
     }
+
     setIsLoadingShipping(true);
     setShippingOptions([]);
     setSelectedShipping(null);
@@ -63,10 +83,19 @@ function CartPage() {
         to_postal_code: cep,
         products: products,
       });
-      setShippingOptions(data);
+      
+      if (data && data.length > 0) {
+        setShippingOptions(data);
+        setShippingSuccess(true);
+        setShippingError('');
+      } else {
+        setShippingError('⚠️ Nenhuma opção de frete disponível para este CEP.');
+        setShippingOptions([]);
+      }
     } catch (error) {
       console.error('Erro ao calcular frete:', error);
-      alert('Não foi possível calcular o frete. Tente novamente.');
+      setShippingError('❌ Erro ao calcular frete. Verifique o CEP e tente novamente.');
+      setShippingOptions([]);
     } finally {
       setIsLoadingShipping(false);
     }
@@ -185,14 +214,25 @@ function CartPage() {
                 <input 
                   type="text" 
                   value={cep} 
-                  onChange={(e) => setCep(e.target.value)} 
-                  placeholder="Ex: 01234-567"
-                  maxLength="9"
+                  onChange={(e) => setCep(e.target.value.replace(/\D/g, '').slice(0, 8))} 
+                  placeholder="Ex: 01234567"
+                  maxLength="8"
+                  className={shippingError && cep ? 'input-error' : ''}
                 />
                 <button onClick={handleCalculateShipping} disabled={isLoadingShipping}>
                   {isLoadingShipping ? 'Calculando...' : 'Calcular'}
                 </button>
               </div>
+              {shippingError && (
+                <div className="shipping-error">
+                  {shippingError}
+                </div>
+              )}
+              {shippingSuccess && shippingOptions.length > 0 && (
+                <div className="shipping-success">
+                  ✅ Opções de frete carregadas com sucesso!
+                </div>
+              )}
               {shippingOptions.length > 0 && (
                 <div className="shipping-options">
                   {shippingOptions.map(option => (
