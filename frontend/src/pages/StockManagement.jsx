@@ -499,17 +499,17 @@ const StockManagement = () => {
                       <input type="number" step="0.001" name="peso" className={styles.formControl} placeholder="0.000" defaultValue={editProduct && editProduct.peso !== undefined ? editProduct.peso : ''} />
                     </div>
                     <div className={styles.formGroup}>
-                      <label>Altura (cm)</label>
+                      <label>Altura (m)</label>
                       <input type="number" step="0.01" name="altura" className={styles.formControl} placeholder="0.00" defaultValue={editProduct && editProduct.altura !== undefined ? editProduct.altura : ''} />
                     </div>
                   </div>
                   <div className={styles.formRow}>
                     <div className={styles.formGroup}>
-                      <label>Largura (cm)</label>
+                      <label>Largura (m)</label>
                       <input type="number" step="0.01" name="largura" className={styles.formControl} placeholder="0.00" defaultValue={editProduct && editProduct.largura !== undefined ? editProduct.largura : ''} />
                     </div>
                     <div className={styles.formGroup}>
-                      <label>Profundidade (cm)</label>
+                      <label>Profundidade (m)</label>
                       <input type="number" step="0.01" name="profundidade" className={styles.formControl} placeholder="0.00" defaultValue={editProduct && editProduct.profundidade !== undefined ? editProduct.profundidade : ''} />
                     </div>
                   </div>
