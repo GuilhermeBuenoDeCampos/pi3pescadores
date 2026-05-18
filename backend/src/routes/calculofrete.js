@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
       to: { postal_code: to_postal_code },
       products: melhorenvioProducts,
     }, {
-      Authorization: `Bearer ${process.env.MELHOR_ENVIO_TOKEN}`,
+      Authorization: process.env.MELHOR_ENVIO_TOKEN,
       'User-Agent': process.env.USER_AGENT,
     });
 
