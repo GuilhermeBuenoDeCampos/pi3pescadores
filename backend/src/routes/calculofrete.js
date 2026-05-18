@@ -26,14 +26,21 @@ router.post('/', async (req, res) => {
   }));
 
   try {
+    const headers = {
+      'User-Agent': process.env.USER_AGENT,
+    };
+
+    // Remove "Bearer " prefix if it exists in the token
+    const token = (process.env.MELHOR_ENVIO_TOKEN || '').replace(/^Bearer\s+/i, '');
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
     const { data } = await melhorenvio.calculoDeFretesPorProdutos({
       from: { postal_code: from_postal_code },
       to: { postal_code: to_postal_code },
       products: melhorenvioProducts,
-    }, {
-      Authorization: process.env.MELHOR_ENVIO_TOKEN,
-      'User-Agent': process.env.USER_AGENT,
-    });
+    }, headers);
 
     const filteredServices = data.filter(service => ['PAC', 'SEDEX'].includes(service.name));
 
