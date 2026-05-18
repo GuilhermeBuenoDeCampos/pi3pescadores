@@ -12,6 +12,7 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
+    "@api/melhorenvio": "file:.api/apis/melhorenvio",
     "cors": "^2.8.6"
   }
 }

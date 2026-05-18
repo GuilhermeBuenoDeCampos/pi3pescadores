@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Header from '../components/Header';
 import './cart.css';
 import semImagem from '../assets/ProdutoSemImagem/semimagem.png';
-import { getAuthToken, getAuthUser, getImageUrl } from '../services/api';
+import { getAuthToken, getAuthUser, getImageUrl, calculateShipping } from '../services/api';
 import { formatPrice } from '../utils/productUtils';
 
 function CartPage() {
@@ -12,6 +12,10 @@ function CartPage() {
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState('');
   const [couponDiscount, setCouponDiscount] = useState(0);
+  const [cep, setCep] = useState('');
+  const [shippingOptions, setShippingOptions] = useState([]);
+  const [selectedShipping, setSelectedShipping] = useState(null);
+  const [isLoadingShipping, setIsLoadingShipping] = useState(false);
 
   // Usar itens do cart
   const displayItems = Array.isArray(cart.items) ? cart.items : [];
@@ -35,10 +39,39 @@ function CartPage() {
     return total + price * item.quantity;
   }, 0);
 
-  const shipping = 0; // Frete grátis no momento
-  const total = subtotal + shipping - couponDiscount;
+  const shippingCost = selectedShipping ? parseFloat(selectedShipping.price) : 0;
+  const total = subtotal + shippingCost - couponDiscount;
   
   const totalItems = displayItems.reduce((total, item) => total + item.quantity, 0);
+
+  const handleCalculateShipping = async () => {
+    if (!cep.trim()) {
+      alert('Por favor, informe o CEP.');
+      return;
+    }
+    setIsLoadingShipping(true);
+    setShippingOptions([]);
+    setSelectedShipping(null);
+
+    const products = displayItems.map(item => ({
+      ...item.product,
+      quantity: item.quantity,
+    }));
+
+    try {
+      const data = await calculateShipping({
+        to_postal_code: cep,
+        products: products,
+      });
+      setShippingOptions(data);
+    } catch (error) {
+      console.error('Erro ao calcular frete:', error);
+      alert('Não foi possível calcular o frete. Tente novamente.');
+    } finally {
+      setIsLoadingShipping(false);
+    }
+  };
+
   const applyCoupon = () => {
     if (couponCode.toLowerCase() === 'desc10') {
       setCouponDiscount(subtotal * 0.1);
@@ -63,6 +96,8 @@ function CartPage() {
       '',
       ...productLines,
       '',
+      `Subtotal: R$ ${formatPrice(subtotal)}`,
+      selectedShipping ? `Frete (${selectedShipping.name}): R$ ${formatPrice(shippingCost)}` : 'Frete a calcular',
       `Total: R$ ${formatPrice(total)}`,
       '',
       `Meu nome: ${userName}`,
@@ -143,6 +178,47 @@ function CartPage() {
               <span>Produtos ({totalItems})</span>
               <span>R$ {formatPrice(subtotal)}</span>
             </div>
+            
+            <div className="shipping-calculator">
+              <h4>Calcular frete</h4>
+              <div className="cep-input-container">
+                <input 
+                  type="text" 
+                  value={cep} 
+                  onChange={(e) => setCep(e.target.value)} 
+                  placeholder="Digite seu CEP"
+                />
+                <button onClick={handleCalculateShipping} disabled={isLoadingShipping}>
+                  {isLoadingShipping ? 'Calculando...' : 'Calcular'}
+                </button>
+              </div>
+              {shippingOptions.length > 0 && (
+                <div className="shipping-options">
+                  {shippingOptions.map(option => (
+                    <div key={option.name} className="shipping-option">
+                      <input 
+                        type="radio" 
+                        id={option.name} 
+                        name="shipping" 
+                        value={option.name}
+                        onChange={() => setSelectedShipping(option)}
+                      />
+                      <label htmlFor={option.name}>
+                        {option.name} - R$ {formatPrice(option.price)} ({option.delivery_time} dias)
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {selectedShipping && (
+              <div className="summary-item">
+                <span>Frete ({selectedShipping.name})</span>
+                <span>R$ {formatPrice(shippingCost)}</span>
+              </div>
+            )}
+
             <div className="summary-item total">
               <span>Total</span>
               <span>R$ {formatPrice(total)}</span>

@@ -4,6 +4,7 @@ const produtosRoutes = require('./produtos');
 const auditoriaRoutes = require('./auditoria');
 const authRoutes = require('./auth');
 const pesquisasRoutes = require('./pesquisas');
+const calculoFreteRoutes = require('./calculofrete');
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use('/produtos', produtosRoutes);
 router.use('/auditoria', auditoriaRoutes);
 router.use('/auth', authRoutes);
 router.use('/pesquisas', pesquisasRoutes);
+router.use('/frete', calculoFreteRoutes);
 
 module.exports = router;

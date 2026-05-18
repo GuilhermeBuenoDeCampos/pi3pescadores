@@ -99,9 +99,7 @@ export function clearAuthSession() {
 export function getImageUrl(url) {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  // ensure we don't accidentally join without a slash: handle 'uploads/img.jpg' and '/uploads/img.jpg'
-  const normalized = url.startsWith('/') ? url : `/${url}`;
-  return `${BACKEND_URL}${normalized}`;
+  return `${BACKEND_URL}${url}`;
 }
 
 
@@ -307,4 +305,18 @@ export async function updateProductStatus(id, ativo) {
 
   const result = await response.json();
   return result.data;
+}
+
+export async function calculateShipping(payload) {
+    const response = await fetch(`${API_URL}/frete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+        throw new Error(await parseApiError(response, 'Erro ao calcular o frete.'));
+    }
+
+    return response.json();
 }
