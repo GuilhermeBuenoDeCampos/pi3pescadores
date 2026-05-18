@@ -350,6 +350,156 @@ body {
   }
 }
 
+/* Seção de Cálculo de Frete */
+.shipping-calculator {
+  background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+  border: 1px solid var(--tp-border-light);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.shipping-calculator h4 {
+  margin: 0 0 14px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tp-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cep-input-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.cep-input-container input {
+  flex: 1;
+  padding: 11px 14px;
+  border: 1px solid var(--tp-border-light);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+  background: var(--tp-white);
+}
+
+.cep-input-container input:focus {
+  outline: none;
+  border-color: var(--tp-yellow);
+  box-shadow: 0 0 0 3px rgba(46, 158, 130, 0.1);
+}
+
+.cep-input-container input::placeholder {
+  color: #999;
+}
+
+.cep-input-container button {
+  padding: 11px 18px;
+  background: var(--tp-yellow);
+  color: var(--tp-white);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.cep-input-container button:hover:not(:disabled) {
+  background: #25866a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(46, 158, 130, 0.2);
+}
+
+.cep-input-container button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Opções de Frete */
+.shipping-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.shipping-option {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1.5px solid var(--tp-border-light);
+  border-radius: 6px;
+  background: var(--tp-white);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shipping-option:hover {
+  border-color: var(--tp-yellow);
+  background: rgba(46, 158, 130, 0.05);
+}
+
+.shipping-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  cursor: pointer;
+  accent-color: var(--tp-yellow);
+}
+
+.shipping-option label {
+  flex: 1;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--tp-text-main);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shipping-option input[type="radio"]:checked + label {
+  font-weight: 600;
+  color: var(--tp-navy);
+}
+
+.shipping-option input[type="radio"]:checked {
+  border-color: var(--tp-yellow);
+}
+
+/* Destaque para opção selecionada */
+.shipping-option input[type="radio"]:checked + label::before {
+  content: "✓";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: var(--tp-yellow);
+  color: white;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: -24px;
+  margin-right: 8px;
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+  .cep-input-container {
+    flex-direction: column;
+  }
+  
+  .cep-input-container button {
+    width: 100%;
+  }
+}
+
 @media (max-width: 1024px) {
   .maybe-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

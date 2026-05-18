@@ -180,13 +180,14 @@ function CartPage() {
             </div>
             
             <div className="shipping-calculator">
-              <h4>Calcular frete</h4>
+              <h4>📦 Calcular frete</h4>
               <div className="cep-input-container">
                 <input 
                   type="text" 
                   value={cep} 
                   onChange={(e) => setCep(e.target.value)} 
-                  placeholder="Digite seu CEP"
+                  placeholder="Ex: 01234-567"
+                  maxLength="9"
                 />
                 <button onClick={handleCalculateShipping} disabled={isLoadingShipping}>
                   {isLoadingShipping ? 'Calculando...' : 'Calcular'}
@@ -204,7 +205,8 @@ function CartPage() {
                         onChange={() => setSelectedShipping(option)}
                       />
                       <label htmlFor={option.name}>
-                        {option.name} - R$ {formatPrice(option.price)} ({option.delivery_time} dias)
+                        {option.name === 'PAC' ? '🚚' : '⚡'} 
+                        {option.name} - <strong>R$ {formatPrice(option.price)}</strong> ({option.delivery_time} dias)
                       </label>
                     </div>
                   ))}
