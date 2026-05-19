@@ -12,7 +12,8 @@ import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/productUtils';
 
 function ProductPage() {
-  const { addToCart = () => {} } = useCart() || {};
+  const cartContext = useCart();
+  const { addToCart = () => {} } = cartContext || {};
   const navigate = useNavigate();
   const [justAdded, setJustAdded] = useState(false);
   const { id, nome } = useParams();
@@ -80,6 +81,28 @@ function ProductPage() {
 
   const productPrice = formatPrice(product?.preco_venda);
   const isOutOfStock = Number(product?.estoque_atual) <= 0;
+
+  const handleAddToCart = (shouldNavigate = false) => {
+    if (isOutOfStock) {
+      return;
+    }
+
+    if (!cartContext) {
+      console.error('CartContext indisponivel no ProductPage');
+      return;
+    }
+
+    void addToCart(product).then(() => {
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1800);
+
+      if (shouldNavigate) {
+        navigate('/carrinho');
+      }
+    }).catch((error) => {
+      console.error('Erro ao adicionar produto ao carrinho:', error);
+    });
+  };
 
   if (loading) {
     return (
@@ -198,12 +221,7 @@ function ProductPage() {
             <div className={styles.actionGroup}>
               <button
                 className={`${styles.btn} ${styles.primaryButton}`}
-                onClick={() => {
-                  if (isOutOfStock) return;
-                  addToCart(product);
-                  setJustAdded(true);
-                  setTimeout(() => setJustAdded(false), 1800);
-                }}
+                onClick={() => handleAddToCart(false)}
                 disabled={isOutOfStock}
                 aria-live="polite"
               >
@@ -212,11 +230,7 @@ function ProductPage() {
               <button
                 type="button"
                 className={`${styles.btn} ${styles.secondaryButton}`}
-                onClick={() => {
-                  if (isOutOfStock) return;
-                  addToCart(product);
-                  navigate('/carrinho');
-                }}
+                onClick={() => handleAddToCart(true)}
                 disabled={isOutOfStock}
               >
                 Comprar agora

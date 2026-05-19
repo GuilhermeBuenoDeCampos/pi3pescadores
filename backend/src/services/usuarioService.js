@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const db = require('../database/models');
 const AppError = require('../middlewares/appError');
 const jwt = require('../utils/jwt');
+const carrinhoService = require('./carrinhoService');
 
 const TIPOS_USUARIO = new Set(['admin', 'cliente', 'funcionario']);
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -195,8 +196,18 @@ exports.autenticarUsuario = async (payload) => {
     tipo_usuario: usuario.tipo_usuario,
   });
 
+  let carrinho = null;
+
+  if (payload.guest_token) {
+    carrinho = await carrinhoService.associarCarrinhoGuestAoUsuario({
+      guestToken: payload.guest_token,
+      userId: usuario.id,
+    });
+  }
+
   return {
     token,
     usuario: usuarioPayload,
+    carrinho,
   };
 };
