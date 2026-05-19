@@ -1,53 +1,62 @@
 const express = require('express');
-const cors = require("cors");
+const cors = require('cors');
 const path = require('path');
 const routes = require('./routes');
 const notFound = require('./middlewares/notFound');
 const errorHandler = require('./middlewares/errorHandler');
 
-function configureCors(allowedOrigins) {
-  return (req, res, next) => {
-    const origin = req.headers.origin;
-
-    if (origin && allowedOrigins.includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-    }
-
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    if (req.method === 'OPTIONS') {
-      return res.sendStatus(204);
-    }
-
-    return next();
-  };
-}
-
 const app = express();
 
-app.use(cors({
-  origin: "https://pi3pescadores.pages.dev",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+function normalizeOrigin(origin) {
+  return String(origin || '').trim().replace(/\/+$/, '');
+}
 
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  process.env.API_URL,
-  'https://pi3pescadores.onrender.com',
-  'http://127.0.0.1:3000',
+function parseOrigins(value) {
+  return String(value || '')
+    .split(',')
+    .map(normalizeOrigin)
+    .filter(Boolean);
+}
+
+const allowedOrigins = new Set([
   'http://localhost:5173',
+  'http://localhost:5174',
   'http://127.0.0.1:5173',
-  'https://pi3pescadores.onrender.com/',
-  'https://pi3pescadores.pages.dev/'
-].filter(Boolean);
+  'http://127.0.0.1:5174',
+  'https://pi3pescadores.pages.dev',
+  ...parseOrigins(process.env.FRONTEND_URL),
+  ...parseOrigins(process.env.FRONTEND_URLS),
+  ...parseOrigins(process.env.CORS_ORIGINS),
+]);
+
+console.info(`[cors] Allowed origins: ${[...allowedOrigins].join(', ')}`);
+
+const corsOptions = {
+  origin(origin, callback) {
+    // Requests without Origin are server-to-server, curl, health checks or same-origin.
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const normalizedOrigin = normalizeOrigin(origin);
+
+    if (allowedOrigins.has(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`[cors] Blocked origin: ${origin}. Allowed origins: ${[...allowedOrigins].join(', ')}`);
+    return callback(null, false);
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use(configureCors(allowedOrigins));
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 

@@ -1,17 +1,29 @@
 .page {
   min-height: 56vh;
-  padding: 64px 5%;
+  padding: 48px 5%;
   background: #f8fafc;
 }
 
-.panel {
-  max-width: 760px;
-  margin: 0 auto;
+.headerPanel,
+.statePanel,
+.errorPanel,
+.filters,
+.orderCard {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.headerPanel {
+  align-items: center;
   background: #ffffff;
   border: 1px solid rgba(61, 78, 143, 0.12);
   border-radius: 8px;
-  padding: 34px;
   box-shadow: 0 16px 36px rgba(30, 37, 66, 0.08);
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  padding: 30px;
 }
 
 .label {
@@ -23,29 +35,197 @@
   text-transform: uppercase;
 }
 
-.panel h1 {
+.headerPanel h1,
+.statePanel h1,
+.statePanel h2 {
   color: var(--indigo-dark);
   font-family: 'Cormorant Garamond', serif;
   font-size: 2.2rem;
   margin: 0 0 10px;
 }
 
-.panel p {
+.headerPanel p,
+.statePanel p {
   color: var(--text-mid);
   line-height: 1.6;
-  margin: 0 0 24px;
+  margin: 0;
 }
 
-.backLink {
+.backLink,
+.orderFooter a,
+.searchForm button,
+.pagination button {
   background: var(--indigo-dark);
+  border: none;
   border-radius: 6px;
   color: #ffffff;
+  cursor: pointer;
   display: inline-flex;
+  font-weight: 700;
   padding: 0.78rem 1rem;
   text-decoration: none;
 }
 
-.backLink:hover {
+.backLink:hover,
+.orderFooter a:hover,
+.searchForm button:hover,
+.pagination button:hover:not(:disabled) {
   background: #2f3f68;
   color: #ffffff;
+}
+
+.filters {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 220px;
+  margin-top: 24px;
+}
+
+.searchForm {
+  display: flex;
+}
+
+.searchForm input,
+.filters select {
+  border: 1px solid rgba(61, 78, 143, 0.18);
+  border-radius: 6px;
+  color: var(--text-main);
+  font: inherit;
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+.searchForm input {
+  border-radius: 6px 0 0 6px;
+  flex: 1;
+}
+
+.searchForm button {
+  border-radius: 0 6px 6px 0;
+}
+
+.resultMeta {
+  color: var(--text-mid);
+  font-size: 0.92rem;
+  margin: 18px auto 10px;
+  max-width: 1120px;
+}
+
+.ordersList {
+  display: grid;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.orderCard {
+  background: #ffffff;
+  border: 1px solid rgba(61, 78, 143, 0.1);
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 118px 1fr;
+  overflow: hidden;
+}
+
+.orderImage {
+  background: #f1f5f9;
+  min-height: 132px;
+}
+
+.orderImage img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.orderContent {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.orderTop,
+.orderFooter {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.orderNumber {
+  color: var(--indigo-dark);
+  display: block;
+  font-size: 1.06rem;
+  font-weight: 800;
+}
+
+.orderTop time {
+  color: var(--text-light);
+  font-size: 0.86rem;
+}
+
+.itemsPreview {
+  color: var(--text-mid);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.itemsPreview span {
+  background: #f8fafc;
+  border-radius: 999px;
+  padding: 0.42rem 0.64rem;
+}
+
+.orderFooter strong {
+  color: var(--indigo-dark);
+  font-size: 1.12rem;
+}
+
+.statePanel,
+.errorPanel {
+  background: #ffffff;
+  border: 1px solid rgba(61, 78, 143, 0.12);
+  border-radius: 8px;
+  margin-top: 24px;
+  padding: 32px;
+}
+
+.errorPanel {
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 760px) {
+  .headerPanel,
+  .orderTop,
+  .orderFooter {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .orderCard {
+    grid-template-columns: 1fr;
+  }
+
+  .orderImage {
+    height: 180px;
+  }
 }

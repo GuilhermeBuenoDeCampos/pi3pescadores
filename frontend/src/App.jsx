@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import AccountPage from './pages/AccountPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
+import OrderDetailsPage from './pages/OrderDetailsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import styles from './App.module.css';
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/produto-nome/:nome" element={<ProductPage />} />
         <Route path="/carrinho" element={<CartPage />} />
         <Route path="/meus-pedidos" element={<AccountPage type="orders" />} />
+        <Route path="/meus-pedidos/:id" element={<OrderDetailsPage />} />
         <Route path="/meus-enderecos" element={<AccountPage type="addresses" />} />
         <Route
           path="/estoque"

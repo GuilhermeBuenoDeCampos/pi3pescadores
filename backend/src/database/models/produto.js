@@ -19,6 +19,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'movimentacoesEstoque',
         foreignKey: 'id_produto',
       });
+
+      Produto.hasMany(models.PedidoItem, {
+        as: 'pedidoItens',
+        foreignKey: 'id_produto',
+      });
     }
   }
 

@@ -6,6 +6,7 @@ const authRoutes = require('./auth');
 const pesquisasRoutes = require('./pesquisas');
 const calculoFreteRoutes = require('./calculofrete');
 const usuariosRoutes = require('./usuarios');
+const pedidosRoutes = require('./pedidos');
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/auth', authRoutes);
 router.use('/pesquisas', pesquisasRoutes);
 router.use('/frete', calculoFreteRoutes);
 router.use('/usuarios', usuariosRoutes);
+router.use('/pedidos', pedidosRoutes);
 
 module.exports = router;

@@ -1,19 +1,11 @@
+import { BACKEND_URL, API_URL } from '../config/appConfig';
+
+export { BACKEND_URL, API_URL };
+
 /**
  * API Configuration & Utilities
- * 
- * Gerencia todas as chamadas HTTP para o backend
- * Centraliza a URL base para facilitar mudanças entre dev/produção
- * 
- * IMPORTANTE: Para produção, configurar VITE_BACKEND_URL no .env
- * Exemplo .env:
- * - DEV: VITE_BACKEND_URL=https://pi3pescadores.onrender.com
- * - PROD: VITE_BACKEND_URL=https://api.seudominio.com
+ * Handles backend API requests and exposes the shared backend URL configuration.
  */
-
-// URL base do backend local
-export const BACKEND_URL = 'https://pi3pescadores.onrender.com';
-
-const API_URL = `${BACKEND_URL}/api`;
 
 export function getAuthHeaders() {
   const token = getAuthToken();
@@ -399,4 +391,71 @@ export async function excluirUsuario(id) {
   if (!response.ok) {
     throw new Error(await parseApiError(response, 'Falha ao excluir usuário'));
   }
+}
+
+/**
+ * Pedidos
+ */
+
+export async function criarPedido(payload) {
+  const response = await fetch(`${API_URL}/pedidos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel criar o pedido.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function fetchMeusPedidos(params = {}) {
+  const query = new URLSearchParams();
+
+  if (params.page) query.append('page', params.page);
+  if (params.limit) query.append('limit', params.limit);
+  if (params.status) query.append('status', params.status);
+  if (params.search) query.append('search', params.search);
+
+  const queryString = query.toString();
+  const response = await fetch(`${API_URL}/pedidos/meus${queryString ? `?${queryString}` : ''}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel carregar seus pedidos.'));
+  }
+
+  return response.json();
+}
+
+export async function fetchMeuPedido(id) {
+  const response = await fetch(`${API_URL}/pedidos/meus/${id}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Pedido nao encontrado.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function atualizarStatusPedido(id, status) {
+  const response = await fetch(`${API_URL}/pedidos/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ status }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel atualizar o pedido.'));
+  }
+
+  const result = await response.json();
+  return result.data;
 }

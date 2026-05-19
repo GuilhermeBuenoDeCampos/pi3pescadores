@@ -1,6 +1,7 @@
 const path = require('path');
 const loadEnv = require('./src/config/loadEnv');
 
+// Load project-specific .env (overrides dotenv when necessary)
 loadEnv(path.resolve(__dirname, '.env'), { override: true });
 
 const app = require('./src/app');

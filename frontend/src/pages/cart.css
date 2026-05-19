@@ -534,6 +534,68 @@ body {
   animation: slideIn 0.3s ease;
 }
 
+.checkout-form {
+  display: grid;
+  gap: 10px;
+  margin: 22px 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--tp-border-light);
+}
+
+.checkout-form h4 {
+  color: var(--tp-navy);
+  font-size: 0.92rem;
+  margin: 8px 0 2px;
+}
+
+.checkout-form input,
+.checkout-form select,
+.checkout-form textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--tp-border-light);
+  border-radius: 4px;
+  color: var(--tp-text-main);
+  font: inherit;
+}
+
+.checkout-form input:focus,
+.checkout-form select:focus,
+.checkout-form textarea:focus {
+  border-color: var(--tp-yellow);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(46, 158, 130, 0.12);
+}
+
+.checkout-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.6fr) minmax(120px, 1.4fr);
+  gap: 10px;
+}
+
+.checkout-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tp-text-muted);
+  font-size: 0.9rem;
+}
+
+.checkout-checkbox input {
+  width: auto;
+}
+
+.checkout-error {
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  background: #fdeaea;
+  border: 1.5px solid #e74c3c;
+  border-radius: 6px;
+  color: #c0392b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -548,5 +610,11 @@ body {
 @media (max-width: 1024px) {
   .maybe-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .checkout-row {
+    grid-template-columns: 1fr;
   }
 }

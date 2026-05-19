@@ -1,0 +1,39 @@
+.badge {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.45rem 0.68rem;
+}
+
+.pendente {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.confirmado {
+  background: #ecfeff;
+  color: #155e75;
+}
+
+.preparando {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.enviado {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.concluido {
+  background: #e8f8f5;
+  color: #1e8449;
+}
+
+.cancelado {
+  background: #fef2f2;
+  color: #991b1b;
+}

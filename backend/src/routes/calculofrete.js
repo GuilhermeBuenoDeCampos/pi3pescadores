@@ -1,5 +1,6 @@
 const { Router } = require('express');
-const fetch = require('node-fetch');
+
+const fetch = globalThis.fetch;
 
 const router = Router();
 
@@ -36,6 +37,10 @@ router.post('/', async (req, res) => {
   }));
 
   try {
+    if (!fetch) {
+      return res.status(500).json({ error: 'Fetch API not available in this runtime.' });
+    }
+
     // Remove "Bearer " prefix if it exists
     const token = (process.env.MELHOR_ENVIO_TOKEN || '').replace(/^Bearer\s+/i, '');
 
