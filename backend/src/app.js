@@ -153,6 +153,41 @@ app.get('/test/pedidos-count', async (req, res) => {
   }
 });
 
+app.get('/test/pedidos-debug/:usuarioId', async (req, res) => {
+  try {
+    const db = require('./database/models');
+    const { usuarioId } = req.params;
+
+    if (!db.Pedido) {
+      return res.status(500).json({ error: 'Model Pedido not found' });
+    }
+
+    // Tentar a mesma query que listarPedidosDoUsuario
+    const { count, rows } = await db.Pedido.findAndCountAll({
+      where: { id_usuario: usuarioId },
+      distinct: true,
+      order: [['criado_em', 'DESC']],
+      limit: 8,
+      offset: 0,
+    });
+
+    res.json({
+      success: true,
+      usuarioId,
+      totalPedidos: count,
+      pedidosRetornados: rows.length,
+      firstPedido: rows.length > 0 ? rows[0].toJSON() : null,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      errorType: error.constructor.name,
+      errorCode: error.code,
+      stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined,
+    });
+  }
+});
+
 app.use('/api', routes);
 
 app.use(notFound);

@@ -210,37 +210,45 @@ function formatPedido(pedido) {
 }
 
 async function buscarPedidoCompleto(where, transaction) {
-  const pedido = await db.Pedido.findOne({
-    where,
-    include: [
-      {
-        model: db.PedidoItem,
-        as: 'itens',
-        include: [
-          {
-            model: db.Produto,
-            as: 'produto',
-            attributes: ['id', 'nome', 'ativo'],
-            include: [
-              {
-                model: db.ProdutoImagem,
-                as: 'imagens',
-                attributes: ['id', 'url'],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    order: [[{ model: db.PedidoItem, as: 'itens' }, 'id', 'ASC']],
-    transaction,
-  });
+  try {
+    console.log('[pedidoService] buscarPedidoCompleto:', { where });
 
-  if (!pedido) {
-    throw new AppError(404, 'Pedido não encontrado');
+    // Buscar o pedido SEM includes primeiro
+    const pedido = await db.Pedido.findOne({
+      where,
+      transaction,
+      raw: false,
+    });
+
+    if (!pedido) {
+      throw new AppError(404, 'Pedido não encontrado');
+    }
+
+    // Carregar itens manualmente
+    if (db.PedidoItem) {
+      try {
+        const itens = await db.PedidoItem.findAll({
+          where: { id_pedido: pedido.id },
+          transaction,
+          raw: false,
+        });
+        pedido.dataValues.itens = itens;
+      } catch (itenError) {
+        console.error('[pedidoService] erro ao carregar itens:', itenError.message);
+        pedido.dataValues.itens = [];
+      }
+    }
+
+    return pedido;
+  } catch (error) {
+    console.error('[pedidoService] erro em buscarPedidoCompleto:', {
+      where,
+      errorMessage: error.message,
+      errorCode: error.code,
+      stack: error.stack,
+    });
+    throw error;
   }
-
-  return pedido;
 }
 
 exports.criarPedido = async (usuarioId, payload) => {
@@ -377,28 +385,23 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
   }
 
   try {
-    // Validar que os modelos existem
-    if (!db.Pedido) {
-      throw new AppError(500, 'Database model "Pedido" not found');
-    }
-    if (!db.PedidoItem) {
-      throw new AppError(500, 'Database model "PedidoItem" not found');
-    }
-    if (!db.Produto) {
-      throw new AppError(500, 'Database model "Produto" not found');
-    }
-    if (!db.ProdutoImagem) {
-      throw new AppError(500, 'Database model "ProdutoImagem" not found');
-    }
-
     console.log('[pedidoService] listarPedidosDoUsuario iniciado', {
       usuarioId,
+      where,
       page,
       limit,
       offset,
     });
 
-    // Tentar query mais simples primeiro
+    // Validar que os modelos existem
+    if (!db.Pedido) {
+      const errorMsg = 'Database model "Pedido" not found';
+      console.error(`[pedidoService] ${errorMsg}`);
+      throw new AppError(500, errorMsg);
+    }
+
+    // Query SEM includes primeiro
+    console.log('[pedidoService] executando query simples (sem includes)...');
     const { count, rows } = await db.Pedido.findAndCountAll({
       where,
       distinct: true,
@@ -407,29 +410,24 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
       offset,
     });
 
-    console.log('[pedidoService] query base executada com sucesso', {
+    console.log('[pedidoService] query simples sucesso', {
       total: count,
-      rows: rows.length,
+      rowsReturned: rows.length,
     });
 
-    // Se query base passou, tentar adicionar includes um por um
-    if (rows.length > 0) {
-      console.log('[pedidoService] carregando itens do pedido...');
+    // Tentar carregar itens se houver pedidos
+    if (rows.length > 0 && db.PedidoItem) {
+      console.log('[pedidoService] carregando itens...');
       for (const pedido of rows) {
         try {
-          await pedido.getItens({
-            include: [
-              {
-                model: db.Produto,
-                as: 'produto',
-                required: false,
-                attributes: ['id', 'nome', 'ativo'],
-              },
-            ],
+          const itens = await db.PedidoItem.findAll({
+            where: { id_pedido: pedido.id },
+            raw: true,
           });
-        } catch (includeError) {
-          console.error('[pedidoService] erro ao carregar itens:', includeError.message);
-          // Continua sem os itens em vez de falhar completamente
+          pedido.dataValues.itens = itens;
+        } catch (itemError) {
+          console.error(`[pedidoService] erro ao carregar itens para pedido ${pedido.id}:`, itemError.message);
+          pedido.dataValues.itens = [];
         }
       }
     }
@@ -444,14 +442,22 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
       },
     };
   } catch (error) {
-    console.error('[pedidoService] erro ao listar pedidos do usuário:', {
+    console.error('[pedidoService] erro crítico em listarPedidosDoUsuario:', {
       usuarioId,
-      query,
+      errorType: error.constructor.name,
       errorMessage: error.message,
-      errorCode: error.code,
-      errorName: error.name,
+      errorCode: error.code || error.original?.code,
       stack: error.stack,
     });
+    
+    // Se for erro de banco de dados, adicionar contexto
+    if (error.original) {
+      console.error('[pedidoService] erro original (banco de dados):', {
+        message: error.original.message,
+        code: error.original.code,
+      });
+    }
+
     throw error;
   }
 };
