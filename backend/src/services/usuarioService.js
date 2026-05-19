@@ -152,6 +152,110 @@ exports.criarUsuario = async (payload) => {
   return toUsuarioPayload(usuario);
 };
 
+exports.listarUsuarios = async (payload = {}) => {
+  const where = {};
+
+  if (payload.ativo !== undefined) {
+    where.ativo = payload.ativo;
+  }
+
+  if (payload.tipo_usuario) {
+    where.tipo_usuario = payload.tipo_usuario;
+  }
+
+  const usuarios = await db.Usuario.findAll({
+    where,
+    order: [['created_at', 'DESC']],
+  });
+
+  return usuarios.map(toUsuarioPayload);
+};
+
+exports.buscarUsuarioPorId = async (id) => {
+  const usuario = await db.Usuario.findByPk(id);
+
+  if (!usuario) {
+    throw new AppError(404, 'Usuário não encontrado');
+  }
+
+  return toUsuarioPayload(usuario);
+};
+
+exports.atualizarUsuario = async (id, payload) => {
+  const usuario = await db.Usuario.findByPk(id);
+
+  if (!usuario) {
+    throw new AppError(404, 'Usuário não encontrado');
+  }
+
+  const updates = {};
+
+  if (payload.nome !== undefined) {
+    const nome = String(payload.nome).trim();
+    if (!nome) throw new AppError(400, 'nome is required');
+    updates.nome = nome;
+  }
+
+  if (payload.email !== undefined) {
+    const email = normalizeEmail(payload.email);
+    if (!EMAIL_REGEX.test(email)) throw new AppError(400, 'email must be valid');
+    updates.email = email;
+  }
+
+  if (payload.telefone !== undefined) {
+    updates.telefone = payload.telefone ? String(payload.telefone).trim() : null;
+  }
+
+  if (payload.cpf !== undefined) {
+    const cpf = formatCpf(payload.cpf);
+    if (!cpf) throw new AppError(400, 'cpf must have 11 digits');
+    updates.cpf = cpf;
+  }
+
+  if (payload.tipo_usuario !== undefined) {
+    const tipoUsuario = String(payload.tipo_usuario).trim().toLowerCase();
+    if (!TIPOS_USUARIO.has(tipoUsuario)) {
+      throw new AppError(400, 'tipo_usuario must be admin, cliente or funcionario');
+    }
+    updates.tipo_usuario = tipoUsuario;
+  }
+
+  if (payload.ativo !== undefined) {
+    updates.ativo = Boolean(payload.ativo);
+  }
+
+  if (payload.senha !== undefined) {
+    const senha = String(payload.senha);
+    if (senha.length < 6) {
+      throw new AppError(400, 'senha must have at least 6 characters');
+    }
+    updates.senha_hash = await hashSenha(senha);
+  }
+
+  if (Object.keys(updates).length === 0) {
+    throw new AppError(400, 'No fields to update');
+  }
+
+  updates.updated_at = new Date();
+
+  await usuario.update(updates);
+
+  const updated = await db.Usuario.findByPk(id);
+  return toUsuarioPayload(updated);
+};
+
+exports.excluirUsuario = async (id) => {
+  const usuario = await db.Usuario.findByPk(id);
+
+  if (!usuario) {
+    throw new AppError(404, 'Usuário não encontrado');
+  }
+
+  await usuario.update({ ativo: false, updated_at: new Date() });
+
+  return toUsuarioPayload({ ...usuario.toJSON(), ativo: false });
+};
+
 exports.autenticarUsuario = async (payload) => {
   const email = normalizeEmail(payload.email);
   const senha = String(payload.senha || '');
@@ -168,8 +272,8 @@ exports.autenticarUsuario = async (payload) => {
     throw new AppError(401, 'email or password is invalid');
   }
 
-  if (!usuario.ativo) {
-    throw new AppError(403, 'user is inactive');
+  if (usuario.ativo !== true) {
+    throw new AppError(401, 'Conta não encontrada');
   }
 
   const senhaValida = await verificarSenha(senha, usuario.senha_hash);

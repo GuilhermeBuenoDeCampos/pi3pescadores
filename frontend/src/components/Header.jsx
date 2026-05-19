@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaBoxOpen, FaMapMarkerAlt, FaShoppingCart, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { FaBoxOpen, FaClipboardList, FaMapMarkerAlt, FaShoppingCart, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
 import styles from './Header.module.css';
 import logo from '../assets/logo/logo.png';
 import { useCart } from '../context/CartContext';
@@ -73,6 +73,18 @@ function Header() {
                   <FaMapMarkerAlt size={14} />
                   Meus enderecos
                 </Link>
+                {user.tipo_usuario === 'admin' && (
+                  <Link to="/admin" onClick={() => setIsUserMenuOpen(false)}>
+                    <FaClipboardList size={14} />
+                    Painel Administrativo
+                  </Link>
+                )}
+                {user.tipo_usuario === 'funcionario' && (
+                  <Link to="/estoque" onClick={() => setIsUserMenuOpen(false)}>
+                    <FaClipboardList size={14} />
+                    Gerenciar Estoque
+                  </Link>
+                )}
                 <button type="button" onClick={handleLogout}>
                   <FaSignOutAlt size={14} />
                   Sair

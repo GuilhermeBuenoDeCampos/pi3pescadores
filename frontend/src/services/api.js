@@ -70,6 +70,11 @@ function buildCartHeaders(extraHeaders = {}) {
   return headers;
 }
 
+export function getAuthHeaders() {
+  const token = getAuthToken();
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
 async function parseApiError(response, fallbackMessage) {
   try {
     const body = await response.json();
@@ -296,7 +301,9 @@ export async function fetchHistoricoAuditoria(page = 1, limit = 10) {
 }
 
 export async function fetchMediaAcuracidade() {
-  const response = await fetch(`${API_URL}/auditoria/acuracidade-media`);
+  const response = await fetch(`${API_URL}/auditoria/acuracidade-media`, {
+    headers: { ...getAuthHeaders() },
+  });
 
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Failed to fetch accuracy average: ${response.statusText}`));
@@ -322,7 +329,9 @@ export async function registrarPalavraPesquisada(palavra) {
 }
 
 export async function fetchPalavrasMaisPesquisadas(limit = 5) {
-  const response = await fetch(`${API_URL}/pesquisas/mais-pesquisadas?limit=${limit}`);
+  const response = await fetch(`${API_URL}/pesquisas/mais-pesquisadas?limit=${limit}`, {
+    headers: { ...getAuthHeaders() },
+  });
 
   if (!response.ok) {
     throw new Error(await parseApiError(response, 'Nao foi possivel carregar as palavras mais pesquisadas.'));
@@ -361,7 +370,7 @@ export async function fetchCategories() {
 export async function updateProductStatus(id, ativo) {
   const response = await fetch(`${API_URL}/produtos/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ ativo })
   });
   
@@ -442,4 +451,75 @@ export async function calculateShipping(payload) {
     }
 
     return response.json();
+}
+
+/**
+ * Usuários CRUD (Admin)
+ */
+
+export async function fetchUsuarios() {
+  const response = await fetch(`${API_URL}/usuarios`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Falha ao carregar usuários'));
+  }
+
+  const result = await response.json();
+  return result.data || [];
+}
+
+export async function fetchUsuarioById(id) {
+  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Usuário não encontrado'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function criarUsuario(payload) {
+  const response = await fetch(`${API_URL}/usuarios`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Falha ao criar usuário'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function atualizarUsuario(id, payload) {
+  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Falha ao atualizar usuário'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function excluirUsuario(id) {
+  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Falha ao excluir usuário'));
+  }
 }

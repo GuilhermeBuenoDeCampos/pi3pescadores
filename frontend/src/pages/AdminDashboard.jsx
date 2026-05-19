@@ -13,9 +13,13 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { FiRefreshCw } from 'react-icons/fi';
+import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
-import { fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas } from '../services/api';
+import nsaVerde from '../assets/logo/nsa-verde.png';
+import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
+import nsaVermelho from '../assets/logo/nsa-vermelho.png';
+import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser } from '../services/api';
 import styles from './AdminDashboard.module.css';
 
 ChartJS.register(
@@ -57,6 +61,7 @@ const commonOptions = {
 };
 
 function AdminDashboard() {
+  const navigate = useNavigate();
   const [accuracy, setAccuracy] = useState(null);
   const [loadingAccuracy, setLoadingAccuracy] = useState(true);
   const [accuracyError, setAccuracyError] = useState('');
@@ -101,6 +106,31 @@ function AdminDashboard() {
 
   const accuracyValue = Math.max(0, Math.min(100, Number(accuracy?.media_acuracidade || 0)));
   const topSearch = topSearches[0];
+
+  // Determine color and image based on accuracy percentage
+  const getAccuracyMetrics = (value) => {
+    if (value >= 95) {
+      return {
+        color: '#27ae60',
+        image: nsaVerde,
+        label: 'Excelente',
+      };
+    } else if (value >= 90 && value < 95) {
+      return {
+        color: '#f39c12',
+        image: nsaAmarelo,
+        label: 'Bom',
+      };
+    } else {
+      return {
+        color: '#e74c3c',
+        image: nsaVermelho,
+        label: 'Alerta',
+      };
+    }
+  };
+
+  const accuracyMetrics = getAccuracyMetrics(accuracyValue);
 
   const revenueData = useMemo(() => ({
     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'],
@@ -163,13 +193,13 @@ function AdminDashboard() {
     datasets: [
       {
         data: [accuracyValue, 100 - accuracyValue],
-        backgroundColor: [chartColors.teal, '#bfc5c8'],
+        backgroundColor: [accuracyMetrics.color, '#bfc5c8'],
         borderColor: ['#ffffff', '#ffffff'],
         borderWidth: 2,
         cutout: '68%',
       },
     ],
-  }), [accuracyValue]);
+  }), [accuracyValue, accuracyMetrics.color]);
 
   return (
     <main className={styles.page}>
@@ -179,6 +209,61 @@ function AdminDashboard() {
           <div>
             <h1>Painel Administrativo</h1>
             <p>Visao geral e gestao rapida</p>
+          </div>
+          <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b' }}>
+              <FiUser size={14} />
+              {getAuthUser()?.nome || 'Usuário'}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button
+                onClick={() => navigate('/')}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#5366aa', background: '#f0f2f8', border: 'none', cursor: 'pointer',
+                }}
+              >
+                <FiArrowLeft size={14} />
+                Voltar
+              </button>
+              <Link
+                to="/admin/usuarios"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#fff', background: '#5366aa',
+                  boxShadow: '0 8px 20px rgba(83,102,170,0.25)',
+                  textDecoration: 'none',
+                }}
+              >
+                <FiUsers size={14} />
+                Gerenciar Usuários
+              </Link>
+              <Link
+                to="/estoque"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#08936f', background: '#e6f5f0',
+                  textDecoration: 'none',
+                }}
+              >
+                <FiPackage size={14} />
+                Gerenciar Estoque
+              </Link>
+              <button
+                onClick={() => { clearAuthSession(); navigate('/login'); }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#b91c1c', background: '#fef2f2', border: 'none', cursor: 'pointer',
+                }}
+              >
+                <FiLogOut size={14} />
+                Sair
+              </button>
+            </div>
           </div>
         </header>
 
@@ -284,9 +369,12 @@ function AdminDashboard() {
 
           <article className={styles.accuracyCard}>
             <div className={styles.accuracyHeader}>
-              <div>
-                <h2>Acuracidade</h2>
-                <span>{accuracy?.total_auditorias || 0} produtos auditados</span>
+              <div className={styles.headerContent}>
+                <div>
+                  <h2>Acuracidade</h2>
+                  <span>{accuracy?.total_auditorias || 0} produtos auditados</span>
+                </div>
+                <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.headerNsaImage} />
               </div>
               {loadingAccuracy && <FiRefreshCw className={styles.loadingIcon} />}
             </div>

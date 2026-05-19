@@ -8,9 +8,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AccountPage from './pages/AccountPage';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
+import ProtectedRoute from './components/ProtectedRoute';
 import styles from './App.module.css';
 
-// App component defines the two main application pages.
 function App() {
   return (
     <div className={styles.appWrapper}>
@@ -20,11 +21,33 @@ function App() {
         <Route path="/cadastro" element={<Register />} />
         <Route path="/produto/:id" element={<ProductPage />} />
         <Route path="/produto-nome/:nome" element={<ProductPage />} />
-        <Route path="/estoque" element={<StockManagement />} />
         <Route path="/carrinho" element={<CartPage />} />
         <Route path="/meus-pedidos" element={<AccountPage type="orders" />} />
         <Route path="/meus-enderecos" element={<AccountPage type="addresses" />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route
+          path="/estoque"
+          element={
+            <ProtectedRoute roles={['admin', 'funcionario']}>
+              <StockManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/usuarios"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <AdminUsers />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );
