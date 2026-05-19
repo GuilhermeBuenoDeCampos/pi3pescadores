@@ -62,8 +62,10 @@ const corsOptions = {
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Guest-Token', 'x-guest-token'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Guest-Token', 'x-guest-token', 'accept', 'accept-language'],
+  exposedHeaders: ['Content-Length', 'Date'],
   optionsSuccessStatus: 204,
+  preflightContinue: false,
 };
 
 app.use(cors(corsOptions));
