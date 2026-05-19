@@ -100,6 +100,25 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.get('/health/models', (req, res) => {
+  const db = require('./database/models');
+  const models = Object.keys(db)
+    .filter((key) => key !== 'sequelize' && key !== 'Sequelize')
+    .map((key) => ({
+      name: key,
+      type: typeof db[key],
+      hasAssociate: typeof db[key].associate === 'function',
+    }));
+
+  res.json({
+    ok: true,
+    modelsLoaded: models.length,
+    models,
+    sequelizeConnected: !!db.sequelize,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 if (process.env.NODE_ENV !== 'production') {
   app.use((req, res, next) => {
     console.warn(`[dev] ${req.method} ${req.originalUrl}`);

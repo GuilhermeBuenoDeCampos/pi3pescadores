@@ -377,21 +377,45 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
   }
 
   try {
+    // Validar que os modelos existem
+    if (!db.Pedido) {
+      throw new AppError(500, 'Database model "Pedido" not found');
+    }
+    if (!db.PedidoItem) {
+      throw new AppError(500, 'Database model "PedidoItem" not found');
+    }
+    if (!db.Produto) {
+      throw new AppError(500, 'Database model "Produto" not found');
+    }
+    if (!db.ProdutoImagem) {
+      throw new AppError(500, 'Database model "ProdutoImagem" not found');
+    }
+
+    console.log('[pedidoService] listarPedidosDoUsuario iniciado', {
+      usuarioId,
+      page,
+      limit,
+      offset,
+    });
+
     const { count, rows } = await db.Pedido.findAndCountAll({
       where,
       include: [
         {
           model: db.PedidoItem,
           as: 'itens',
+          required: false,
           include: [
             {
               model: db.Produto,
               as: 'produto',
+              required: false,
               attributes: ['id', 'nome', 'ativo'],
               include: [
                 {
                   model: db.ProdutoImagem,
                   as: 'imagens',
+                  required: false,
                   attributes: ['id', 'url'],
                 },
               ],
@@ -403,6 +427,12 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
       order: [['criado_em', 'DESC']],
       limit,
       offset,
+      subQuery: false,
+    });
+
+    console.log('[pedidoService] query executada com sucesso', {
+      total: count,
+      rows: rows.length,
     });
 
     return {
@@ -418,7 +448,8 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
     console.error('[pedidoService] erro ao listar pedidos do usuário:', {
       usuarioId,
       query,
-      error: error.message,
+      errorMessage: error.message,
+      errorCode: error.code,
       stack: error.stack,
     });
     throw error;
