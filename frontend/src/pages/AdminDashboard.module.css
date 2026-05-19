@@ -116,7 +116,13 @@
   align-items: start;
 }
 
-.chartBlock,
+.chartBlock {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 16px 34px rgba(47, 58, 98, 0.07);
+  padding: 16px;
+}
+
 .accuracyCard {
   width: 240px;
   min-height: 240px;
@@ -131,6 +137,13 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.chartBlock h2 {
+  color: #333946;
+  font-size: 0.98rem;
+  font-weight: 500;
+  margin: 0 0 8px;
 }
 
 .accuracyHeader {
@@ -163,16 +176,19 @@
   justify-content: center;
   align-items: center;
   margin-bottom: 12px;
-  height: 70px;
+  height: 80px;
   width: 100%;
+  min-height: 80px;
 }
 
 .nsaImage {
-  width: 65px;
-  height: 65px;
+  width: auto;
+  height: 70px;
+  max-width: 70px;
   object-fit: contain;
   animation: fadeIn 0.5s ease-in;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  display: block;
 }
 
 .accuracyChart {
