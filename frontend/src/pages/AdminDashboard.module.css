@@ -116,37 +116,11 @@
   align-items: start;
 }
 
-.chartBlock,
-.accuracyCard {
+.chartBlock {
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 16px 34px rgba(47, 58, 98, 0.07);
   padding: 16px;
-}
-
-.chartBlock h2,
-.accuracyCard h2 {
-  color: #333946;
-  font-size: 0.98rem;
-  font-weight: 500;
-  margin: 0 0 8px;
-}
-
-.chartCanvas {
-  height: 230px;
-  min-width: 0;
-}
-
-.wide .chartCanvas {
-  height: 250px;
-}
-
-.productChart {
-  grid-column: span 1;
-}
-
-.productChart .chartCanvas {
-  height: 250px;
 }
 
 .accuracyCard {
@@ -157,21 +131,53 @@
     url('https://pi3pescadores.onrender.com/uploads/img/acuracidade.jpeg') center / cover;
   color: #ffffff;
   align-self: start;
-  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 16px 34px rgba(47, 58, 98, 0.07);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.chartBlock h2 {
+  color: #333946;
+  font-size: 0.98rem;
+  font-weight: 500;
+  margin: 0 0 8px;
 }
 
 .accuracyHeader {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.headerNsaImage {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  animation: fadeIn 0.5s ease-in;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .accuracyHeader h2 {
   color: #ffffff;
   font-weight: 700;
-  text-align: center;
+  margin: 0 0 4px;
+  text-align: left;
+  font-size: 1.1rem;
 }
 
 .accuracyHeader span {
@@ -224,6 +230,17 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

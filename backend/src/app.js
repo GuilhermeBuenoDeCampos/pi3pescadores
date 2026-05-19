@@ -8,7 +8,17 @@ const errorHandler = require('./middlewares/errorHandler');
 const app = express();
 
 function normalizeOrigin(origin) {
-  return String(origin || '').trim().replace(/\/+$/, '');
+  const value = String(origin || '').trim().replace(/\/+$/, '');
+
+  if (!value) {
+    return '';
+  }
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return value;
+  }
 }
 
 function parseOrigins(value) {
@@ -19,14 +29,17 @@ function parseOrigins(value) {
 }
 
 const allowedOrigins = new Set([
+  'https://pi3pescadores.onrender.com',
+  'https://pi3pescadores.pages.dev',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
-  'https://pi3pescadores.pages.dev',
+  'http://127.0.0.1:3000',
   ...parseOrigins(process.env.FRONTEND_URL),
   ...parseOrigins(process.env.FRONTEND_URLS),
   ...parseOrigins(process.env.CORS_ORIGINS),
+  ...parseOrigins(process.env.API_URL),
 ]);
 
 console.info(`[cors] Allowed origins: ${[...allowedOrigins].join(', ')}`);
@@ -49,7 +62,7 @@ const corsOptions = {
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Guest-Token', 'x-guest-token'],
   optionsSuccessStatus: 204,
 };
 

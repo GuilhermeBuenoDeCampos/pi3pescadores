@@ -8,7 +8,7 @@ import { getAuthToken, getAuthUser, getImageUrl, calculateShipping, criarPedido 
 import { formatPrice } from '../utils/productUtils';
 
 function CartPage() {
-  const { cart, removeFromCart, clearCart, addToCart, decreaseQuantity } = useCart();
+  const { cart, removeFromCart, clearCart, addToCart, decreaseQuantity, isCartLoading, cartError } = useCart();
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState('');
   const [couponDiscount, setCouponDiscount] = useState(0);
@@ -39,11 +39,15 @@ function CartPage() {
   const displayItems = Array.isArray(cart.items) ? cart.items : [];
 
   const handleIncrease = (product) => {
-    addToCart(product);
+    void addToCart(product).catch((error) => {
+      console.error('Erro ao adicionar item ao carrinho:', error);
+    });
   };
 
   const handleDecrease = (productId) => {
-    decreaseQuantity(productId);
+    void decreaseQuantity(productId).catch((error) => {
+      console.error('Erro ao atualizar quantidade do carrinho:', error);
+    });
   };
 
   const getProductPrice = (product) => Number(product.preco_venda ?? product.preco ?? 0) || 0;
@@ -61,6 +65,19 @@ function CartPage() {
   const total = subtotal + shippingCost - couponDiscount;
   
   const totalItems = displayItems.reduce((total, item) => total + item.quantity, 0);
+
+  if (isCartLoading) {
+    return (
+      <div>
+        <Header />
+        <main>
+          <div className="cart-container">
+            <div className="cart-loading">Carregando carrinho...</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const validateCEP = (cepValue) => {
     const cleanCEP = cepValue.replace(/\D/g, '');
@@ -202,6 +219,12 @@ function CartPage() {
       <Header />
       <main>
         <div className="cart-container">
+          {cartError && !isCartLoading && (
+            <div className="cart-loading">
+              {cartError}
+            </div>
+          )}
+
           <div className="cart-items">
             <div className="cart-header">
               <h2>Seu Carrinho</h2>
@@ -234,7 +257,16 @@ function CartPage() {
                     <Link to={`/produto/${product.id}`} className="item-title">{product.nome}</Link>
                   </div>
                   <div className="item-actions">
-                    <button type="button" onClick={() => removeFromCart(product.id)}>Excluir</button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void removeFromCart(product.id).catch((error) => {
+                          console.error('Erro ao remover item do carrinho:', error);
+                        });
+                      }}
+                    >
+                      Excluir
+                    </button>
                   </div>
                 </div>
 

@@ -28,7 +28,7 @@ function Header() {
   }, []);
 
   function handleLogout() {
-    clearAuthSession();
+    clearAuthSession({ rotateGuestToken: true });
     setUser(null);
     setIsUserMenuOpen(false);
   }

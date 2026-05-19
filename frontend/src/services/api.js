@@ -7,6 +7,56 @@ export { BACKEND_URL, API_URL };
  * Handles backend API requests and exposes the shared backend URL configuration.
  */
 
+const GUEST_TOKEN_KEY = 'guest_token';
+
+function notifyAuthSessionChanged() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('auth-session-changed'));
+  }
+}
+
+export function getGuestToken() {
+  return localStorage.getItem(GUEST_TOKEN_KEY);
+}
+
+export function ensureGuestToken() {
+  const existing = getGuestToken();
+
+  if (existing) {
+    return existing;
+  }
+
+  const token = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(GUEST_TOKEN_KEY, token);
+  return token;
+}
+
+export function rotateGuestToken() {
+  localStorage.removeItem(GUEST_TOKEN_KEY);
+  return ensureGuestToken();
+}
+
+function buildCartHeaders(extraHeaders = {}) {
+  const headers = {
+    ...extraHeaders,
+  };
+
+  const authToken = getAuthToken();
+  const guestToken = ensureGuestToken();
+
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`;
+  }
+
+  if (guestToken) {
+    headers['x-guest-token'] = guestToken;
+  }
+
+  return headers;
+}
+
 export function getAuthHeaders() {
   const token = getAuthToken();
   return token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -37,10 +87,14 @@ export async function registerUser(payload) {
 }
 
 export async function loginUser(payload) {
+  const guestToken = ensureGuestToken();
   const response = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      ...payload,
+      guest_token: guestToken,
+    }),
   });
 
   if (!response.ok) {
@@ -72,11 +126,18 @@ export function getAuthUser() {
 export function saveAuthSession(session) {
   localStorage.setItem('authToken', session.token);
   localStorage.setItem('authUser', JSON.stringify(session.usuario));
+  notifyAuthSessionChanged();
 }
 
-export function clearAuthSession() {
+export function clearAuthSession(options = {}) {
   localStorage.removeItem('authToken');
   localStorage.removeItem('authUser');
+
+  if (options.rotateGuestToken) {
+    rotateGuestToken();
+  }
+
+  notifyAuthSessionChanged();
 }
 
 /**
@@ -175,7 +236,9 @@ export async function fetchProductByName(nome) {
  * @throws {Error} Se falhar requisição
  */
 export async function fetchProdutosAleatorios() {
-  const response = await fetch(`${API_URL}/auditoria/aleatorios`);
+  const response = await fetch(`${API_URL}/auditoria/aleatorios`, {
+    headers: { ...getAuthHeaders() },
+  });
   
   if (!response.ok) {
     throw new Error(`Failed to fetch random products: ${response.statusText}`);
@@ -195,7 +258,7 @@ export async function fetchProdutosAleatorios() {
 export async function salvarAuditoria(auditorias) {
   const response = await fetch(`${API_URL}/auditoria/salvar`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ auditorias })
   });
   
@@ -216,7 +279,9 @@ export async function salvarAuditoria(auditorias) {
  * @throws {Error} Se falhar requisição
  */
 export async function fetchHistoricoAuditoria(page = 1, limit = 10) {
-  const response = await fetch(`${API_URL}/auditoria/historico?page=${page}&limit=${limit}`);
+  const response = await fetch(`${API_URL}/auditoria/historico?page=${page}&limit=${limit}`, {
+    headers: { ...getAuthHeaders() },
+  });
   
   if (!response.ok) {
     throw new Error(`Failed to fetch audit history: ${response.statusText}`);
@@ -302,6 +367,63 @@ export async function updateProductStatus(id, ativo) {
   
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Failed to update product status: ${response.statusText}`));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function fetchCart() {
+  const response = await fetch(`${API_URL}/cart`, {
+    headers: buildCartHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel carregar o carrinho.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function addCartItem(payload) {
+  const response = await fetch(`${API_URL}/cart/items`, {
+    method: 'POST',
+    headers: buildCartHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel adicionar o item ao carrinho.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function updateCartItem(itemId, payload) {
+  const response = await fetch(`${API_URL}/cart/items/${itemId}`, {
+    method: 'PATCH',
+    headers: buildCartHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel atualizar o item do carrinho.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function removeCartItem(itemId) {
+  const response = await fetch(`${API_URL}/cart/items/${itemId}`, {
+    method: 'DELETE',
+    headers: buildCartHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel remover o item do carrinho.'));
   }
 
   const result = await response.json();
