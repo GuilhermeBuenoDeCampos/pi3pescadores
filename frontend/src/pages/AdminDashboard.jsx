@@ -109,13 +109,13 @@ function AdminDashboard() {
 
   // Determine color and image based on accuracy percentage
   const getAccuracyMetrics = (value) => {
-    if (value > 90) {
+    if (value >= 95) {
       return {
         color: '#27ae60',
         image: nsaVerde,
         label: 'Excelente',
       };
-    } else if (value >= 90 && value <= 95) {
+    } else if (value >= 90 && value < 95) {
       return {
         color: '#f39c12',
         image: nsaAmarelo,
