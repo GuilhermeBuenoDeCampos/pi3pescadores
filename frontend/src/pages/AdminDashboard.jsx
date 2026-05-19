@@ -16,6 +16,9 @@ import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
 import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
+import nsaVerde from '../assets/logo/nsa-verde.png';
+import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
+import nsaVermelho from '../assets/logo/nsa-vermelho.png';
 import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser } from '../services/api';
 import styles from './AdminDashboard.module.css';
 
@@ -109,35 +112,19 @@ function AdminDashboard() {
     if (value >= 95) {
       return {
         color: '#27ae60',
-        svg: (
-          <svg width="70" height="70" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="60" cy="60" r="55" fill="#27ae60" stroke="#27ae60" strokeWidth="3" />
-            <path d="M 40 65 L 55 80 L 80 45" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          </svg>
-        ),
+        image: nsaVerde,
         label: 'Excelente',
       };
     } else if (value >= 90 && value < 95) {
       return {
         color: '#f39c12',
-        svg: (
-          <svg width="70" height="70" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="60" cy="60" r="55" fill="#f39c12" stroke="#f39c12" strokeWidth="3" />
-            <text x="60" y="75" fontSize="50" fill="white" textAnchor="middle" fontWeight="bold">!</text>
-          </svg>
-        ),
+        image: nsaAmarelo,
         label: 'Bom',
       };
     } else {
       return {
         color: '#e74c3c',
-        svg: (
-          <svg width="70" height="70" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="60" cy="60" r="55" fill="#e74c3c" stroke="#e74c3c" strokeWidth="3" />
-            <path d="M 40 40 L 80 80" stroke="white" strokeWidth="5" strokeLinecap="round" />
-            <path d="M 80 40 L 40 80" stroke="white" strokeWidth="5" strokeLinecap="round" />
-          </svg>
-        ),
+        image: nsaVermelho,
         label: 'Alerta',
       };
     }
@@ -389,7 +376,7 @@ function AdminDashboard() {
               {loadingAccuracy && <FiRefreshCw className={styles.loadingIcon} />}
             </div>
             <div className={styles.accuracyImageContainer}>
-              {accuracyMetrics.svg}
+              <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.nsaImage} />
             </div>
             <div className={styles.accuracyChart}>
               <Doughnut
