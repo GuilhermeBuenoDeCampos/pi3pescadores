@@ -398,42 +398,41 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
       offset,
     });
 
+    // Tentar query mais simples primeiro
     const { count, rows } = await db.Pedido.findAndCountAll({
       where,
-      include: [
-        {
-          model: db.PedidoItem,
-          as: 'itens',
-          required: false,
-          include: [
-            {
-              model: db.Produto,
-              as: 'produto',
-              required: false,
-              attributes: ['id', 'nome', 'ativo'],
-              include: [
-                {
-                  model: db.ProdutoImagem,
-                  as: 'imagens',
-                  required: false,
-                  attributes: ['id', 'url'],
-                },
-              ],
-            },
-          ],
-        },
-      ],
       distinct: true,
       order: [['criado_em', 'DESC']],
       limit,
       offset,
-      subQuery: false,
     });
 
-    console.log('[pedidoService] query executada com sucesso', {
+    console.log('[pedidoService] query base executada com sucesso', {
       total: count,
       rows: rows.length,
     });
+
+    // Se query base passou, tentar adicionar includes um por um
+    if (rows.length > 0) {
+      console.log('[pedidoService] carregando itens do pedido...');
+      for (const pedido of rows) {
+        try {
+          await pedido.getItens({
+            include: [
+              {
+                model: db.Produto,
+                as: 'produto',
+                required: false,
+                attributes: ['id', 'nome', 'ativo'],
+              },
+            ],
+          });
+        } catch (includeError) {
+          console.error('[pedidoService] erro ao carregar itens:', includeError.message);
+          // Continua sem os itens em vez de falhar completamente
+        }
+      }
+    }
 
     return {
       data: rows.map(formatPedido),
@@ -450,6 +449,7 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
       query,
       errorMessage: error.message,
       errorCode: error.code,
+      errorName: error.name,
       stack: error.stack,
     });
     throw error;

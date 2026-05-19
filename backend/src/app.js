@@ -126,6 +126,33 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// Endpoint de teste para debug de pedidos
+app.get('/test/pedidos-count', async (req, res) => {
+  try {
+    const db = require('./database/models');
+    if (!db.Pedido) {
+      return res.status(500).json({
+        error: 'Model Pedido not found',
+        modelsLoaded: Object.keys(db).filter((k) => k !== 'sequelize' && k !== 'Sequelize'),
+      });
+    }
+
+    const count = await db.Pedido.count();
+    const sample = await db.Pedido.findAll({ limit: 1 });
+
+    res.json({
+      success: true,
+      pedidoCount: count,
+      samplePedido: sample.length > 0 ? sample[0].toJSON() : null,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined,
+    });
+  }
+});
+
 app.use('/api', routes);
 
 app.use(notFound);
