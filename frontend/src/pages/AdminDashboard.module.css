@@ -181,14 +181,9 @@
   min-height: 80px;
 }
 
-.nsaImage {
-  width: auto;
-  height: 70px;
-  max-width: 70px;
-  object-fit: contain;
+.accuracyImageContainer svg {
   animation: fadeIn 0.5s ease-in;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-  display: block;
 }
 
 .accuracyChart {
