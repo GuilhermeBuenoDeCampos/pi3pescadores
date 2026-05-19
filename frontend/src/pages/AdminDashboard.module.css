@@ -149,15 +149,33 @@
 .accuracyHeader {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.headerNsaImage {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  animation: fadeIn 0.5s ease-in;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  flex-shrink: 0;
 }
 
 .accuracyHeader h2 {
   color: #ffffff;
   font-weight: 700;
-  text-align: center;
+  margin: 0 0 4px;
+  text-align: left;
+  font-size: 1.1rem;
 }
 
 .accuracyHeader span {
@@ -169,30 +187,6 @@
 
 .loadingIcon {
   animation: spin 0.9s linear infinite;
-}
-
-.accuracyImageContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 12px;
-  height: 90px;
-  width: 100%;
-  min-height: 90px;
-}
-
-.accuracyImageContainer svg {
-  animation: fadeIn 0.5s ease-in;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-}
-
-.nsaImage {
-  max-width: 80px;
-  max-height: 80px;
-  object-fit: contain;
-  animation: fadeIn 0.5s ease-in;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  display: block;
 }
 
 .accuracyChart {
