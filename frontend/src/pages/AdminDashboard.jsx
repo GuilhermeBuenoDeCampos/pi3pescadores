@@ -370,11 +370,11 @@ function AdminDashboard() {
           <article className={styles.accuracyCard}>
             <div className={styles.accuracyHeader}>
               <div className={styles.headerContent}>
-                <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.headerNsaImage} />
                 <div>
                   <h2>Acuracidade</h2>
                   <span>{accuracy?.total_auditorias || 0} produtos auditados</span>
                 </div>
+                <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.headerNsaImage} />
               </div>
               {loadingAccuracy && <FiRefreshCw className={styles.loadingIcon} />}
             </div>
