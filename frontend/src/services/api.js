@@ -183,7 +183,9 @@ export async function fetchProductByName(nome) {
  * @throws {Error} Se falhar requisição
  */
 export async function fetchProdutosAleatorios() {
-  const response = await fetch(`${API_URL}/auditoria/aleatorios`);
+  const response = await fetch(`${API_URL}/auditoria/aleatorios`, {
+    headers: { ...getAuthHeaders() },
+  });
   
   if (!response.ok) {
     throw new Error(`Failed to fetch random products: ${response.statusText}`);
@@ -203,7 +205,7 @@ export async function fetchProdutosAleatorios() {
 export async function salvarAuditoria(auditorias) {
   const response = await fetch(`${API_URL}/auditoria/salvar`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ auditorias })
   });
   
@@ -224,7 +226,9 @@ export async function salvarAuditoria(auditorias) {
  * @throws {Error} Se falhar requisição
  */
 export async function fetchHistoricoAuditoria(page = 1, limit = 10) {
-  const response = await fetch(`${API_URL}/auditoria/historico?page=${page}&limit=${limit}`);
+  const response = await fetch(`${API_URL}/auditoria/historico?page=${page}&limit=${limit}`, {
+    headers: { ...getAuthHeaders() },
+  });
   
   if (!response.ok) {
     throw new Error(`Failed to fetch audit history: ${response.statusText}`);
