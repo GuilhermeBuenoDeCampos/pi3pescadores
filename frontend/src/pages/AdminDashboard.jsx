@@ -13,9 +13,10 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { FiRefreshCw } from 'react-icons/fi';
+import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
-import { fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas } from '../services/api';
+import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser } from '../services/api';
 import styles from './AdminDashboard.module.css';
 
 ChartJS.register(
@@ -57,6 +58,7 @@ const commonOptions = {
 };
 
 function AdminDashboard() {
+  const navigate = useNavigate();
   const [accuracy, setAccuracy] = useState(null);
   const [loadingAccuracy, setLoadingAccuracy] = useState(true);
   const [accuracyError, setAccuracyError] = useState('');
@@ -179,6 +181,61 @@ function AdminDashboard() {
           <div>
             <h1>Painel Administrativo</h1>
             <p>Visao geral e gestao rapida</p>
+          </div>
+          <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b' }}>
+              <FiUser size={14} />
+              {getAuthUser()?.nome || 'Usuário'}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button
+                onClick={() => navigate('/')}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#5366aa', background: '#f0f2f8', border: 'none', cursor: 'pointer',
+                }}
+              >
+                <FiArrowLeft size={14} />
+                Voltar
+              </button>
+              <Link
+                to="/admin/usuarios"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#fff', background: '#5366aa',
+                  boxShadow: '0 8px 20px rgba(83,102,170,0.25)',
+                  textDecoration: 'none',
+                }}
+              >
+                <FiUsers size={14} />
+                Gerenciar Usuários
+              </Link>
+              <Link
+                to="/estoque"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#08936f', background: '#e6f5f0',
+                  textDecoration: 'none',
+                }}
+              >
+                <FiPackage size={14} />
+                Gerenciar Estoque
+              </Link>
+              <button
+                onClick={() => { clearAuthSession(); navigate('/login'); }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#b91c1c', background: '#fef2f2', border: 'none', cursor: 'pointer',
+                }}
+              >
+                <FiLogOut size={14} />
+                Sair
+              </button>
+            </div>
           </div>
         </header>
 

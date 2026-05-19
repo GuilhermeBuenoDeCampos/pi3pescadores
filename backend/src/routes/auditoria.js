@@ -1,18 +1,14 @@
 const { Router } = require('express');
 const auditoriaController = require('../controllers/auditoriaController');
+const authenticate = require('../middlewares/authenticate');
+const authorize = require('../middlewares/authorize');
 
 const router = Router();
 
-// Get 5 random products for audit
-router.get('/aleatorios', auditoriaController.getProdutosAleatorios);
-
-// Save audit records
-router.post('/salvar', auditoriaController.salvarAuditoria);
-
-// Get audit history
-router.get('/historico', auditoriaController.getHistoricoAuditoria);
-
-// Get average stock accuracy
-router.get('/acuracidade-media', auditoriaController.getMediaAcuracidade);
+// All audit routes require admin or funcionario
+router.get('/aleatorios', authenticate, authorize('admin', 'funcionario'), auditoriaController.getProdutosAleatorios);
+router.post('/salvar', authenticate, authorize('admin', 'funcionario'), auditoriaController.salvarAuditoria);
+router.get('/historico', authenticate, authorize('admin', 'funcionario'), auditoriaController.getHistoricoAuditoria);
+router.get('/acuracidade-media', authenticate, authorize('admin', 'funcionario'), auditoriaController.getMediaAcuracidade);
 
 module.exports = router;

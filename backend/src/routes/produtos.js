@@ -2,6 +2,8 @@ const { Router } = require('express');
 const multer = require('multer');
 const path = require('path');
 const produtoController = require('../controllers/produtoController');
+const authenticate = require('../middlewares/authenticate');
+const authorize = require('../middlewares/authorize');
 
 const router = Router();
 
@@ -17,17 +19,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Public routes (read-only)
 router.get('/', produtoController.listar);
 router.get('/nome/:nome', produtoController.detalharPorNome);
 router.get('/:id', produtoController.detalhar);
-router.post('/', upload.array('imagens', 10), produtoController.criar);
-router.post('/:id/imagens', produtoController.adicionarImagem);
-router.post('/:id/movimentacoes', produtoController.registrarMovimentacao);
-// edit product
-router.put('/:id', upload.array('imagens', 10), produtoController.atualizar);
-// also accept POST for updates (multipart forms are more reliably sent via POST from browsers)
-router.post('/:id', upload.array('imagens', 10), produtoController.atualizar);
-// lançamento em massa: aceita { movimentacoes: [{ id_produto, tipo, quantidade, motivo }] }
-router.post('/movimentacoes/massa', produtoController.registrarMovimentacoesEmMassa);
+
+// Protected routes (admin/funcionario only)
+router.post('/', authenticate, authorize('admin', 'funcionario'), upload.array('imagens', 10), produtoController.criar);
+router.post('/:id/imagens', authenticate, authorize('admin', 'funcionario'), produtoController.adicionarImagem);
+router.post('/:id/movimentacoes', authenticate, authorize('admin', 'funcionario'), produtoController.registrarMovimentacao);
+router.put('/:id', authenticate, authorize('admin', 'funcionario'), upload.array('imagens', 10), produtoController.atualizar);
+router.post('/:id', authenticate, authorize('admin', 'funcionario'), upload.array('imagens', 10), produtoController.atualizar);
+router.post('/movimentacoes/massa', authenticate, authorize('admin', 'funcionario'), produtoController.registrarMovimentacoesEmMassa);
 
 module.exports = router;

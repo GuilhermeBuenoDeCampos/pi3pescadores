@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react';
 import {
   BACKEND_URL,
+  clearAuthSession,
   fetchCategories,
   fetchProducts,
   fetchProductById,
+  getAuthHeaders,
+  getAuthUser,
   getImageUrl,
   updateProductStatus,
 } from '../services/api';
+import { FiArrowLeft, FiLogOut, FiUser } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import AuditoriaModal from '../components/AuditoriaModal';
 import styles from './StockManagement.module.css';
 
 const StockManagement = () => {
+  const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState(null);
   const [isAuditoriaOpen, setIsAuditoriaOpen] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -139,16 +145,19 @@ const StockManagement = () => {
       });
 
     try {
+      const headers = { ...getAuthHeaders() };
       let response;
       if (editProduct && editProduct.id) {
         // use POST to update when sending multipart FormData from the browser
         response = await fetch(`${BACKEND_URL}/api/produtos/${editProduct.id}`, {
           method: 'POST',
+          headers,
           body: formData,
         });
       } else {
         response = await fetch(`${BACKEND_URL}/api/produtos`, {
           method: 'POST',
+          headers,
           body: formData,
         });
       }
@@ -184,7 +193,7 @@ const StockManagement = () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/categorias`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ nome: newCategoryName })
       });
 
@@ -296,7 +305,7 @@ const StockManagement = () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/produtos/movimentacoes/massa`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ movimentacoes: massItems.map(item => ({ id_produto: item.id_produto, tipo: 'entrada', quantidade: Number(item.quantidade), motivo: 'compra' })) }),
       });
 
@@ -324,6 +333,36 @@ const StockManagement = () => {
           <div className={styles.titleContainer}>
             <h1>Tres Pescadores Store</h1>
             <div className={styles.subtitle}>Gerenciar Estoque</div>
+          </div>
+          <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b' }}>
+              <FiUser size={14} />
+              {getAuthUser()?.nome || 'Usuário'}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button
+                onClick={() => navigate('/admin')}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#5366aa', background: '#f0f2f8', border: 'none', cursor: 'pointer',
+                }}
+              >
+                <FiArrowLeft size={14} />
+                Voltar
+              </button>
+              <button
+                onClick={() => { clearAuthSession(); navigate('/login'); }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#b91c1c', background: '#fef2f2', border: 'none', cursor: 'pointer',
+                }}
+              >
+                <FiLogOut size={14} />
+                Sair
+              </button>
+            </div>
           </div>
         </header>
 
