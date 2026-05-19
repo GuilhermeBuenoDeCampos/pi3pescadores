@@ -16,6 +16,9 @@ import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
 import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
+import nsaVerde from '../assets/logo/nsa-verde.png';
+import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
+import nsaVermelho from '../assets/logo/nsa-vermelho.png';
 import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser } from '../services/api';
 import styles from './AdminDashboard.module.css';
 
@@ -104,6 +107,31 @@ function AdminDashboard() {
   const accuracyValue = Math.max(0, Math.min(100, Number(accuracy?.media_acuracidade || 0)));
   const topSearch = topSearches[0];
 
+  // Determine color and image based on accuracy percentage
+  const getAccuracyMetrics = (value) => {
+    if (value > 90) {
+      return {
+        color: '#27ae60',
+        image: nsaVerde,
+        label: 'Excelente',
+      };
+    } else if (value >= 90 && value <= 95) {
+      return {
+        color: '#f39c12',
+        image: nsaAmarelo,
+        label: 'Bom',
+      };
+    } else {
+      return {
+        color: '#e74c3c',
+        image: nsaVermelho,
+        label: 'Alerta',
+      };
+    }
+  };
+
+  const accuracyMetrics = getAccuracyMetrics(accuracyValue);
+
   const revenueData = useMemo(() => ({
     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'],
     datasets: [
@@ -165,13 +193,13 @@ function AdminDashboard() {
     datasets: [
       {
         data: [accuracyValue, 100 - accuracyValue],
-        backgroundColor: [chartColors.teal, '#bfc5c8'],
+        backgroundColor: [accuracyMetrics.color, '#bfc5c8'],
         borderColor: ['#ffffff', '#ffffff'],
         borderWidth: 2,
         cutout: '68%',
       },
     ],
-  }), [accuracyValue]);
+  }), [accuracyValue, accuracyMetrics.color]);
 
   return (
     <main className={styles.page}>
@@ -346,6 +374,9 @@ function AdminDashboard() {
                 <span>{accuracy?.total_auditorias || 0} produtos auditados</span>
               </div>
               {loadingAccuracy && <FiRefreshCw className={styles.loadingIcon} />}
+            </div>
+            <div className={styles.accuracyImageContainer}>
+              <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.nsaImage} />
             </div>
             <div className={styles.accuracyChart}>
               <Doughnut

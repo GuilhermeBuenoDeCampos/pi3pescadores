@@ -185,6 +185,21 @@
   animation: spin 0.9s linear infinite;
 }
 
+.accuracyImageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+  height: 60px;
+}
+
+.nsaImage {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  animation: fadeIn 0.5s ease-in;
+}
+
 .accuracyChart {
   height: 150px;
   position: relative;
@@ -224,6 +239,17 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
