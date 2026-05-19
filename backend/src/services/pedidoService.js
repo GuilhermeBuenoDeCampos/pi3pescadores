@@ -376,43 +376,53 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
     };
   }
 
-  const { count, rows } = await db.Pedido.findAndCountAll({
-    where,
-    include: [
-      {
-        model: db.PedidoItem,
-        as: 'itens',
-        include: [
-          {
-            model: db.Produto,
-            as: 'produto',
-            attributes: ['id', 'nome', 'ativo'],
-            include: [
-              {
-                model: db.ProdutoImagem,
-                as: 'imagens',
-                attributes: ['id', 'url'],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    distinct: true,
-    order: [['criado_em', 'DESC']],
-    limit,
-    offset,
-  });
-
-  return {
-    data: rows.map(formatPedido),
-    pagination: {
-      total: count,
-      page,
+  try {
+    const { count, rows } = await db.Pedido.findAndCountAll({
+      where,
+      include: [
+        {
+          model: db.PedidoItem,
+          as: 'itens',
+          include: [
+            {
+              model: db.Produto,
+              as: 'produto',
+              attributes: ['id', 'nome', 'ativo'],
+              include: [
+                {
+                  model: db.ProdutoImagem,
+                  as: 'imagens',
+                  attributes: ['id', 'url'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      distinct: true,
+      order: [['criado_em', 'DESC']],
       limit,
-      pages: Math.ceil(count / limit),
-    },
-  };
+      offset,
+    });
+
+    return {
+      data: rows.map(formatPedido),
+      pagination: {
+        total: count,
+        page,
+        limit,
+        pages: Math.ceil(count / limit),
+      },
+    };
+  } catch (error) {
+    console.error('[pedidoService] erro ao listar pedidos do usuário:', {
+      usuarioId,
+      query,
+      error: error.message,
+      stack: error.stack,
+    });
+    throw error;
+  }
 };
 
 exports.buscarPedidoDoUsuario = async (usuarioId, idPedido) => {
