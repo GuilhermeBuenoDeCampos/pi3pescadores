@@ -7,7 +7,7 @@ function Footer() {
     <footer className={styles.footer}>
       <div className={styles.footerGrid}>
         <div>
-          <div className={styles.footerLogo}>Tres <span>Pescadores</span></div>
+          <div className={styles.footerLogo}>Três <span>Pescadores</span></div>
           <p className={styles.footerDesc}>
             Loja de artigos religiosos católicos para fé, devoção e presentes com significado.
           </p>
@@ -36,12 +36,12 @@ function Footer() {
         <div className={styles.footerCol}>
           <h4>Contato</h4>
           <p>Endereço, telefone, e-mail e redes sociais não estão cadastrados no frontend atual.</p>
-          <p>Use os canais oficiais da Tres Pescadores Store para atendimento.</p>
+          <p>Use os canais oficiais da Três Pescadores Store para atendimento.</p>
         </div>
       </div>
 
       <div className={styles.footerBottom}>
-        <span>© {year} Tres Pescadores. Todos os direitos reservados.</span>
+        <span>© {year} Três Pescadores. Todos os direitos reservados.</span>
         <div className={styles.payments}>
           <span>Catálogo</span>
           <strong>Online</strong>

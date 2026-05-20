@@ -35,7 +35,7 @@ const Login = () => {
             saveAuthSession(session);
             navigate(location.state?.from || '/');
         } catch (err) {
-            setError(err.message || 'Email ou senha invalidos.');
+            setError(err.message || 'E-mail ou senha inválidos.');
         } finally {
             setIsSubmitting(false);
         }
@@ -90,7 +90,7 @@ const Login = () => {
                     <div className={styles.links}>
                         <Link to="#" className={styles.link}>Esqueci minha senha</Link>
                         <span className={styles.link}>
-                            Nao tem uma conta? <Link to="/cadastro" className={`${styles.link} ${styles.bold}`}>Criar conta</Link>
+                            Não tem uma conta? <Link to="/cadastro" className={`${styles.link} ${styles.bold}`}>Criar conta</Link>
                         </span>
                     </div>
                 </div>
@@ -100,7 +100,7 @@ const Login = () => {
                 <div className={styles.circle1}></div>
                 <div className={styles.circle2}></div>
                 <div className={styles.circle3}></div>
-                <img src={logo} alt="Tres Pescadores Store" className={styles.logo} />
+                <img src={logo} alt="Três Pescadores Store" className={styles.logo} />
             </div>
         </div>
     );

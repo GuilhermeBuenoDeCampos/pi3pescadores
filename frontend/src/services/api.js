@@ -64,10 +64,15 @@ export function getAuthHeaders() {
 
 async function parseApiError(response, fallbackMessage) {
   try {
-    const body = await response.json();
+    const body = await response.clone().json();
     return body?.error?.message || body?.message || fallbackMessage;
   } catch {
-    return fallbackMessage;
+    try {
+      const text = await response.text();
+      return text || fallbackMessage;
+    } catch {
+      return fallbackMessage;
+    }
   }
 }
 
@@ -79,7 +84,7 @@ export async function registerUser(payload) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Nao foi possivel criar a conta.'));
+    throw new Error(await parseApiError(response, 'Não foi possível criar a conta.'));
   }
 
   const result = await response.json();
@@ -98,7 +103,7 @@ export async function loginUser(payload) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Email ou senha invalidos.'));
+    throw new Error(await parseApiError(response, 'E-mail ou senha inválidos.'));
   }
 
   const result = await response.json();
@@ -132,6 +137,8 @@ export function saveAuthSession(session) {
 export function clearAuthSession(options = {}) {
   localStorage.removeItem('authToken');
   localStorage.removeItem('authUser');
+  sessionStorage.removeItem('authToken');
+  sessionStorage.removeItem('authUser');
 
   if (options.rotateGuestToken) {
     rotateGuestToken();
@@ -185,7 +192,7 @@ export async function fetchProducts(filters = {}) {
   const response = await fetch(url);
   
   if (!response.ok) {
-    throw new Error(await parseApiError(response, `Failed to fetch products: ${response.statusText}`));
+    throw new Error(await parseApiError(response, `Não foi possível carregar os produtos: ${response.statusText}`));
   }
 
   const result = await response.json();
@@ -204,7 +211,7 @@ export async function fetchProductById(id) {
   const response = await fetch(`${API_URL}/produtos/${id}`);
   
   if (!response.ok) {
-    throw new Error(await parseApiError(response, `Failed to fetch product: ${response.statusText}`));
+    throw new Error(await parseApiError(response, `Não foi possível carregar o produto: ${response.statusText}`));
   }
 
   const result = await response.json();
@@ -241,7 +248,7 @@ export async function fetchProdutosAleatorios() {
   });
   
   if (!response.ok) {
-    throw new Error(`Failed to fetch random products: ${response.statusText}`);
+    throw new Error(`Não foi possível carregar os produtos aleatórios: ${response.statusText}`);
   }
 
   const result = await response.json();
@@ -263,7 +270,7 @@ export async function salvarAuditoria(auditorias) {
   });
   
   if (!response.ok) {
-    throw new Error(`Failed to save audit: ${response.statusText}`);
+    throw new Error(`Não foi possível salvar a auditoria: ${response.statusText}`);
   }
 
   const result = await response.json();
@@ -284,7 +291,7 @@ export async function fetchHistoricoAuditoria(page = 1, limit = 10) {
   });
   
   if (!response.ok) {
-    throw new Error(`Failed to fetch audit history: ${response.statusText}`);
+    throw new Error(`Não foi possível carregar o histórico de auditorias: ${response.statusText}`);
   }
 
   const result = await response.json();
@@ -297,7 +304,7 @@ export async function fetchMediaAcuracidade() {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, `Failed to fetch accuracy average: ${response.statusText}`));
+    throw new Error(await parseApiError(response, `Não foi possível carregar a média de acuracidade: ${response.statusText}`));
   }
 
   const result = await response.json();
@@ -312,7 +319,7 @@ export async function registrarPalavraPesquisada(palavra) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Nao foi possivel registrar a pesquisa.'));
+    throw new Error(await parseApiError(response, 'Não foi possível registrar a pesquisa.'));
   }
 
   const result = await response.json();
@@ -325,7 +332,7 @@ export async function fetchPalavrasMaisPesquisadas(limit = 5) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Nao foi possivel carregar as palavras mais pesquisadas.'));
+    throw new Error(await parseApiError(response, 'Não foi possível carregar as palavras mais pesquisadas.'));
   }
 
   const result = await response.json();
@@ -343,7 +350,7 @@ export async function fetchCategories() {
   const response = await fetch(`${API_URL}/categorias`);
   
   if (!response.ok) {
-    throw new Error(await parseApiError(response, `Failed to fetch categories: ${response.statusText}`));
+    throw new Error(await parseApiError(response, `Não foi possível carregar as categorias: ${response.statusText}`));
   }
 
   const result = await response.json();
@@ -366,7 +373,7 @@ export async function updateProductStatus(id, ativo) {
   });
   
   if (!response.ok) {
-    throw new Error(await parseApiError(response, `Failed to update product status: ${response.statusText}`));
+    throw new Error(await parseApiError(response, `Não foi possível atualizar o status do produto: ${response.statusText}`));
   }
 
   const result = await response.json();
@@ -379,7 +386,7 @@ export async function fetchCart() {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Nao foi possivel carregar o carrinho.'));
+    throw new Error(await parseApiError(response, 'Não foi possível carregar o carrinho.'));
   }
 
   const result = await response.json();
@@ -394,7 +401,7 @@ export async function addCartItem(payload) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Nao foi possivel adicionar o item ao carrinho.'));
+    throw new Error(await parseApiError(response, 'Não foi possível adicionar o item ao carrinho.'));
   }
 
   const result = await response.json();
@@ -409,7 +416,7 @@ export async function updateCartItem(itemId, payload) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Nao foi possivel atualizar o item do carrinho.'));
+    throw new Error(await parseApiError(response, 'Não foi possível atualizar o item do carrinho.'));
   }
 
   const result = await response.json();
@@ -423,7 +430,7 @@ export async function removeCartItem(itemId) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Nao foi possivel remover o item do carrinho.'));
+    throw new Error(await parseApiError(response, 'Não foi possível remover o item do carrinho.'));
   }
 
   const result = await response.json();
@@ -442,6 +449,77 @@ export async function calculateShipping(payload) {
     }
 
     return response.json();
+}
+
+export async function fetchAddresses() {
+  const response = await fetch(`${API_URL}/enderecos`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Não foi possível carregar os endereços.'));
+  }
+
+  const result = await response.json();
+  return result.data || [];
+}
+
+export async function createAddress(payload) {
+  const response = await fetch(`${API_URL}/enderecos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Não foi possível criar o endereço.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function updateAddress(id, payload) {
+  const response = await fetch(`${API_URL}/enderecos/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Não foi possível atualizar o endereço.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function deleteAddress(id) {
+  const response = await fetch(`${API_URL}/enderecos/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Não foi possível excluir o endereço.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function setPrimaryAddress(id) {
+  const response = await fetch(`${API_URL}/enderecos/${id}/principal`, {
+    method: 'PATCH',
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Não foi possível definir o endereço principal.'));
+  }
+
+  const result = await response.json();
+  return result.data;
 }
 
 /**
@@ -527,7 +605,7 @@ export async function criarPedido(payload) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Nao foi possivel criar o pedido.'));
+    throw new Error(await parseApiError(response, 'Não foi possível criar o pedido.'));
   }
 
   const result = await response.json();
@@ -548,7 +626,7 @@ export async function fetchMeusPedidos(params = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Nao foi possivel carregar seus pedidos.'));
+    throw new Error(await parseApiError(response, 'Não foi possível carregar seus pedidos.'));
   }
 
   return response.json();
@@ -560,7 +638,7 @@ export async function fetchMeuPedido(id) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Pedido nao encontrado.'));
+    throw new Error(await parseApiError(response, 'Pedido não encontrado.'));
   }
 
   const result = await response.json();
@@ -575,7 +653,7 @@ export async function atualizarStatusPedido(id, status) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseApiError(response, 'Nao foi possivel atualizar o pedido.'));
+    throw new Error(await parseApiError(response, 'Não foi possível atualizar o pedido.'));
   }
 
   const result = await response.json();

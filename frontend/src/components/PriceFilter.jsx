@@ -9,19 +9,19 @@ function PriceFilter({ sortOrder, onSortChange, minPrice, maxPrice, onMinPriceCh
           className={`${styles.sortButton} ${sortOrder === 'asc' ? styles.active : ''}`}
           onClick={() => onSortChange('asc')}
         >
-          Preço: Menor para Maior
+          Preço: menor para maior
         </button>
         <button
           type="button"
           className={`${styles.sortButton} ${sortOrder === 'desc' ? styles.active : ''}`}
           onClick={() => onSortChange('desc')}
         >
-          Preço: Maior para Menor
+          Preço: maior para menor
         </button>
       </div>
       <div className={styles.priceInputs}>
         <label>
-          Preço Mínimo:
+          Preço mínimo:
           <input
             type="number"
             value={minPrice}
@@ -31,7 +31,7 @@ function PriceFilter({ sortOrder, onSortChange, minPrice, maxPrice, onMinPriceCh
           />
         </label>
         <label>
-          Preço Máximo:
+          Preço máximo:
           <input
             type="number"
             value={maxPrice}

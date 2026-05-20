@@ -46,7 +46,7 @@ function OrderDetailsPage() {
         const data = await fetchMeuPedido(id);
         if (active) setOrder(data);
       } catch (err) {
-        if (active) setError(err.message || 'Nao foi possivel carregar o pedido.');
+        if (active) setError(err.message || 'Não foi possível carregar o pedido.');
       } finally {
         if (active) setLoading(false);
       }

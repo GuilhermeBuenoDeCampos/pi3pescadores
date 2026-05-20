@@ -23,9 +23,30 @@ function App() {
         <Route path="/produto/:id" element={<ProductPage />} />
         <Route path="/produto-nome/:nome" element={<ProductPage />} />
         <Route path="/carrinho" element={<CartPage />} />
-        <Route path="/meus-pedidos" element={<AccountPage type="orders" />} />
-        <Route path="/meus-pedidos/:id" element={<OrderDetailsPage />} />
-        <Route path="/meus-enderecos" element={<AccountPage type="addresses" />} />
+        <Route
+          path="/meus-pedidos"
+          element={
+            <ProtectedRoute roles={['cliente']} redirectTo="/">
+              <AccountPage type="orders" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/meus-pedidos/:id"
+          element={
+            <ProtectedRoute roles={['cliente']} redirectTo="/">
+              <OrderDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/meus-enderecos"
+          element={
+            <ProtectedRoute roles={['cliente']} redirectTo="/">
+              <AccountPage type="addresses" />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/estoque"
           element={

@@ -295,6 +295,7 @@ exports.autenticarUsuario = async (payload) => {
   });
 
   const token = jwt.sign({
+    id: usuario.id,
     sub: usuario.id,
     email: usuario.email,
     tipo_usuario: usuario.tipo_usuario,

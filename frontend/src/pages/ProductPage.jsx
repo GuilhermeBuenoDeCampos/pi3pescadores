@@ -75,7 +75,7 @@ function ProductPage() {
 
   useEffect(() => {
     if (product) {
-      document.title = `${product.nome} | Tres Pescadores`;
+      document.title = `${product.nome} | Três Pescadores`;
     }
   }, [product]);
 
@@ -88,7 +88,7 @@ function ProductPage() {
     }
 
     if (!cartContext) {
-      console.error('CartContext indisponivel no ProductPage');
+      console.error('CartContext indisponível no ProductPage');
       return;
     }
 

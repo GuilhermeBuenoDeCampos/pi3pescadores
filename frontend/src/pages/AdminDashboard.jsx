@@ -176,10 +176,10 @@ function AdminDashboard() {
   }), []);
 
   const satisfactionData = useMemo(() => ({
-    labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preco', 'Experiencia'],
+    labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preço', 'Experiência'],
     datasets: [
       {
-        label: 'Satisfacao',
+        label: 'Satisfação',
         data: [0.75, 0.78, 0.92, 0.68, 0.82],
         borderColor: '#a7824f',
         backgroundColor: 'rgba(167, 130, 79, 0.22)',
@@ -189,7 +189,7 @@ function AdminDashboard() {
   }), []);
 
   const accuracyData = useMemo(() => ({
-    labels: ['Acuracidade media', 'Diferenca'],
+    labels: ['Acuracidade média', 'Diferença'],
     datasets: [
       {
         data: [accuracyValue, 100 - accuracyValue],
@@ -205,10 +205,10 @@ function AdminDashboard() {
     <main className={styles.page}>
       <section className={styles.shell}>
         <header className={styles.hero}>
-          <img src={logo} alt="Tres Pescadores Store" />
+          <img src={logo} alt="Três Pescadores Store" />
           <div>
             <h1>Painel Administrativo</h1>
-            <p>Visao geral e gestao rapida</p>
+            <p>Visão geral e gestão rápida</p>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b' }}>
@@ -273,11 +273,11 @@ function AdminDashboard() {
             <strong>R$ 198.450,90</strong>
           </article>
           <article className={styles.kpiCard}>
-            <span>Taxa de conversao</span>
+            <span>Taxa de conversão</span>
             <strong>2,35%</strong>
           </article>
           <article className={styles.kpiCard}>
-            <span>Ticket medio</span>
+            <span>Ticket médio</span>
             <strong>R$ 243,65</strong>
           </article>
           <article className={styles.kpiCard}>
@@ -322,7 +322,7 @@ function AdminDashboard() {
           </article>
 
           <article className={styles.chartBlock}>
-            <h2>Funil de conversao</h2>
+            <h2>Funil de conversão</h2>
             <div className={styles.chartCanvas}>
               <Doughnut data={funnelData} options={commonOptions} />
             </div>
@@ -346,7 +346,7 @@ function AdminDashboard() {
           </article>
 
           <article className={styles.chartBlock}>
-            <h2>Satisfacao</h2>
+            <h2>Satisfação</h2>
             <div className={styles.chartCanvas}>
               <Radar
                 data={satisfactionData}
@@ -396,7 +396,7 @@ function AdminDashboard() {
               />
               <div className={styles.accuracyValue}>
                 <strong>{loadingAccuracy ? '--' : `${accuracyValue.toFixed(2)}%`}</strong>
-                <span>Acuracidade media</span>
+                <span>Acuracidade média</span>
               </div>
             </div>
             {accuracyError && <p className={styles.errorText}>{accuracyError}</p>}

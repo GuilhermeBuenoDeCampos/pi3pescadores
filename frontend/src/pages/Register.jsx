@@ -55,7 +55,7 @@ const Register = () => {
             setSuccess('Conta criada com sucesso. Redirecionando para o login...');
             setTimeout(() => navigate('/login'), 1200);
         } catch (err) {
-            setError(err.message || 'Nao foi possivel criar a conta.');
+            setError(err.message || 'Não foi possível criar a conta.');
         } finally {
             setIsSubmitting(false);
         }
@@ -65,12 +65,12 @@ const Register = () => {
         <div className={styles.container}>
             <div className={styles.leftPanel}>
                 <div className={styles.formContainer}>
-                    <h1 className={styles.title}>Criar Conta</h1>
+                    <h1 className={styles.title}>Criar conta</h1>
                     <p className={styles.subtitle}>Preencha os dados para se cadastrar na plataforma</p>
 
                     <form onSubmit={handleSubmit}>
                         <div className={styles.formGroup}>
-                            <label className={styles.label}>Nome Completo</label>
+                            <label className={styles.label}>Nome completo</label>
                             <input
                                 type="text"
                                 name="nome"
@@ -140,7 +140,7 @@ const Register = () => {
                         </div>
 
                         <div className={styles.formGroup}>
-                            <label className={styles.label}>Confirmar Senha</label>
+                            <label className={styles.label}>Confirmar senha</label>
                             <div className={styles.inputWrapper}>
                                 <input
                                     type={showConfirmPassword ? 'text' : 'password'}
@@ -162,13 +162,13 @@ const Register = () => {
                         {success && <span className={styles.successText}>{success}</span>}
 
                         <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
-                            {isSubmitting ? 'Criando...' : 'Criar Conta'}
+                            {isSubmitting ? 'Criando...' : 'Criar conta'}
                         </button>
                     </form>
 
                     <div className={styles.links}>
                         <span className={styles.link}>
-                            Ja tem uma conta? <Link to="/login" className={`${styles.link} ${styles.bold}`}>Entrar</Link>
+                            Já tem uma conta? <Link to="/login" className={`${styles.link} ${styles.bold}`}>Entrar</Link>
                         </span>
                     </div>
                 </div>
@@ -178,7 +178,7 @@ const Register = () => {
                 <div className={styles.circle1}></div>
                 <div className={styles.circle2}></div>
                 <div className={styles.circle3}></div>
-                <img src={logo} alt="Tres Pescadores Store" className={styles.logo} />
+                <img src={logo} alt="Três Pescadores Store" className={styles.logo} />
             </div>
         </div>
     );

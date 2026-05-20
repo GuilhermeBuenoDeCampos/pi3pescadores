@@ -5,7 +5,7 @@ function RelatedProducts({ products }) {
   return (
     <section className={styles.relatedSection}>
       <div className={styles.header}>
-        <span className={styles.label}>Voce também pode gostar</span>
+        <span className={styles.label}>Você também pode gostar</span>
       </div>
       <div className={styles.grid}>
         {products.map((product) => (

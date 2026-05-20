@@ -6,6 +6,7 @@ const authRoutes = require('./auth');
 const pesquisasRoutes = require('./pesquisas');
 const calculoFreteRoutes = require('./calculofrete');
 const cartRoutes = require('./cart');
+const enderecosRoutes = require('./enderecos');
 const usuariosRoutes = require('./usuarios');
 const pedidosRoutes = require('./pedidos');
 
@@ -18,6 +19,7 @@ router.use('/auth', authRoutes);
 router.use('/pesquisas', pesquisasRoutes);
 router.use('/frete', calculoFreteRoutes);
 router.use('/cart', cartRoutes);
+router.use('/enderecos', enderecosRoutes);
 router.use('/usuarios', usuariosRoutes);
 router.use('/pedidos', pedidosRoutes);
 

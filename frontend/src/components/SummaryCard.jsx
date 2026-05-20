@@ -4,7 +4,7 @@ import styles from './SummaryCard.module.css';
 const SummaryCard = ({ subtotal, shipping, total, onCheckout, disabled }) => {
   return (
     <aside className={styles.summaryCard}>
-      <h3 className={styles.title}>Resumo do Pedido</h3>
+      <h3 className={styles.title}>Resumo do pedido</h3>
       <div className={styles.row}>
         <span>Subtotal</span>
         <span>R$ {subtotal.toFixed(2)}</span>
@@ -22,7 +22,7 @@ const SummaryCard = ({ subtotal, shipping, total, onCheckout, disabled }) => {
         onClick={onCheckout}
         disabled={disabled}
       >
-        Finalizar Compra
+        Finalizar compra
       </button>
     </aside>
   );

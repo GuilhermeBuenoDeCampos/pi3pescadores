@@ -128,7 +128,7 @@ function Home() {
       <main>
         <section className={styles.heroSection}>
           <div className={styles.heroLeft}>
-            <span className={styles.heroBadge}>Tres Pescadores Store</span>
+            <span className={styles.heroBadge}>Três Pescadores Store</span>
             <h1>
               Artigos religiosos para <em>fé</em> e devoção
             </h1>
@@ -262,7 +262,7 @@ function Home() {
           <div className={styles.testimonialsGrid}>
             <article className={styles.testimonialCard}>
               <p>Curadoria focada em artigos religiosos católicos para diferentes momentos de fé.</p>
-              <span>Tres Pescadores Store</span>
+              <span>Três Pescadores Store</span>
             </article>
             <article className={styles.testimonialCard}>
               <p>Produtos apresentados com imagens, categorias e preços reais do catálogo.</p>

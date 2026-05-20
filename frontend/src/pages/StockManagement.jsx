@@ -329,9 +329,9 @@ const StockManagement = () => {
       <div className={styles.contentWrapper}>
         {/* Header */}
         <header className={styles.header}>
-          <img src={logo} alt="Tres Pescadores Store Logo" className={styles.logo} />
+          <img src={logo} alt="Logo Três Pescadores Store" className={styles.logo} />
           <div className={styles.titleContainer}>
-            <h1>Tres Pescadores Store</h1>
+            <h1>Três Pescadores Store</h1>
             <div className={styles.subtitle}>Gerenciar Estoque</div>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>

@@ -208,7 +208,7 @@ function CartPage() {
       navigate(`/meus-pedidos/${pedido.id}`, { state: { created: true } });
     } catch (error) {
       console.error('Erro ao criar pedido:', error);
-      setCheckoutError(error.message || 'Nao foi possivel finalizar o pedido.');
+      setCheckoutError(error.message || 'Não foi possível finalizar o pedido.');
     } finally {
       setIsSubmittingOrder(false);
     }
@@ -227,7 +227,7 @@ function CartPage() {
 
           <div className="cart-items">
             <div className="cart-header">
-              <h2>Seu Carrinho</h2>
+              <h2>Seu carrinho</h2>
             </div>
 
             {displayItems.length === 0 && (
