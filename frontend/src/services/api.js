@@ -464,6 +464,10 @@ export async function fetchAddresses() {
   return result.data || [];
 }
 
+export async function getUserAddresses() {
+  return fetchAddresses();
+}
+
 export async function createAddress(payload) {
   const response = await fetch(`${API_URL}/enderecos`, {
     method: 'POST',

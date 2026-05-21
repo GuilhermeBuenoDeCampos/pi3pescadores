@@ -12,6 +12,10 @@ import AdminUsers from './pages/AdminUsers';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import styles from './App.module.css';
+import CheckoutAddressPage from './pages/CheckoutAddressPage';
+import CheckoutShippingPage from './pages/CheckoutShippingPage';
+import CheckoutPaymentPage from './pages/CheckoutPaymentPage';
+import CheckoutSuccessPage from './pages/CheckoutSuccessPage';
 
 function App() {
   return (
@@ -23,6 +27,38 @@ function App() {
         <Route path="/produto/:id" element={<ProductPage />} />
         <Route path="/produto-nome/:nome" element={<ProductPage />} />
         <Route path="/carrinho" element={<CartPage />} />
+        <Route
+          path="/checkout/address"
+          element={
+            <ProtectedRoute roles={['cliente']} redirectTo="/login">
+              <CheckoutAddressPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout/shipping"
+          element={
+            <ProtectedRoute roles={['cliente']} redirectTo="/login">
+              <CheckoutShippingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout/payment"
+          element={
+            <ProtectedRoute roles={['cliente']} redirectTo="/login">
+              <CheckoutPaymentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout/success"
+          element={
+            <ProtectedRoute roles={['cliente']} redirectTo="/login">
+              <CheckoutSuccessPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/meus-pedidos"
           element={

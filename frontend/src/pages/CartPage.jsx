@@ -1,41 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Header from '../components/Header';
 import './cart.css';
 import semImagem from '../assets/ProdutoSemImagem/semimagem.png';
-import { getAuthToken, getAuthUser, getImageUrl, calculateShipping, criarPedido } from '../services/api';
+import { getAuthToken, getImageUrl, calculateShipping } from '../services/api';
 import { formatPrice } from '../utils/productUtils';
 
 function CartPage() {
-  const { cart, removeFromCart, clearCart, addToCart, decreaseQuantity, isCartLoading, cartError } = useCart();
+  const { cart, removeFromCart, addToCart, decreaseQuantity, isCartLoading, cartError } = useCart();
   const navigate = useNavigate();
-  const [couponCode, setCouponCode] = useState('');
-  const [couponDiscount, setCouponDiscount] = useState(0);
+  
   const [cep, setCep] = useState('');
   const [shippingOptions, setShippingOptions] = useState([]);
   const [selectedShipping, setSelectedShipping] = useState(null);
   const [isLoadingShipping, setIsLoadingShipping] = useState(false);
   const [shippingError, setShippingError] = useState('');
   const [shippingSuccess, setShippingSuccess] = useState(false);
-  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
-  const [checkoutError, setCheckoutError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('whatsapp');
-  const [observacoes, setObservacoes] = useState('');
-  const [openWhatsAppAfterOrder, setOpenWhatsAppAfterOrder] = useState(true);
-  const [deliveryAddress, setDeliveryAddress] = useState({
-    nome_destinatario: '',
-    cep: '',
-    rua: '',
-    numero: '',
-    complemento: '',
-    bairro: '',
-    cidade: '',
-    estado: '',
-    telefone: '',
-  });
 
-  // Usar itens do cart
   const displayItems = Array.isArray(cart.items) ? cart.items : [];
 
   const handleIncrease = (product) => {
@@ -62,22 +44,9 @@ function CartPage() {
   }, 0);
 
   const shippingCost = selectedShipping ? parseFloat(selectedShipping.price) : 0;
-  const total = subtotal + shippingCost - couponDiscount;
+  const total = subtotal + shippingCost;
   
   const totalItems = displayItems.reduce((total, item) => total + item.quantity, 0);
-
-  if (isCartLoading) {
-    return (
-      <div>
-        <Header />
-        <main>
-          <div className="cart-container">
-            <div className="cart-loading">Carregando carrinho...</div>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   const validateCEP = (cepValue) => {
     const cleanCEP = cepValue.replace(/\D/g, '');
@@ -134,85 +103,33 @@ function CartPage() {
     }
   };
 
-  const applyCoupon = () => {
-    if (couponCode.toLowerCase() === 'desc10') {
-      setCouponDiscount(subtotal * 0.1);
-      alert('Cupom aplicado com 10% de desconto!');
-    } else {
-      alert('Cupom inválido');
-      setCouponDiscount(0);
-    }
-  };
-
-  const buildWhatsAppMessage = (user, pedido) => {
-    const productLines = displayItems.map(({ product, quantity }) => {
-      const itemTotal = getProductPrice(product) * quantity;
-      return `* ${product.nome} (${quantity}x) - R$ ${formatPrice(itemTotal)}`;
-    });
-
-    const userName = user?.nome || '';
-    const userPhone = user?.telefone || '';
-
-    return [
-      pedido ? `Olá! Acabei de criar o pedido ${pedido.numero_pedido}:` : 'Olá! Gostaria de fazer um pedido:',
-      '',
-      ...productLines,
-      '',
-      `Subtotal: R$ ${formatPrice(subtotal)}`,
-      selectedShipping ? `Frete (${selectedShipping.name}): R$ ${formatPrice(shippingCost)}` : 'Frete a calcular',
-      `Total: R$ ${formatPrice(total)}`,
-      '',
-      `Meu nome: ${userName}`,
-      `Meu telefone: ${userPhone}`,
-    ].join('\n');
-  };
-
-  const updateDeliveryAddress = (field, value) => {
-    setDeliveryAddress((current) => ({
-      ...current,
-      [field]: field === 'cep' ? value.replace(/\D/g, '').slice(0, 8) : value,
-    }));
-  };
-
-  const handleCheckout = async (event) => {
+  const handleCheckout = (event) => {
     event.preventDefault();
-    if (displayItems.length === 0) return;
-    setCheckoutError('');
-
-    if (!getAuthToken()) {
-      navigate('/login', { state: { from: '/carrinho' } });
+    if (displayItems.length === 0) {
+      alert("Seu carrinho está vazio. Adicione produtos antes de continuar.");
       return;
     }
 
-    try {
-      setIsSubmittingOrder(true);
-      const pedido = await criarPedido({
-        itens: displayItems.map(({ product, quantity }) => ({
-          id_produto: product.id,
-          quantidade: quantity,
-        })),
-        endereco_entrega: deliveryAddress,
-        metodo_pagamento: paymentMethod,
-        observacoes,
-        frete: selectedShipping ? { name: selectedShipping.name } : null,
-      });
-
-      const user = getAuthUser();
-      clearCart();
-
-      if (openWhatsAppAfterOrder) {
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(buildWhatsAppMessage(user, pedido))}`;
-        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-      }
-
-      navigate(`/meus-pedidos/${pedido.id}`, { state: { created: true } });
-    } catch (error) {
-      console.error('Erro ao criar pedido:', error);
-      setCheckoutError(error.message || 'Não foi possível finalizar o pedido.');
-    } finally {
-      setIsSubmittingOrder(false);
+    if (!getAuthToken()) {
+      navigate('/login', { state: { from: '/checkout/address' } });
+      return;
     }
+
+    navigate('/checkout/address');
   };
+
+  if (isCartLoading) {
+    return (
+      <div>
+        <Header />
+        <main>
+          <div className="cart-container">
+            <div className="cart-loading">Carregando carrinho...</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -291,7 +208,7 @@ function CartPage() {
             </div>
             
             <div className="shipping-calculator">
-              <h4>📦 Calcular frete</h4>
+              <h4>Simular frete</h4>
               <div className="cep-input-container">
                 <input 
                   type="text" 
@@ -302,9 +219,10 @@ function CartPage() {
                   className={shippingError && cep ? 'input-error' : ''}
                 />
                 <button type="button" onClick={handleCalculateShipping} disabled={isLoadingShipping}>
-                  {isLoadingShipping ? 'Calculando...' : 'Calcular'}
+                  {isLoadingShipping ? 'Consultando...' : 'Simular'}
                 </button>
               </div>
+              <p className="shipping-helper">Valor estimado. O frete final sera calculado no checkout.</p>
               {shippingError && (
                 <div className="shipping-error">
                   {shippingError}
@@ -312,7 +230,7 @@ function CartPage() {
               )}
               {shippingSuccess && shippingOptions.length > 0 && (
                 <div className="shipping-success">
-                  ✅ Opções de frete carregadas com sucesso!
+                  Estimativas de entrega carregadas com sucesso.
                 </div>
               )}
               {shippingOptions.length > 0 && (
@@ -338,7 +256,7 @@ function CartPage() {
 
             {selectedShipping && (
               <div className="summary-item">
-                <span>Frete ({selectedShipping.name})</span>
+                <span>Frete estimado ({selectedShipping.name})</span>
                 <span>R$ {formatPrice(shippingCost)}</span>
               </div>
             )}
@@ -348,102 +266,8 @@ function CartPage() {
               <span>R$ {formatPrice(total)}</span>
             </div>
 
-            <div className="checkout-form">
-              <h4>Entrega</h4>
-              <input
-                type="text"
-                value={deliveryAddress.nome_destinatario}
-                onChange={(event) => updateDeliveryAddress('nome_destinatario', event.target.value)}
-                placeholder="Nome do destinatário"
-                required
-              />
-              <input
-                type="text"
-                value={deliveryAddress.cep}
-                onChange={(event) => updateDeliveryAddress('cep', event.target.value)}
-                placeholder="CEP"
-                required
-              />
-              <input
-                type="text"
-                value={deliveryAddress.rua}
-                onChange={(event) => updateDeliveryAddress('rua', event.target.value)}
-                placeholder="Rua"
-                required
-              />
-              <div className="checkout-row">
-                <input
-                  type="text"
-                  value={deliveryAddress.numero}
-                  onChange={(event) => updateDeliveryAddress('numero', event.target.value)}
-                  placeholder="Número"
-                  required
-                />
-                <input
-                  type="text"
-                  value={deliveryAddress.complemento}
-                  onChange={(event) => updateDeliveryAddress('complemento', event.target.value)}
-                  placeholder="Complemento"
-                />
-              </div>
-              <input
-                type="text"
-                value={deliveryAddress.bairro}
-                onChange={(event) => updateDeliveryAddress('bairro', event.target.value)}
-                placeholder="Bairro"
-                required
-              />
-              <div className="checkout-row">
-                <input
-                  type="text"
-                  value={deliveryAddress.cidade}
-                  onChange={(event) => updateDeliveryAddress('cidade', event.target.value)}
-                  placeholder="Cidade"
-                  required
-                />
-                <input
-                  type="text"
-                  value={deliveryAddress.estado}
-                  onChange={(event) => updateDeliveryAddress('estado', event.target.value.slice(0, 2).toUpperCase())}
-                  placeholder="UF"
-                  required
-                />
-              </div>
-              <input
-                type="text"
-                value={deliveryAddress.telefone}
-                onChange={(event) => updateDeliveryAddress('telefone', event.target.value)}
-                placeholder="Telefone"
-              />
-
-              <h4>Pagamento</h4>
-              <select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)}>
-                <option value="whatsapp">Combinar pelo WhatsApp</option>
-                <option value="pix">Pix</option>
-                <option value="cartao">Cartão</option>
-                <option value="dinheiro">Dinheiro</option>
-                <option value="boleto">Boleto</option>
-              </select>
-              <textarea
-                value={observacoes}
-                onChange={(event) => setObservacoes(event.target.value)}
-                placeholder="Observações para o pedido"
-                rows="3"
-              />
-              <label className="checkout-checkbox">
-                <input
-                  type="checkbox"
-                  checked={openWhatsAppAfterOrder}
-                  onChange={(event) => setOpenWhatsAppAfterOrder(event.target.checked)}
-                />
-                Enviar resumo pelo WhatsApp após salvar
-              </label>
-            </div>
-
-            {checkoutError && <div className="checkout-error">{checkoutError}</div>}
-
-            <button className="btn-checkout" type="submit" disabled={displayItems.length === 0 || isSubmittingOrder}>
-              {isSubmittingOrder ? 'Criando pedido...' : 'Finalizar pedido'}
+            <button className="btn-checkout" type="submit" disabled={displayItems.length === 0}>
+              Continuar para o Checkout
             </button>
           </form>
         </div>

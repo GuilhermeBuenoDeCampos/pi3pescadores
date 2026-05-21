@@ -435,6 +435,13 @@ body {
   cursor: not-allowed;
 }
 
+.shipping-helper {
+  color: var(--tp-text-light);
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 8px 0 0;
+}
+
 /* Opções de Frete */
 .shipping-options {
   display: flex;

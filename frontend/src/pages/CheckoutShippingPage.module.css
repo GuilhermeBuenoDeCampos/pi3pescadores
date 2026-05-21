@@ -1,0 +1,209 @@
+.sectionPanel {
+    display: grid;
+    gap: 16px;
+}
+
+.sectionHeading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.sectionHeading h2 {
+    margin: 0;
+    color: var(--indigo-dark);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.65rem;
+    line-height: 1.05;
+}
+
+.sectionHeading p {
+    margin: 0.4rem 0 0;
+    color: var(--text-mid);
+    line-height: 1.6;
+}
+
+.selectedAddressCard,
+.shippingOption {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(61, 78, 143, 0.12);
+    border-radius: 18px;
+    box-shadow: 0 18px 38px rgba(30, 37, 66, 0.08);
+}
+
+.selectedAddressCard {
+    display: grid;
+    gap: 10px;
+    padding: 18px 20px;
+}
+
+.addressEyebrow,
+.optionDescription,
+.deliveryEstimate {
+    color: var(--text-light);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.addressEyebrow {
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.addressTitle {
+    color: var(--indigo-dark);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.05;
+}
+
+.addressDetails {
+    display: grid;
+    gap: 2px;
+    color: var(--text-mid);
+    font-size: 0.94rem;
+    line-height: 1.5;
+}
+
+.addressDetails p {
+    margin: 0;
+}
+
+.shippingList {
+    display: grid;
+    gap: 14px;
+}
+
+.shippingOption {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 20px;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+
+.shippingOption:hover {
+    transform: translateY(-2px);
+    border-color: rgba(61, 78, 143, 0.22);
+    box-shadow: 0 20px 42px rgba(30, 37, 66, 0.12);
+}
+
+.shippingOptionSelected {
+    border-color: rgba(61, 78, 143, 0.36);
+    background: linear-gradient(180deg, rgba(247, 249, 255, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%);
+    box-shadow: 0 18px 42px rgba(61, 78, 143, 0.13);
+}
+
+.optionMain {
+    display: grid;
+    gap: 5px;
+}
+
+.optionName {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--indigo-dark);
+    font-size: 1.04rem;
+    font-weight: 800;
+}
+
+.optionName small {
+    color: var(--text-light);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.optionDescription {
+    color: var(--text-mid);
+    font-weight: 600;
+}
+
+.deliveryEstimate {
+    justify-self: end;
+    color: var(--text-mid);
+    white-space: nowrap;
+}
+
+.optionPrice {
+    color: var(--indigo-dark);
+    font-size: 1.08rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.checkMark {
+    width: 1.45rem;
+    height: 1.45rem;
+    border-radius: 999px;
+    border: 1.5px solid rgba(31, 45, 42, 0.18);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--indigo-dark);
+    font-weight: 800;
+    background: #fff;
+}
+
+.checkMarkSelected {
+    border-color: var(--indigo-dark);
+    background: var(--indigo-dark);
+    color: #fff;
+}
+
+.checkMarkSelected::after {
+    border-bottom: 2px solid #fff;
+    border-right: 2px solid #fff;
+    content: '';
+    height: 0.55rem;
+    transform: rotate(45deg) translate(-1px, -1px);
+    width: 0.28rem;
+}
+
+.notice {
+    margin: 0;
+    color: #66736f;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+    .sectionHeading {
+        flex-direction: column;
+    }
+
+    .shippingOption {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+    }
+
+    .deliveryEstimate,
+    .optionPrice {
+        justify-self: start;
+    }
+
+    .deliveryEstimate {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .optionPrice {
+        grid-column: 1;
+        grid-row: 3;
+    }
+
+    .checkMark {
+        grid-column: 2;
+        grid-row: 1;
+    }
+}
