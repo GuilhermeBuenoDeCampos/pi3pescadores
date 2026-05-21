@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   FiUser,
   FiUserPlus,
@@ -12,6 +12,9 @@ import {
   FiLoader,
   FiArrowLeft,
   FiLogOut,
+  FiDownload,
+  FiFileText,
+  FiGrid,
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -24,6 +27,7 @@ import {
 } from '../services/api';
 import logo from '../assets/logo/logo.png';
 import styles from './AdminUsers.module.css';
+import { exportToPDF, exportToSVG, exportToXLSX } from '../utils/exportUtils';
 
 const emptyForm = {
   tipo: '',
@@ -49,6 +53,20 @@ function crudApp() {
   const [toasts, setToasts] = useState([]);
   const [deleteModal, setDeleteModal] = useState({ open: false, userId: null, userName: '' });
   const [saving, setSaving] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const downloadRef = useRef(null);
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (downloadRef.current && !downloadRef.current.contains(e.target)) {
+        setDownloadOpen(false);
+      }
+    }
+    if (downloadOpen) {
+      document.addEventListener('mousedown', handleClick);
+    }
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [downloadOpen]);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -280,6 +298,30 @@ function crudApp() {
     });
   }, []);
 
+  const handleDownload = useCallback(async (format) => {
+    setDownloadOpen(false);
+    const fn = `usuarios_${new Date().toISOString().slice(0, 10)}`;
+    if (format === 'pdf') {
+      let logoBase64 = null;
+      try {
+        const resp = await fetch(logo);
+        const blob = await resp.blob();
+        logoBase64 = await new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(blob);
+        });
+      } catch {}
+      const user = getAuthUser();
+      exportToPDF(filteredUsers, `${fn}.pdf`, {
+        logoBase64,
+        userName: user?.nome || '',
+        userType: user?.tipo_usuario || '',
+      });
+    } else if (format === 'svg') exportToSVG(filteredUsers, `${fn}.svg`);
+    else if (format === 'xlsx') exportToXLSX(filteredUsers, `${fn}.xlsx`);
+  }, [filteredUsers]);
+
   return (
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
@@ -328,12 +370,29 @@ function crudApp() {
             <button className={`${styles.btn} ${styles.btnBlue}`} onClick={openNewForm}>
               <FiUserPlus /> Novo Usuário
             </button>
+            <div className={styles.downloadContainer} ref={downloadRef}>
+              <button
+                className={`${styles.btn} ${styles.btnDownload}`}
+                onClick={() => setDownloadOpen(o => !o)}
+              >
+                <FiDownload /> Exportar
+              </button>
+              {downloadOpen && (
+                <div className={styles.dropdownMenu}>
+                  <button className={styles.dropdownItem} onClick={() => handleDownload('pdf')}>
+                    <FiFileText /> PDF
+                  </button>
+                  <button className={styles.dropdownItem} onClick={() => handleDownload('svg')}>
+                    <FiGrid /> SVG
+                  </button>
+                  <button className={styles.dropdownItem} onClick={() => handleDownload('xlsx')}>
+                    <FiFileText /> XLSX
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Info Box */}
-          <div className={styles.infoBox}>
-            <span style={{fontSize: '18px'}}>ℹ️</span> Dica: Organize os usuários por tipo (Admin, Funcionário, Cliente) para facilitar o gerenciamento de permissões.
-          </div>
 
           {/* Form Card */}
           {showForm && (
