@@ -1,0 +1,421 @@
+.page {
+  min-height: 100vh;
+  padding: 32px 5%;
+  background: #f4f6fb;
+  color: #1f2937;
+}
+
+.light {
+  background: #f4f6fb;
+  color: #1f2937;
+}
+
+.dark {
+  background: #101828;
+  color: #f8fafc;
+}
+
+.topBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.topBar h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.topBar p {
+  color: inherit;
+  opacity: 0.78;
+  margin-top: 8px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backButton,
+.modeButton,
+.printButton,
+.downloadButton,
+.logoutButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.backButton,
+.modeButton,
+.downloadButton,
+.printButton {
+  background: #e2e8f0;
+  color: #1f2937;
+}
+
+.printButton,
+.logoutButton {
+  background: #374151;
+  color: #f8fafc;
+}
+
+.logoutButton {
+  background: #dc2626;
+}
+
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.periodButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.periodButtons button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: #e2e8f0;
+  color: #1f2937;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.periodButtons button:hover,
+.periodButtons button:focus {
+  transform: translateY(-1px);
+}
+
+.activeFilter {
+  background: #5366aa !important;
+  color: #ffffff !important;
+}
+
+.customRange {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.customRange label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.88rem;
+}
+
+.customRange input {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+}
+
+.widgetsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.metricCard {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+}
+
+.monthlyCard {
+  background: linear-gradient(135deg, #465aa8 0%, #495aa8 100%);
+  color: #ffffff;
+  border: none;
+}
+
+.monthlyCard span {
+  color: rgba(255,255,255,0.88);
+}
+
+.monthlyCard strong {
+  color: #ffffff;
+  font-size: 2.25rem;
+}
+
+.metricCard span {
+  display: block;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  color: #64748b;
+}
+
+.metricCard strong {
+  font-size: 1.75rem;
+  line-height: 1.1;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr;
+  gap: 18px;
+}
+
+.chartBlock,
+.statusCard {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.07);
+  padding: 22px;
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.chartHeader h2,
+.statusHeader h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.downloadButton {
+  background: #08936f;
+  color: #ffffff;
+}
+
+.chartCanvas,
+.chartCanvasSmall,
+.paymentChart {
+  min-height: 320px;
+  width: 100%;
+}
+
+.skeletonChart {
+  height: 320px;
+  border-radius: 18px;
+  background: linear-gradient(90deg, rgba(226,232,240,0.8) 25%, rgba(203,213,225,0.4) 50%, rgba(226,232,240,0.8) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #334155;
+  font-weight: 700;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.statusHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.statusHeader span {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.statusList {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 24px;
+}
+
+.statusList div {
+  background: #eef2ff;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statusList strong {
+  font-size: 1.4rem;
+}
+
+.statusList small {
+  color: #475569;
+}
+
+.alertsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.alertCard {
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 20px;
+  border-left: 6px solid #f59e0b;
+}
+
+.alertCard strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.footerActions {
+  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+@media (max-width: 1240px) {
+  .widgetsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 780px) {
+  .topBar,
+  .filterBar,
+  .actions,
+  .statusList,
+  .alertsGrid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .metricCard,
+  .chartBlock,
+  .statusCard {
+    padding: 18px;
+  }
+
+  .chartCanvas,
+  .chartCanvasSmall,
+  .paymentChart {
+    min-height: 240px;
+  }
+}
+
+.dark .metricCard,
+.dark .chartBlock,
+.dark .statusCard,
+.dark .customRange input {
+  background: #1f2937;
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+.dark .metricCard span,
+.dark .statusList small,
+.dark .topBar p,
+.dark .statusHeader span {
+  color: rgba(248, 250, 252, 0.76);
+}
+
+.dark .periodButtons button {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+.dark .activeFilter,
+.dark .backButton,
+.dark .modeButton,
+.dark .downloadButton {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.dark .statusList div {
+  background: rgba(15, 23, 42, 0.75);
+}
+
+.dark .alertCard {
+  background: rgba(30, 41, 59, 0.72);
+  border-color: #f97316;
+}
+
+.highlight {
+  outline: 3px solid rgba(8,147,111,0.12);
+  box-shadow: 0 8px 30px rgba(8,147,111,0.12);
+  transition: outline 0.25s ease, box-shadow 0.25s ease;
+}
+
+.metaEditInput {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  width: 120px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.tableWrap {
+  margin-top: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(15,23,42,0.06);
+  overflow: hidden;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+
+
+.table th,
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(15,23,42,0.04);
+  text-align: left;
+}
+
+.table th {
+  background: #f8fafc;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: #475569;
+  font-weight: 700;
+}
+
+.table tbody tr:hover {
+  background: #fbfdff;
+}

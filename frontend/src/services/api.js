@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { BACKEND_URL, API_URL } from '../config/appConfig';
 
 export { BACKEND_URL, API_URL };
@@ -332,6 +333,50 @@ export async function fetchPalavrasMaisPesquisadas(limit = 5) {
   return result.data || [];
 }
 
+export async function fetchFinanceDashboard(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const response = await axios.get(`${API_URL}/dashboard/financeiro${query ? `?${query}` : ''}`, {
+    headers: getAuthHeaders(),
+  });
+
+  return response.data.data;
+}
+
+export async function fetchFaturamentoMensal(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const response = await axios.get(`${API_URL}/dashboard/faturamento-mensal${query ? `?${query}` : ''}`, {
+    headers: getAuthHeaders(),
+  });
+
+  return response.data.data;
+}
+
+export async function fetchProdutosMaisVendidos(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const response = await axios.get(`${API_URL}/dashboard/produtos-mais-vendidos${query ? `?${query}` : ''}`, {
+    headers: getAuthHeaders(),
+  });
+
+  return response.data.data;
+}
+
+export async function fetchCategorias(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const response = await axios.get(`${API_URL}/dashboard/categorias${query ? `?${query}` : ''}`, {
+    headers: getAuthHeaders(),
+  });
+
+  return response.data.data;
+}
+
+export async function fetchVendasPorPeriodo(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const response = await axios.get(`${API_URL}/dashboard/vendas-por-periodo${query ? `?${query}` : ''}`, {
+    headers: getAuthHeaders(),
+  });
+
+  return response.data.data;
+}
 
 /**
  * Busca todas as categorias de produtos

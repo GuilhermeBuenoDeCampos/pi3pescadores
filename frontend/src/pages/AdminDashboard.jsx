@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers } from 'react-icons/fi';
+import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiTrendingUp, FiUser, FiUsers } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
@@ -227,6 +227,7 @@ function AdminDashboard() {
                 <FiArrowLeft size={14} />
                 Voltar
               </button>
+              {/* Dashboard Financeiro link removed as requested */}
               <Link
                 to="/admin/usuarios"
                 style={{
@@ -268,10 +269,10 @@ function AdminDashboard() {
         </header>
 
         <section className={styles.kpiGrid} aria-label="Indicadores principais">
-          <article className={styles.kpiCard}>
+          <Link to="/admin/financeiro?tab=faturamento-mensal" className={styles.kpiCard} aria-label="Abrir faturamento mensal">
             <span>Faturamento mensal</span>
             <strong>R$ 198.450,90</strong>
-          </article>
+          </Link>
           <article className={styles.kpiCard}>
             <span>Taxa de conversao</span>
             <strong>2,35%</strong>

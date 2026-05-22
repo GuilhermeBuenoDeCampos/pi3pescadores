@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Home from './pages/Home';
 import ProductPage from './pages/ProductPage';
 import StockManagement from './pages/StockManagement';
@@ -8,50 +9,63 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AccountPage from './pages/AccountPage';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminFinanceDashboard from './pages/AdminFinanceDashboard';
 import AdminUsers from './pages/AdminUsers';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import styles from './App.module.css';
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <div className={styles.appWrapper}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/cadastro" element={<Register />} />
-        <Route path="/produto/:id" element={<ProductPage />} />
-        <Route path="/produto-nome/:nome" element={<ProductPage />} />
-        <Route path="/carrinho" element={<CartPage />} />
-        <Route path="/meus-pedidos" element={<AccountPage type="orders" />} />
-        <Route path="/meus-pedidos/:id" element={<OrderDetailsPage />} />
-        <Route path="/meus-enderecos" element={<AccountPage type="addresses" />} />
-        <Route
-          path="/estoque"
-          element={
-            <ProtectedRoute roles={['admin', 'funcionario']}>
-              <StockManagement />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute roles={['admin']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/usuarios"
-          element={
-            <ProtectedRoute roles={['admin']}>
-              <AdminUsers />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <div className={styles.appWrapper}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/cadastro" element={<Register />} />
+          <Route path="/produto/:id" element={<ProductPage />} />
+          <Route path="/produto-nome/:nome" element={<ProductPage />} />
+          <Route path="/carrinho" element={<CartPage />} />
+          <Route path="/meus-pedidos" element={<AccountPage type="orders" />} />
+          <Route path="/meus-pedidos/:id" element={<OrderDetailsPage />} />
+          <Route path="/meus-enderecos" element={<AccountPage type="addresses" />} />
+          <Route
+            path="/estoque"
+            element={
+              <ProtectedRoute roles={['admin', 'funcionario']}>
+                <StockManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/financeiro"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <AdminFinanceDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/usuarios"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <AdminUsers />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </div>
+    </QueryClientProvider>
   );
 }
 
