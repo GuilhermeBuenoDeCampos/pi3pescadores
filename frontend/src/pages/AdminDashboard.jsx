@@ -324,6 +324,29 @@ function AdminDashboard() {
             <strong>R$ 198.450,90</strong>
           </article>
           <article className={styles.kpiCard}>
+            <span>Ticket medio</span>
+            <strong>R$ 243,65</strong>
+          </article>
+          <article className={styles.kpiCard}>
+            <span>Taxa de recompra</span>
+            <strong>26,8%</strong>
+          </article>
+          <article className={`${styles.kpiCard} ${styles.searchKpi}`}>
+            <span>Palavras mais pesquisadas</span>
+            <strong>{loadingSearches ? 'Carregando...' : topSearch?.palavra || 'Sem dados'}</strong>
+            <div className={styles.searchList}>
+              {topSearches.slice(0, 4).map((item) => (
+                <small key={item.palavra}>
+                  <span>{item.palavra}</span>
+                  <b>{item.total}</b>
+                </small>
+              ))}
+            </div>
+          </article>
+        </section>
+
+        <section className={styles.conversionSection} aria-label="Taxa de conversão">
+          <article className={styles.kpiCard}>
             <span>Taxa de conversao</span>
             <strong>
               {loadingTaxaConversao ? 'Carregando...' : `${taxaMesAtual?.taxa_conversao ?? 0}%`}
@@ -345,24 +368,31 @@ function AdminDashboard() {
               </small>
             )}
           </article>
-          <article className={styles.kpiCard}>
-            <span>Ticket medio</span>
-            <strong>R$ 243,65</strong>
-          </article>
-          <article className={styles.kpiCard}>
-            <span>Taxa de recompra</span>
-            <strong>26,8%</strong>
-          </article>
-          <article className={`${styles.kpiCard} ${styles.searchKpi}`}>
-            <span>Palavras mais pesquisadas</span>
-            <strong>{loadingSearches ? 'Carregando...' : topSearch?.palavra || 'Sem dados'}</strong>
-            <div className={styles.searchList}>
-              {topSearches.slice(0, 4).map((item) => (
-                <small key={item.palavra}>
-                  <span>{item.palavra}</span>
-                  <b>{item.total}</b>
-                </small>
-              ))}
+          <article className={styles.chartBlock}>
+            <h2>Taxa de conversão por mês</h2>
+            <div className={styles.chartCanvas}>
+              {loadingTaxaConversao ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
+                  Carregando dados...
+                </div>
+              ) : (
+                <Line
+                  data={conversionRateData}
+                  options={{
+                    ...commonOptions,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                      x: { grid: { display: false } },
+                      y: {
+                        min: 0,
+                        max: 100,
+                        ticks: { callback: (value) => `${value}%` },
+                        grid: { color: chartColors.grid },
+                      },
+                    },
+                  }}
+                />
+              )}
             </div>
           </article>
         </section>
@@ -411,34 +441,6 @@ function AdminDashboard() {
                   },
                 }}
               />
-            </div>
-          </article>
-
-          <article className={`${styles.chartBlock} ${styles.wide}`}>
-            <h2>Taxa de conversão por mês</h2>
-            <div className={styles.chartCanvas}>
-              {loadingTaxaConversao ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
-                  Carregando dados...
-                </div>
-              ) : (
-                <Line
-                  data={conversionRateData}
-                  options={{
-                    ...commonOptions,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      x: { grid: { display: false } },
-                      y: {
-                        min: 0,
-                        max: 100,
-                        ticks: { callback: (value) => `${value}%` },
-                        grid: { color: chartColors.grid },
-                      },
-                    },
-                  }}
-                />
-              )}
             </div>
           </article>
 
