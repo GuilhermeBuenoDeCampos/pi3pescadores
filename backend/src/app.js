@@ -4,6 +4,7 @@ const path = require('path');
 const routes = require('./routes');
 const notFound = require('./middlewares/notFound');
 const errorHandler = require('./middlewares/errorHandler');
+const captureClientInfo = require('./middlewares/captureClientInfo');
 
 const app = express();
 
@@ -89,6 +90,7 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(captureClientInfo);
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 

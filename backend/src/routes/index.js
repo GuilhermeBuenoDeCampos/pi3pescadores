@@ -8,6 +8,7 @@ const calculoFreteRoutes = require('./calculofrete');
 const cartRoutes = require('./cart');
 const usuariosRoutes = require('./usuarios');
 const pedidosRoutes = require('./pedidos');
+const visitanteEventoRoutes = require('./visitanteEvento');
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/frete', calculoFreteRoutes);
 router.use('/cart', cartRoutes);
 router.use('/usuarios', usuariosRoutes);
 router.use('/pedidos', pedidosRoutes);
+router.use('/visitante-evento', visitanteEventoRoutes);
 
 module.exports = router;

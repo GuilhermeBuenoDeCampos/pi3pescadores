@@ -1,0 +1,52 @@
+'use strict';
+
+const { Model } = require('sequelize');
+
+module.exports = (sequelize, DataTypes) => {
+  class VisitanteEvento extends Model {
+    static associate(models) {
+      // associations can be defined here
+    }
+  }
+
+  VisitanteEvento.init(
+    {
+      id: {
+        type: DataTypes.BIGINT,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      ip: {
+        type: DataTypes.STRING(45),
+        allowNull: true,
+      },
+      dispositivo: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      evento: {
+        type: DataTypes.ENUM(
+          'visitou_home',
+          'visualizou_produto',
+          'adicionou_produto_no_carrinho',
+          'checkout',
+          'comprou'
+        ),
+        allowNull: false,
+      },
+      criado_em: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+    },
+    {
+      sequelize,
+      modelName: 'VisitanteEvento',
+      tableName: 'visitante_evento',
+      timestamps: false,
+    }
+  );
+
+  return VisitanteEvento;
+};
