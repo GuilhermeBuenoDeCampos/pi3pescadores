@@ -5,6 +5,7 @@ import {
   fetchCategories,
   fetchProducts,
   fetchProductById,
+  fetchTodosPedidos,
   getAuthHeaders,
   getAuthUser,
   getImageUrl,
@@ -27,6 +28,7 @@ const StockManagement = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [productFilter, setProductFilter] = useState('');
   const [editProduct, setEditProduct] = useState(null);
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
   // Single launch
   const [searchTerm, setSearchTerm] = useState('');
   const [launchQuantity, setLaunchQuantity] = useState(0);
@@ -59,8 +61,18 @@ const StockManagement = () => {
     }
   };
 
+  const loadPendingOrdersCount = async () => {
+    try {
+      const result = await fetchTodosPedidos({ status: 'pendente', limit: 1 });
+      setPendingOrdersCount(result.pagination?.total || 0);
+    } catch (err) {
+      console.error("Failed to load pending orders count", err);
+    }
+  };
+
   useEffect(() => {
     loadData();
+    loadPendingOrdersCount();
   }, []);
 
   // Auto-desativar produtos com estoque zero
@@ -378,6 +390,12 @@ const StockManagement = () => {
             {/* botão 'Lançar Produtos' removido */}
             <button className={`${styles.btn} ${styles.btnYellow}`} onClick={() => setActiveModal('lancamento-massa')}>&equiv; Lançar Produto</button>
             <button className={`${styles.btn} ${styles.btnGreen}`} onClick={() => setIsAuditoriaOpen(true)}>✓ Auditoria</button>
+            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => navigate('/vendas')} style={{ position: 'relative' }}>
+              📊 Vendas
+              {pendingOrdersCount > 0 && (
+                <span className={styles.badge}>{pendingOrdersCount}</span>
+              )}
+            </button>
             <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => setActiveModal('configuracoes')}>⚙️ Configurações</button>
           </div>
 

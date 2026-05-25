@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import ProductPage from './pages/ProductPage';
 import StockManagement from './pages/StockManagement';
+import SalesManagement from './pages/SalesManagement';
 import CartPage from './pages/CartPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -31,6 +32,14 @@ function App() {
           element={
             <ProtectedRoute roles={['admin', 'funcionario']}>
               <StockManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vendas"
+          element={
+            <ProtectedRoute roles={['admin', 'funcionario']}>
+              <SalesManagement />
             </ProtectedRoute>
           }
         />

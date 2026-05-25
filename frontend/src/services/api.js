@@ -581,3 +581,36 @@ export async function atualizarStatusPedido(id, status) {
   const result = await response.json();
   return result.data;
 }
+
+export async function fetchTodosPedidos(params = {}) {
+  const query = new URLSearchParams();
+
+  if (params.page) query.append('page', params.page);
+  if (params.limit) query.append('limit', params.limit);
+  if (params.status) query.append('status', params.status);
+  if (params.search) query.append('search', params.search);
+
+  const queryString = query.toString();
+  const response = await fetch(`${API_URL}/pedidos${queryString ? `?${queryString}` : ''}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel carregar os pedidos.'));
+  }
+
+  return response.json();
+}
+
+export async function fetchPedidoAdmin(id) {
+  const response = await fetch(`${API_URL}/pedidos/${id}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Pedido não encontrado.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
