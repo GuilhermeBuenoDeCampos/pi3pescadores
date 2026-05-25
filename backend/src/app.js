@@ -121,6 +121,39 @@ app.get('/health/models', (req, res) => {
   });
 });
 
+app.get('/test/visitante-evento', async (req, res) => {
+  try {
+    const db = require('./database/models');
+    
+    console.log('[test/visitante-evento] Models loaded:', Object.keys(db).filter(k => k !== 'sequelize' && k !== 'Sequelize'));
+    
+    if (!db.VisitanteEvento) {
+      return res.status(500).json({
+        error: 'Model VisitanteEvento not found',
+        modelsLoaded: Object.keys(db).filter((k) => k !== 'sequelize' && k !== 'Sequelize'),
+      });
+    }
+
+    const count = await db.VisitanteEvento.count();
+    const sample = await db.VisitanteEvento.findAll({ limit: 1 });
+
+    res.json({
+      success: true,
+      visitanteEventoCount: count,
+      sampleEvento: sample.length > 0 ? sample[0].toJSON() : null,
+      modelInfo: {
+        name: db.VisitanteEvento.name,
+        tableName: db.VisitanteEvento.tableName,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      stack: error.stack,
+    });
+  }
+});
+
 if (process.env.NODE_ENV !== 'production') {
   app.use((req, res, next) => {
     console.warn(`[dev] ${req.method} ${req.originalUrl}`);
