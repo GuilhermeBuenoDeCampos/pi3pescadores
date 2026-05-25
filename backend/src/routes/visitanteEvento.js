@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const visitanteEventoService = require('../services/visitanteEventoService');
 const asyncHandler = require('../utils/asyncHandler');
+const authenticateOptional = require('../middlewares/authenticateOptional');
 
 const router = Router();
 
@@ -10,6 +11,7 @@ const router = Router();
  */
 router.post(
   '/',
+  authenticateOptional,
   asyncHandler(async (req, res) => {
     const { evento } = req.body;
     const ip = req.clientIp;
