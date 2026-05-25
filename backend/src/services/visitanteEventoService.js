@@ -26,6 +26,26 @@ exports.registrarEvento = async (evento, ip, dispositivo, usuarioId = null) => {
       return null;
     }
 
+    // Se usuário está autenticado, vincular eventos anteriores do mesmo IP
+    if (usuarioId && ip) {
+      console.log(`[visitanteEventoService] Vinculando eventos anteriores do IP ${ip} ao usuário ${usuarioId}`);
+      
+      // Atualizar eventos sem usuario_id do mesmo IP para adicionar o usuario_id
+      const [updated] = await db.VisitanteEvento.update(
+        { usuario_id: usuarioId },
+        {
+          where: {
+            ip: ip,
+            usuario_id: null, // Apenas eventos sem usuario_id
+          },
+        }
+      );
+      
+      if (updated > 0) {
+        console.log(`[visitanteEventoService] ${updated} evento(s) anterior(es) vinculado(s) ao usuário`);
+      }
+    }
+
     console.log('[visitanteEventoService] Tentando criar registro no banco...');
     const novoEvento = await db.VisitanteEvento.create({
       evento,
@@ -34,7 +54,7 @@ exports.registrarEvento = async (evento, ip, dispositivo, usuarioId = null) => {
       usuario_id: usuarioId || null,
     });
 
-    console.log(`[visitanteEventoService] Evento registrado: ${evento} (ID: ${novoEvento.id}, IP: ${ip})`);
+    console.log(`[visitanteEventoService] Evento registrado: ${evento} (ID: ${novoEvento.id}, IP: ${ip}, usuarioId: ${usuarioId})`);
     return novoEvento;
   } catch (error) {
     console.error('[visitanteEventoService] Erro ao registrar evento:', error.message);
