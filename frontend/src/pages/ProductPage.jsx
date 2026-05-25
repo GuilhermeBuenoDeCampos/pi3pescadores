@@ -102,7 +102,7 @@ function ProductPage() {
 
     void addToCart(product).then(() => {
       // Registrar evento de adição ao carrinho
-      registrarEventoVisitante('adicionado_produto_no_carrinho');
+      registrarEventoVisitante('adicionou_produto_no_carrinho');
       
       setJustAdded(true);
       setTimeout(() => setJustAdded(false), 1800);
