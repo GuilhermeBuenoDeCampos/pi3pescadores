@@ -14,15 +14,16 @@ router.post(
     const { evento } = req.body;
     const ip = req.clientIp;
     const dispositivo = req.clientUserAgent;
+    const usuarioId = req.user?.sub || null; // Capturar ID do usuário autenticado se existir
 
-    console.log('[visitante-evento POST] Recebido:', { evento, ip, dispositivo });
+    console.log('[visitante-evento POST] Recebido:', { evento, ip, dispositivo, usuarioId });
 
     if (!evento) {
       console.warn('[visitante-evento POST] Evento vazio ou undefined');
       return res.status(400).json({ error: 'Evento é obrigatório' });
     }
 
-    const novoEvento = await visitanteEventoService.registrarEvento(evento, ip, dispositivo);
+    const novoEvento = await visitanteEventoService.registrarEvento(evento, ip, dispositivo, usuarioId);
 
     if (!novoEvento) {
       console.error('[visitante-evento POST] Falha ao registrar evento:', evento);

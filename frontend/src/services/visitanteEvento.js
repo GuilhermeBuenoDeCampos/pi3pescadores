@@ -1,4 +1,5 @@
 import { BACKEND_URL } from './api';
+import { getAuthHeaders } from './api';
 
 /**
  * Registra um evento de visitante
@@ -6,11 +7,14 @@ import { BACKEND_URL } from './api';
  */
 export async function registrarEventoVisitante(evento) {
   try {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(), // Incluir token se disponível
+    };
+
     const response = await fetch(`${BACKEND_URL}/api/visitante-evento`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ evento }),
     });
 

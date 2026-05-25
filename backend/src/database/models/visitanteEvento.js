@@ -34,6 +34,14 @@ module.exports = (sequelize, DataTypes) => {
         ),
         allowNull: false,
       },
+      usuario_id: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'usuarios',
+          key: 'id',
+        },
+      },
       criado_em: {
         type: DataTypes.DATE,
         allowNull: false,

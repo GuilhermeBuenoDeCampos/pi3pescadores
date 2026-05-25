@@ -5,8 +5,9 @@ const db = require('../database/models');
  * @param {string} evento - Tipo do evento
  * @param {string} ip - IP do visitante
  * @param {string} dispositivo - User-agent do dispositivo
+ * @param {number} usuarioId - ID do usuário autenticado (opcional)
  */
-exports.registrarEvento = async (evento, ip, dispositivo) => {
+exports.registrarEvento = async (evento, ip, dispositivo, usuarioId = null) => {
   try {
     const eventoValido = [
       'visitou_home',
@@ -30,6 +31,7 @@ exports.registrarEvento = async (evento, ip, dispositivo) => {
       evento,
       ip: ip || null,
       dispositivo: dispositivo || null,
+      usuario_id: usuarioId || null,
     });
 
     console.log(`[visitanteEventoService] Evento registrado: ${evento} (ID: ${novoEvento.id}, IP: ${ip})`);
@@ -97,10 +99,11 @@ exports.obterTaxaConversao = async () => {
     data12MesesAtras.setMonth(data12MesesAtras.getMonth() - 12);
 
     // Query para visitantes únicos que visitaram home (por mês)
+    // Conta usuários logados como únicos por usuario_id, e não-logados como únicos por IP
     const visitantesQuery = await db.sequelize.query(`
       SELECT 
         DATE_TRUNC('month', ve.created_at) AS mes,
-        COUNT(DISTINCT ve.ip) AS visitantes_unicos
+        COUNT(DISTINCT COALESCE(ve.usuario_id::text, ve.ip)) AS visitantes_unicos
       FROM visitante_eventos ve
       WHERE ve.evento = 'visitou_home' 
         AND ve.created_at >= :dataLimite
