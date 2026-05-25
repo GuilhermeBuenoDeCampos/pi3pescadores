@@ -8,6 +8,7 @@ import SectionTitle from '../components/SectionTitle';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
 import { fetchProducts, fetchCategories, registrarPalavraPesquisada } from '../services/api';
+import { registrarEventoVisitante } from '../services/visitanteEvento';
 import { sortProductsByPrice } from '../utils/productUtils';
 import styles from './Home.module.css';
 
@@ -22,6 +23,11 @@ function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Registrar evento de visitação à home
+  useEffect(() => {
+    registrarEventoVisitante('visitou_home');
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {

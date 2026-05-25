@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchProductById, fetchProductByName, fetchProducts, getImageUrl } from '../services/api';
+import { registrarEventoVisitante } from '../services/visitanteEvento';
 
 import Header from '../components/Header';
 import ProductDetailsCard from '../components/ProductDetailsCard';
@@ -45,6 +46,9 @@ function ProductPage() {
         setProduct(productData);
         setActiveImage(productData.imagens?.[0]?.url ? getImageUrl(productData.imagens[0].url) : semImagem);
         setMainImgSrc(productData.imagens?.[0]?.url ? getImageUrl(productData.imagens[0].url) : semImagem);
+        
+        // Registrar evento de visualização de produto
+        registrarEventoVisitante('visualizou_produto');
       } catch (err) {
         console.error('Erro ao carregar produto:', err);
         setError(err?.message || 'Falha ao carregar o produto');
@@ -93,6 +97,9 @@ function ProductPage() {
     }
 
     void addToCart(product).then(() => {
+      // Registrar evento de adição ao carrinho
+      registrarEventoVisitante('adicionado_produto_no_carrinho');
+      
       setJustAdded(true);
       setTimeout(() => setJustAdded(false), 1800);
 
