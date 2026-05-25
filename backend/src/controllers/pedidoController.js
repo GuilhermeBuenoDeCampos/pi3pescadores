@@ -24,6 +24,16 @@ exports.listarMeus = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+exports.listarTodos = asyncHandler(async (req, res) => {
+  console.log('[pedidoController] listarTodos chamado', {
+    query: req.query,
+  });
+
+  const result = await pedidoService.listarTodosPedidos(req.query);
+
+  res.json(result);
+});
+
 exports.detalharMeu = asyncHandler(async (req, res) => {
   const pedido = await pedidoService.buscarPedidoDoUsuario(pedidoService.getUserId(req.user), req.params.id);
 

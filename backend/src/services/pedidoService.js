@@ -172,6 +172,7 @@ function formatItem(item) {
     nome_produto: plain.nome_produto,
     quantidade: plain.quantidade,
     preco_unitario: formatMoney(plain.preco_unitario),
+    preco: formatMoney(plain.preco_unitario),
     subtotal: formatMoney(plain.subtotal),
     produto: produto
       ? {
@@ -195,11 +196,14 @@ function formatPedido(pedido) {
     id: plain.id,
     id_usuario: plain.id_usuario,
     numero_pedido: plain.numero_pedido,
+    nome_cliente: plain.nome_cliente || plain.endereco_entrega?.nome_destinatario || 'N/A',
     status: plain.status,
     subtotal: formatMoney(plain.subtotal),
     valor_frete: formatMoney(plain.valor_frete),
+    tipo_frete: plain.tipo_frete || 'N/A',
     desconto: formatMoney(plain.desconto),
     total: formatMoney(plain.total),
+    valor_total: formatMoney(plain.total),
     endereco_entrega: plain.endereco_entrega,
     metodo_pagamento: plain.metodo_pagamento,
     observacoes: plain.observacoes,
@@ -322,11 +326,12 @@ exports.criarPedido = async (usuarioId, payload) => {
         status: 'pendente',
         subtotal: formatMoney(subtotal),
         valor_frete: formatMoney(valorFrete),
+        tipo_frete: frete.servico || null,
         desconto: formatMoney(desconto),
         total: formatMoney(total),
         endereco_entrega: enderecoEntrega,
         metodo_pagamento: metodoPagamento,
-        observacoes: frete.servico ? [observacoes, `Frete selecionado: ${frete.servico}`].filter(Boolean).join('\n') : observacoes,
+        observacoes: observacoes,
         criado_em: now,
         atualizado_em: now,
       },
@@ -451,6 +456,93 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
     });
     
     // Se for erro de banco de dados, adicionar contexto
+    if (error.original) {
+      console.error('[pedidoService] erro original (banco de dados):', {
+        message: error.original.message,
+        code: error.original.code,
+      });
+    }
+
+    throw error;
+  }
+};
+
+exports.listarTodosPedidos = async (query = {}) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 50);
+  const offset = (page - 1) * limit;
+  const where = {};
+
+  if (query.status && ORDER_STATUSES.has(String(query.status))) {
+    where.status = String(query.status);
+  }
+
+  if (query.search) {
+    where.numero_pedido = {
+      [Op.iLike]: `%${String(query.search).trim()}%`,
+    };
+  }
+
+  try {
+    console.log('[pedidoService] listarTodosPedidos iniciado', {
+      where,
+      page,
+      limit,
+      offset,
+    });
+
+    if (!db.Pedido) {
+      const errorMsg = 'Database model "Pedido" not found';
+      console.error(`[pedidoService] ${errorMsg}`);
+      throw new AppError(500, errorMsg);
+    }
+
+    const { count, rows } = await db.Pedido.findAndCountAll({
+      where,
+      distinct: true,
+      order: [['criado_em', 'DESC']],
+      limit,
+      offset,
+    });
+
+    console.log('[pedidoService] listarTodosPedidos sucesso', {
+      total: count,
+      rowsReturned: rows.length,
+    });
+
+    if (rows.length > 0 && db.PedidoItem) {
+      console.log('[pedidoService] carregando itens para todos os pedidos...');
+      for (const pedido of rows) {
+        try {
+          const itens = await db.PedidoItem.findAll({
+            where: { id_pedido: pedido.id },
+            raw: true,
+          });
+          pedido.dataValues.itens = itens;
+        } catch (itemError) {
+          console.error(`[pedidoService] erro ao carregar itens para pedido ${pedido.id}:`, itemError.message);
+          pedido.dataValues.itens = [];
+        }
+      }
+    }
+
+    return {
+      data: rows.map(formatPedido),
+      pagination: {
+        total: count,
+        page,
+        limit,
+        pages: Math.ceil(count / limit),
+      },
+    };
+  } catch (error) {
+    console.error('[pedidoService] erro crítico em listarTodosPedidos:', {
+      errorType: error.constructor.name,
+      errorMessage: error.message,
+      errorCode: error.code || error.original?.code,
+      stack: error.stack,
+    });
+
     if (error.original) {
       console.error('[pedidoService] erro original (banco de dados):', {
         message: error.original.message,
