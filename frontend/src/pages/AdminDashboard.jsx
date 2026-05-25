@@ -335,6 +335,17 @@ function AdminDashboard() {
             )}
           </article>
           <article className={styles.kpiCard}>
+            <span>Visitantes unicos (mes)</span>
+            <strong>
+              {loadingTaxaConversao ? 'Carregando...' : taxaMesAtual?.visitantes_unicos ?? 0}
+            </strong>
+            {taxaMesAtual && (
+              <small style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                IPs únicos que visitaram home
+              </small>
+            )}
+          </article>
+          <article className={styles.kpiCard}>
             <span>Ticket medio</span>
             <strong>R$ 243,65</strong>
           </article>
