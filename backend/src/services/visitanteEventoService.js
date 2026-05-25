@@ -16,21 +16,27 @@ exports.registrarEvento = async (evento, ip, dispositivo) => {
       'comprou',
     ];
 
+    console.log('[visitanteEventoService] Validando evento:', evento);
+    console.log('[visitanteEventoService] Eventos válidos:', eventoValido);
+    console.log('[visitanteEventoService] Evento é válido?', eventoValido.includes(evento));
+
     if (!eventoValido.includes(evento)) {
-      console.warn(`[visitanteEventoService] Evento inválido: ${evento}`);
+      console.warn(`[visitanteEventoService] Evento inválido: "${evento}"`);
       return null;
     }
 
+    console.log('[visitanteEventoService] Tentando criar registro no banco...');
     const novoEvento = await db.VisitanteEvento.create({
       evento,
       ip: ip || null,
       dispositivo: dispositivo || null,
     });
 
-    console.log(`[visitanteEventoService] Evento registrado: ${evento} (IP: ${ip})`);
+    console.log(`[visitanteEventoService] Evento registrado: ${evento} (ID: ${novoEvento.id}, IP: ${ip})`);
     return novoEvento;
   } catch (error) {
     console.error('[visitanteEventoService] Erro ao registrar evento:', error.message);
+    console.error('[visitanteEventoService] Stack:', error.stack);
     return null;
   }
 };
