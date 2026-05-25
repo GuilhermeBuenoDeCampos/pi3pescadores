@@ -61,3 +61,21 @@ export async function obterEventosRecentes(dias = 7) {
     return [];
   }
 }
+
+/**
+ * Obter taxa de conversão (visitantes vs pedidos confirmados)
+ */
+export async function obterTaxaConversao() {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/visitante-evento/taxa-conversao`);
+    
+    if (!response.ok) {
+      throw new Error('Erro ao obter taxa de conversão');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('[visitante-evento] Erro ao obter taxa de conversão:', error);
+    return [];
+  }
+}

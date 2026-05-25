@@ -20,6 +20,7 @@ import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
 import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser } from '../services/api';
+import { obterTaxaConversao } from '../services/visitanteEvento';
 import styles from './AdminDashboard.module.css';
 
 ChartJS.register(
@@ -67,6 +68,8 @@ function AdminDashboard() {
   const [accuracyError, setAccuracyError] = useState('');
   const [topSearches, setTopSearches] = useState([]);
   const [loadingSearches, setLoadingSearches] = useState(true);
+  const [taxaConversao, setTaxaConversao] = useState([]);
+  const [loadingTaxaConversao, setLoadingTaxaConversao] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -75,24 +78,29 @@ function AdminDashboard() {
       try {
         setLoadingAccuracy(true);
         setLoadingSearches(true);
+        setLoadingTaxaConversao(true);
         setAccuracyError('');
-        const [accuracyData, searchesData] = await Promise.all([
+        const [accuracyData, searchesData, taxaData] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
+          obterTaxaConversao(),
         ]);
 
         if (isMounted) {
           setAccuracy(accuracyData);
           setTopSearches(searchesData);
+          setTaxaConversao(taxaData || []);
         }
       } catch (error) {
         if (isMounted) {
           setAccuracyError(error.message);
+          console.error('Erro ao carregar dados do dashboard:', error);
         }
       } finally {
         if (isMounted) {
           setLoadingAccuracy(false);
           setLoadingSearches(false);
+          setLoadingTaxaConversao(false);
         }
       }
     }
@@ -106,6 +114,9 @@ function AdminDashboard() {
 
   const accuracyValue = Math.max(0, Math.min(100, Number(accuracy?.media_acuracidade || 0)));
   const topSearch = topSearches[0];
+  
+  // Pegar a taxa de conversão do mês mais recente
+  const taxaMesAtual = taxaConversao.length > 0 ? taxaConversao[0] : null;
 
   // Determine color and image based on accuracy percentage
   const getAccuracyMetrics = (value) => {
@@ -160,6 +171,46 @@ function AdminDashboard() {
       },
     ],
   }), []);
+
+  const conversionRateData = useMemo(() => {
+    if (!taxaConversao || taxaConversao.length === 0) {
+      return {
+        labels: [],
+        datasets: [{
+          label: 'Taxa de conversão',
+          data: [],
+          borderColor: chartColors.teal,
+          backgroundColor: 'rgba(8, 147, 111, 0.08)',
+          pointBackgroundColor: chartColors.teal,
+          pointBorderColor: chartColors.teal,
+          pointRadius: 4,
+          tension: 0.35,
+          fill: true,
+        }],
+      };
+    }
+
+    const reversed = [...taxaConversao].reverse();
+    return {
+      labels: reversed.map(item => {
+        const date = new Date(item.mes);
+        return date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+      }),
+      datasets: [
+        {
+          label: 'Taxa de conversão (%)',
+          data: reversed.map(item => item.taxa_conversao),
+          borderColor: chartColors.teal,
+          backgroundColor: 'rgba(8, 147, 111, 0.08)',
+          pointBackgroundColor: chartColors.teal,
+          pointBorderColor: chartColors.teal,
+          pointRadius: 4,
+          tension: 0.35,
+          fill: true,
+        },
+      ],
+    };
+  }, [taxaConversao]);
 
   const productData = useMemo(() => ({
     labels: ['Vela de Soja', 'Ima Aparecida', 'Vela de Mirra', 'Vela de Incenso', 'Terco Oliveira', 'Terco Madeira'],
@@ -274,7 +325,14 @@ function AdminDashboard() {
           </article>
           <article className={styles.kpiCard}>
             <span>Taxa de conversao</span>
-            <strong>2,35%</strong>
+            <strong>
+              {loadingTaxaConversao ? 'Carregando...' : `${taxaMesAtual?.taxa_conversao ?? 0}%`}
+            </strong>
+            {taxaMesAtual && (
+              <small style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                {taxaMesAtual.visitantes_unicos} visitantes | {taxaMesAtual.pedidos_confirmados} pedidos
+              </small>
+            )}
           </article>
           <article className={styles.kpiCard}>
             <span>Ticket medio</span>
@@ -342,6 +400,34 @@ function AdminDashboard() {
                   },
                 }}
               />
+            </div>
+          </article>
+
+          <article className={`${styles.chartBlock} ${styles.wide}`}>
+            <h2>Taxa de conversão por mês</h2>
+            <div className={styles.chartCanvas}>
+              {loadingTaxaConversao ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
+                  Carregando dados...
+                </div>
+              ) : (
+                <Line
+                  data={conversionRateData}
+                  options={{
+                    ...commonOptions,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                      x: { grid: { display: false } },
+                      y: {
+                        min: 0,
+                        max: 100,
+                        ticks: { callback: (value) => `${value}%` },
+                        grid: { color: chartColors.grid },
+                      },
+                    },
+                  }}
+                />
+              )}
             </div>
           </article>
 

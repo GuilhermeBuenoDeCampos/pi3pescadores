@@ -85,3 +85,69 @@ exports.obterEventosRecentes = async (diasAtras = 7) => {
     return [];
   }
 };
+
+/**
+ * Calcular taxa de conversão: visitantes únicos vs pedidos confirmados
+ * Retorna dados dos últimos 12 meses
+ */
+exports.obterTaxaConversao = async () => {
+  try {
+    // Pegar últimos 12 meses
+    const data12MesesAtras = new Date();
+    data12MesesAtras.setMonth(data12MesesAtras.getMonth() - 12);
+
+    // Query para visitantes únicos que visitaram home (por mês)
+    const visitantesQuery = await db.sequelize.query(`
+      SELECT 
+        DATE_TRUNC('month', ve.created_at) AS mes,
+        COUNT(DISTINCT ve.ip) AS visitantes_unicos
+      FROM visitante_eventos ve
+      WHERE ve.evento = 'visitou_home' 
+        AND ve.created_at >= :dataLimite
+      GROUP BY DATE_TRUNC('month', ve.created_at)
+      ORDER BY mes DESC
+    `, {
+      replacements: { dataLimite: data12MesesAtras },
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    // Query para pedidos confirmados (por mês)
+    const pedidosQuery = await db.sequelize.query(`
+      SELECT 
+        DATE_TRUNC('month', p.criado_em) AS mes,
+        COUNT(DISTINCT p.id) AS pedidos_confirmados
+      FROM pedidos p
+      WHERE p.status IN ('confirmado', 'preparando', 'enviado', 'concluido')
+        AND p.criado_em >= :dataLimite
+      GROUP BY DATE_TRUNC('month', p.criado_em)
+      ORDER BY mes DESC
+    `, {
+      replacements: { dataLimite: data12MesesAtras },
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    // Combinar dados
+    const resultado = visitantesQuery.map(v => {
+      const pedido = pedidosQuery.find(p => 
+        new Date(p.mes).getTime() === new Date(v.mes).getTime()
+      );
+      
+      const visitantes = parseInt(v.visitantes_unicos) || 0;
+      const pedidos = parseInt(pedido?.pedidos_confirmados) || 0;
+      const taxa = visitantes > 0 ? ((pedidos / visitantes) * 100).toFixed(2) : 0;
+
+      return {
+        mes: v.mes,
+        visitantes_unicos: visitantes,
+        pedidos_confirmados: pedidos,
+        taxa_conversao: parseFloat(taxa),
+      };
+    });
+
+    console.log('[visitanteEventoService] Taxa de conversão calculada:', resultado.length, 'meses');
+    return resultado;
+  } catch (error) {
+    console.error('[visitanteEventoService] Erro ao calcular taxa de conversão:', error.message);
+    return [];
+  }
+};

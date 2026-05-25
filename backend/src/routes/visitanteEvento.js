@@ -35,6 +35,18 @@ router.post(
 );
 
 /**
+ * GET /api/visitante-evento/taxa-conversao
+ * Obter taxa de conversão (visitantes vs pedidos confirmados)
+ */
+router.get(
+  '/taxa-conversao',
+  asyncHandler(async (req, res) => {
+    const taxaConversao = await visitanteEventoService.obterTaxaConversao();
+    res.json(taxaConversao);
+  })
+);
+
+/**
  * GET /api/visitante-evento/stats
  * Obter estatísticas de eventos
  */
