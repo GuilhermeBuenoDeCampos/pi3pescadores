@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchProductById, fetchProductByName, fetchProducts, getImageUrl } from '../services/api';
 import { registrarEventoVisitante } from '../services/visitanteEvento';
@@ -24,6 +24,7 @@ function ProductPage() {
   const [mainImgSrc, setMainImgSrc] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const productViewRegistered = useRef(false);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -47,8 +48,11 @@ function ProductPage() {
         setActiveImage(productData.imagens?.[0]?.url ? getImageUrl(productData.imagens[0].url) : semImagem);
         setMainImgSrc(productData.imagens?.[0]?.url ? getImageUrl(productData.imagens[0].url) : semImagem);
         
-        // Registrar evento de visualização de produto
-        registrarEventoVisitante('visualizou_produto');
+        // Registrar evento de visualização de produto (apenas uma vez)
+        if (!productViewRegistered.current) {
+          productViewRegistered.current = true;
+          registrarEventoVisitante('visualizou_produto');
+        }
       } catch (err) {
         console.error('Erro ao carregar produto:', err);
         setError(err?.message || 'Falha ao carregar o produto');

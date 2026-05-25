@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import BannerCarousel from '../components/BannerCarousel';
 import SearchBar from '../components/SearchBar';
@@ -23,10 +23,14 @@ function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const homeEventRegistered = useRef(false);
 
-  // Registrar evento de visitação à home
+  // Registrar evento de visitação à home (apenas uma vez)
   useEffect(() => {
-    registrarEventoVisitante('visitou_home');
+    if (!homeEventRegistered.current) {
+      homeEventRegistered.current = true;
+      registrarEventoVisitante('visitou_home');
+    }
   }, []);
 
   useEffect(() => {
