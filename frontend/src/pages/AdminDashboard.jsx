@@ -662,45 +662,66 @@ function AdminDashboard() {
               backgroundImage: `url(${getFaturamentoBackgroundImage()})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
+              backgroundColor: 'transparent',
               position: 'relative',
+              overflow: 'hidden',
             }}
           >
-            <div style={{ position: 'absolute', top: 10, right: 10 }}>
-              <button
-                onClick={() => setShowKpiModal(true)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.9)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: 32,
-                  height: 32,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-                  e.currentTarget.style.transform = 'scale(1.1)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-                title="Configurar faturamento"
-              >
-                <FiSettings size={16} color="#10182c" />
-              </button>
+            {/* Overlay para escurecer a imagem */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            {/* Engrenagem */}
+            <button
+              onClick={() => setShowKpiModal(true)}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="Configurar faturamento"
+            >
+              <FiSettings size={18} color="#10182c" />
+            </button>
+
+            {/* Conteúdo do card */}
+            <div style={{ position: 'relative', zIndex: 2 }}>
+              <span>Faturamento mensal</span>
+              <strong>
+                {loadingFaturamento ? 'Carregando...' : `R$ ${
+                  faturamentoMensal && faturamentoMensal.length > 0
+                    ? faturamentoMensal[faturamentoMensal.length - 1]?.faturamento || '0,00'
+                    : '0,00'
+                }`}
+              </strong>
             </div>
-            <span>Faturamento mensal</span>
-            <strong>
-              {loadingFaturamento ? 'Carregando...' : `R$ ${
-                faturamentoMensal && faturamentoMensal.length > 0
-                  ? faturamentoMensal[faturamentoMensal.length - 1]?.faturamento || '0,00'
-                  : '0,00'
-              }`}
-            </strong>
           </article>
           <article className={styles.kpiCard}>
             <span>Ticket medio</span>

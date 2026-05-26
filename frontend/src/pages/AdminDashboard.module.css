@@ -87,6 +87,13 @@
   line-height: 1;
 }
 
+/* Estilos para cards com background dinâmico */
+.kpiCard[style*="backgroundImage"] {
+  background-color: transparent !important;
+  justify-content: flex-end;
+  padding-bottom: 32px;
+}
+
 .searchKpi {
   background: #08936f;
 }
