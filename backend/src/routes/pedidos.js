@@ -10,9 +10,12 @@ router.use(authenticate);
 router.post('/', pedidoController.criar);
 router.get('/meus', pedidoController.listarMeus);
 router.get('/meus/:id', pedidoController.detalharMeu);
-router.get('/admin/faturamento-mensal', authorize('admin', 'funcionario'), pedidoController.faturamentoMensal);
-router.get('/', authorize('admin', 'funcionario'), pedidoController.listarTodos);
 
+// Rotas admin (mais específicas, devem vir antes de /:id)
+router.get('/admin/faturamento-mensal', authorize('admin', 'funcionario'), pedidoController.faturamentoMensal);
+
+// Rotas genéricas (menos específicas)
+router.get('/', authorize('admin', 'funcionario'), pedidoController.listarTodos);
 router.get('/:id', authorize('admin', 'funcionario'), pedidoController.detalharAdmin);
 router.patch('/:id/status', authorize('admin'), pedidoController.atualizarStatus);
 

@@ -19,9 +19,8 @@ import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser } from '../services/api';
+import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser, API_URL } from '../services/api';
 import { obterTaxaConversao } from '../services/visitanteEvento';
-import { BACKEND_URL } from '../config/appConfig';
 import styles from './AdminDashboard.module.css';
 
 ChartJS.register(
@@ -89,7 +88,7 @@ function AdminDashboard() {
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
-          fetch(`${BACKEND_URL}/pedidos/admin/faturamento-mensal?meses=12`, {
+          fetch(`${API_URL}/pedidos/admin/faturamento-mensal?meses=12`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },
