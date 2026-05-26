@@ -352,7 +352,7 @@ function AdminDashboard() {
               {loadingTaxaConversao ? 'Carregando...' : `${taxaMesAtual?.taxa_conversao ?? 0}%`}
             </strong>
             {taxaMesAtual && (
-              <small style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', marginTop: '4px' }}>
                 {taxaMesAtual.visitantes_unicos} visitantes | {taxaMesAtual.pedidos_confirmados} pedidos
               </small>
             )}
@@ -363,7 +363,7 @@ function AdminDashboard() {
               {loadingTaxaConversao ? 'Carregando...' : taxaMesAtual?.visitantes_unicos ?? 0}
             </strong>
             {taxaMesAtual && (
-              <small style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', marginTop: '4px' }}>
                 IPs únicos que visitaram home
               </small>
             )}
