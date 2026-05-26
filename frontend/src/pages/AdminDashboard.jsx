@@ -712,7 +712,7 @@ function AdminDashboard() {
             </button>
 
             {/* Conteúdo do card */}
-            <div style={{ position: 'relative', zIndex: 2 }}>
+            <div className={styles.revenueKpiContent}>
               <span>Faturamento mensal</span>
               <strong>
                 {loadingFaturamento ? 'Carregando...' : `R$ ${

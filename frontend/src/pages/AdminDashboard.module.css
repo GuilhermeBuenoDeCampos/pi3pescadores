@@ -94,6 +94,23 @@
   padding-bottom: 32px;
 }
 
+.revenueKpiContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.revenueKpiContent span {
+  margin-bottom: 0;
+}
+
+.revenueKpiContent strong {
+  white-space: nowrap;
+}
+
 .searchKpi {
   background: #08936f;
 }
