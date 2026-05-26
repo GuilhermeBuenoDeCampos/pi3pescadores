@@ -77,3 +77,55 @@ exports.faturamentoMensal = asyncHandler(async (req, res) => {
     periodo_meses: meses,
   });
 });
+
+exports.debugPedidos = asyncHandler(async (req, res) => {
+  const db = require('../database/config');
+  const { Op } = require('sequelize');
+
+  console.log('[debugPedidos] Iniciando debug...');
+
+  // Contar pedidos por status
+  const pedidosPorStatus = await db.Pedido.findAll({
+    attributes: ['status', [db.sequelize.fn('COUNT', db.sequelize.col('id')), 'total']],
+    group: ['status'],
+    raw: true,
+  });
+
+  console.log('[debugPedidos] Pedidos por status:', pedidosPorStatus);
+
+  // Buscar todos os pedidos com status válidos
+  const statusValidos = ['preparando', 'enviado', 'confirmado', 'concluido'];
+  const pedidosValidos = await db.Pedido.findAll({
+    where: {
+      status: {
+        [Op.in]: statusValidos,
+      },
+    },
+    attributes: ['id', 'numero_pedido', 'total', 'status', 'criado_em'],
+    order: [['criado_em', 'DESC']],
+    limit: 10,
+    raw: true,
+  });
+
+  console.log('[debugPedidos] Últimos 10 pedidos com status válidos:', pedidosValidos);
+
+  // Contar total de pedidos
+  const totalPedidos = await db.Pedido.count();
+  const totalValidos = await db.Pedido.count({
+    where: {
+      status: {
+        [Op.in]: statusValidos,
+      },
+    },
+  });
+
+  res.json({
+    debug: {
+      totalPedidos,
+      totalComStatusValido: totalValidos,
+      pedidosPorStatus,
+      amostraUltimos10: pedidosValidos,
+    },
+  });
+});
+

@@ -115,6 +115,9 @@ function AdminDashboard() {
 
         if (isMounted) {
           console.log('[AdminDashboard] Dados carregados:', { faturamentoData });
+          console.log('[AdminDashboard] Faturamento - primeiro item:', faturamentoData?.[0]);
+          console.log('[AdminDashboard] Faturamento - todos os dados:', JSON.stringify(faturamentoData, null, 2));
+          console.log('[AdminDashboard] Faturamento - soma total:', faturamentoData?.reduce((sum, item) => sum + parseFloat(item.faturamento || 0), 0));
           setAccuracy(accuracyData);
           setTopSearches(searchesData);
           setTaxaConversao(taxaData || []);
