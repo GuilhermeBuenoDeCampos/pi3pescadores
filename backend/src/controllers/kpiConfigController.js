@@ -5,6 +5,7 @@ const AppError = require('../middlewares/appError');
 
 exports.obterConfig = asyncHandler(async (req, res) => {
   const db = require('../database/models');
+  const { v4: uuidv4 } = require('uuid');
 
   try {
     let config = await db.KpiConfig.findOne();
@@ -12,6 +13,7 @@ exports.obterConfig = asyncHandler(async (req, res) => {
     // Se não existir, criar com valores padrão
     if (!config) {
       config = await db.KpiConfig.create({
+        id: uuidv4(),
         faturamento_baixo: 500,
         faturamento_alto: 5000,
       });
@@ -39,6 +41,7 @@ exports.obterConfig = asyncHandler(async (req, res) => {
 
 exports.atualizarConfig = asyncHandler(async (req, res) => {
   const db = require('../database/models');
+  const { v4: uuidv4 } = require('uuid');
   const { faturamento_baixo, faturamento_alto } = req.body;
 
   // Validações
@@ -59,6 +62,7 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
 
     if (!config) {
       config = await db.KpiConfig.create({
+        id: uuidv4(),
         faturamento_baixo,
         faturamento_alto,
       });
@@ -66,7 +70,6 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
       config = await config.update({
         faturamento_baixo,
         faturamento_alto,
-        update_at: new Date(),
       });
     }
 
@@ -79,13 +82,11 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('[kpiConfigController] Erro ao atualizar config:', error.message);
+    console.error('Stack trace:', error.stack);
     // Se a tabela não existir, apenas retornar os valores recebidos
-    res.json({
-      data: {
-        id: null,
-        faturamento_baixo: parseFloat(faturamento_baixo),
-        faturamento_alto: parseFloat(faturamento_alto),
-      },
+    res.status(500).json({
+      error: 'Erro ao atualizar configuração',
+      message: error.message,
     });
   }
 });

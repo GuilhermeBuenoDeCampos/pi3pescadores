@@ -26,18 +26,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true,
       },
-      created_at: {
-        type: DataTypes.DATE,
-        field: 'created_at',
-      },
-      update_at: {
-        type: DataTypes.DATE,
-        field: 'update_at',
-      },
     },
     {
       tableName: 'kpi_config',
-      timestamps: false,
+      timestamps: true,
+      createdAt: 'created_at',
+      updatedAt: 'update_at',
     }
   );
 
