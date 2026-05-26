@@ -638,12 +638,6 @@ exports.obterFaturamentoMensal = async (meses = 12) => {
       order: [['criado_em', 'DESC']],
     });
 
-    console.log('[pedidoService] Pedidos encontrados com status válidos:', {
-      statusValidos,
-      totalEncontrado: pedidos.length,
-      pedidos: pedidos.slice(0, 3).map(p => ({ total: p.total, criado_em: p.criado_em })),
-    });
-
     // Agrupar por mês
     const faturamentoPorMes = {};
     const hoje = new Date();
@@ -681,11 +675,7 @@ exports.obterFaturamentoMensal = async (meses = 12) => {
         return anoA === anoB ? mesA - mesB : anoA - anoB;
       });
 
-    console.log('[pedidoService] faturamento mensal calculado', {
-      meses,
-      totalMeses: resultado.length,
-      resultado: resultado,
-    });
+
 
     return resultado;
   } catch (error) {

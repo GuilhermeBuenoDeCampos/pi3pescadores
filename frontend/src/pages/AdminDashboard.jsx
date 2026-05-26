@@ -105,19 +105,13 @@ function AdminDashboard() {
             }
             return res.json();
           }).then(data => {
-            console.log('[AdminDashboard] Faturamento carregado:', data);
             return data.data || [];
           }).catch(err => {
-            console.error('Erro ao carregar faturamento mensal:', err);
             return [];
           }),
         ]);
 
         if (isMounted) {
-          console.log('[AdminDashboard] Dados carregados:', { faturamentoData });
-          console.log('[AdminDashboard] Faturamento - primeiro item:', faturamentoData?.[0]);
-          console.log('[AdminDashboard] Faturamento - todos os dados:', JSON.stringify(faturamentoData, null, 2));
-          console.log('[AdminDashboard] Faturamento - soma total:', faturamentoData?.reduce((sum, item) => sum + parseFloat(item.faturamento || 0), 0));
           setAccuracy(accuracyData);
           setTopSearches(searchesData);
           setTaxaConversao(taxaData || []);

@@ -62,65 +62,11 @@ exports.atualizarStatus = asyncHandler(async (req, res) => {
 
 exports.faturamentoMensal = asyncHandler(async (req, res) => {
   const meses = Math.min(Math.max(Number(req.query.meses) || 12, 1), 60);
-  
-  console.log('[pedidoController] faturamentoMensal chamado com meses:', meses);
-  
   const faturamento = await pedidoService.obterFaturamentoMensal(meses);
-
-  console.log('[pedidoController] faturamento recebido:', {
-    totalItens: faturamento.length,
-    faturamento: faturamento.slice(0, 3),
-  });
 
   res.json({
     data: faturamento,
     periodo_meses: meses,
-  });
-});
-
-exports.debugPedidos = asyncHandler(async (req, res) => {
-  const db = require('../database/models');
-  const { Op } = require('sequelize');
-
-  console.log('[debugPedidos] Iniciando debug...');
-
-  // Buscar todos os pedidos
-  const todosOsPedidos = await db.Pedido.findAll({
-    attributes: ['id', 'numero_pedido', 'total', 'status', 'criado_em'],
-    order: [['criado_em', 'DESC']],
-    raw: true,
-  });
-
-  console.log('[debugPedidos] Total de pedidos encontrados:', todosOsPedidos.length);
-
-  // Agrupar por status manualmente
-  const pedidosPorStatus = {};
-  todosOsPedidos.forEach(pedido => {
-    if (!pedidosPorStatus[pedido.status]) {
-      pedidosPorStatus[pedido.status] = 0;
-    }
-    pedidosPorStatus[pedido.status]++;
-  });
-
-  console.log('[debugPedidos] Pedidos por status:', pedidosPorStatus);
-
-  // Buscar os últimos 10 pedidos
-  const ultimos10 = todosOsPedidos.slice(0, 10);
-
-  // Buscar pedidos com status válidos
-  const statusValidos = ['preparando', 'enviado', 'confirmado', 'concluido'];
-  const pedidosValidos = todosOsPedidos.filter(p => statusValidos.includes(p.status));
-
-  console.log('[debugPedidos] Total de pedidos com status válido:', pedidosValidos.length);
-
-  res.json({
-    debug: {
-      totalPedidos: todosOsPedidos.length,
-      totalComStatusValido: pedidosValidos.length,
-      pedidosPorStatus,
-      ultimos10,
-      statusValidos,
-    },
   });
 });
 
