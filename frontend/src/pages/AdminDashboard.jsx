@@ -19,7 +19,7 @@ import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser, API_URL } from '../services/api';
+import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser, getAuthToken, API_URL } from '../services/api';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import styles from './AdminDashboard.module.css';
 
@@ -84,15 +84,30 @@ function AdminDashboard() {
         setLoadingFaturamento(true);
         setAccuracyError('');
         
+        const authToken = getAuthToken();
+        const faturamentoHeaders = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (authToken) {
+          faturamentoHeaders['Authorization'] = `Bearer ${authToken}`;
+        }
+
         const [accuracyData, searchesData, taxaData, faturamentoData] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
           fetch(`${API_URL}/pedidos/admin/faturamento-mensal?meses=12`, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
-          }).then(res => res.json()).then(data => data.data || []),
+            headers: faturamentoHeaders,
+          }).then(res => {
+            if (!res.ok) {
+              throw new Error(`Erro ao carregar faturamento: ${res.status}`);
+            }
+            return res.json();
+          }).then(data => data.data || []).catch(err => {
+            console.error('Erro ao carregar faturamento mensal:', err);
+            return [];
+          }),
         ]);
 
         if (isMounted) {
