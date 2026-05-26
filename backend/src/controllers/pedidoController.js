@@ -79,52 +79,47 @@ exports.faturamentoMensal = asyncHandler(async (req, res) => {
 });
 
 exports.debugPedidos = asyncHandler(async (req, res) => {
-  const db = require('../database/config');
+  const db = require('../database/models');
   const { Op } = require('sequelize');
 
   console.log('[debugPedidos] Iniciando debug...');
 
-  // Contar pedidos por status
-  const pedidosPorStatus = await db.Pedido.findAll({
-    attributes: ['status', [db.sequelize.fn('COUNT', db.sequelize.col('id')), 'total']],
-    group: ['status'],
+  // Buscar todos os pedidos
+  const todosOsPedidos = await db.Pedido.findAll({
+    attributes: ['id', 'numero_pedido', 'total', 'status', 'criado_em'],
+    order: [['criado_em', 'DESC']],
     raw: true,
+  });
+
+  console.log('[debugPedidos] Total de pedidos encontrados:', todosOsPedidos.length);
+
+  // Agrupar por status manualmente
+  const pedidosPorStatus = {};
+  todosOsPedidos.forEach(pedido => {
+    if (!pedidosPorStatus[pedido.status]) {
+      pedidosPorStatus[pedido.status] = 0;
+    }
+    pedidosPorStatus[pedido.status]++;
   });
 
   console.log('[debugPedidos] Pedidos por status:', pedidosPorStatus);
 
-  // Buscar todos os pedidos com status válidos
+  // Buscar os últimos 10 pedidos
+  const ultimos10 = todosOsPedidos.slice(0, 10);
+
+  // Buscar pedidos com status válidos
   const statusValidos = ['preparando', 'enviado', 'confirmado', 'concluido'];
-  const pedidosValidos = await db.Pedido.findAll({
-    where: {
-      status: {
-        [Op.in]: statusValidos,
-      },
-    },
-    attributes: ['id', 'numero_pedido', 'total', 'status', 'criado_em'],
-    order: [['criado_em', 'DESC']],
-    limit: 10,
-    raw: true,
-  });
+  const pedidosValidos = todosOsPedidos.filter(p => statusValidos.includes(p.status));
 
-  console.log('[debugPedidos] Últimos 10 pedidos com status válidos:', pedidosValidos);
-
-  // Contar total de pedidos
-  const totalPedidos = await db.Pedido.count();
-  const totalValidos = await db.Pedido.count({
-    where: {
-      status: {
-        [Op.in]: statusValidos,
-      },
-    },
-  });
+  console.log('[debugPedidos] Total de pedidos com status válido:', pedidosValidos.length);
 
   res.json({
     debug: {
-      totalPedidos,
-      totalComStatusValido: totalValidos,
+      totalPedidos: todosOsPedidos.length,
+      totalComStatusValido: pedidosValidos.length,
       pedidosPorStatus,
-      amostraUltimos10: pedidosValidos,
+      ultimos10,
+      statusValidos,
     },
   });
 });
