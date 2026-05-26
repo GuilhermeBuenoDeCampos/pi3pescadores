@@ -602,6 +602,20 @@ export async function fetchTodosPedidos(params = {}) {
   return response.json();
 }
 
+export async function fetchTaxaRecompraAnual(ano) {
+  const query = ano ? `?ano=${encodeURIComponent(ano)}` : '';
+  const response = await fetch(`${API_URL}/pedidos/admin/taxa-recompra-anual${query}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel carregar a taxa de recompra.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
 export async function fetchPedidoAdmin(id) {
   const response = await fetch(`${API_URL}/pedidos/${id}`, {
     headers: { ...getAuthHeaders() },

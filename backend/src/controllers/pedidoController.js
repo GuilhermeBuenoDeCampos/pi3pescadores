@@ -70,3 +70,13 @@ exports.faturamentoMensal = asyncHandler(async (req, res) => {
   });
 });
 
+exports.taxaRecompraAnual = asyncHandler(async (req, res) => {
+  const anoAtual = new Date().getFullYear();
+  const ano = Math.min(Math.max(Number(req.query.ano) || anoAtual, 2000), anoAtual + 1);
+  const taxaRecompra = await pedidoService.obterTaxaRecompraAnual(ano);
+
+  res.json({
+    data: taxaRecompra,
+  });
+});
+

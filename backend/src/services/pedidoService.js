@@ -684,4 +684,44 @@ exports.obterFaturamentoMensal = async (meses = 12) => {
   }
 };
 
+exports.obterTaxaRecompraAnual = async (ano = new Date().getFullYear()) => {
+  const anoNumero = Number(ano) || new Date().getFullYear();
+  const inicioAno = new Date(anoNumero, 0, 1);
+  const inicioProximoAno = new Date(anoNumero + 1, 0, 1);
+  const statusValidos = ['confirmado', 'preparando', 'enviado', 'concluido'];
+
+  const pedidos = await db.Pedido.findAll({
+    where: {
+      status: {
+        [Op.in]: statusValidos,
+      },
+      criado_em: {
+        [Op.gte]: inicioAno,
+        [Op.lt]: inicioProximoAno,
+      },
+    },
+    attributes: ['id_usuario'],
+  });
+
+  const comprasPorCliente = new Map();
+
+  pedidos.forEach((pedido) => {
+    const clienteId = String(pedido.id_usuario);
+    comprasPorCliente.set(clienteId, (comprasPorCliente.get(clienteId) || 0) + 1);
+  });
+
+  const totalClientes = comprasPorCliente.size;
+  const clientesRecompra = Array.from(comprasPorCliente.values())
+    .filter((totalCompras) => totalCompras > 1).length;
+  const taxa = totalClientes > 0 ? (clientesRecompra / totalClientes) * 100 : 0;
+
+  return {
+    ano: anoNumero,
+    taxa: Number(taxa.toFixed(2)),
+    totalClientes,
+    clientesRecompra,
+    statusConsiderados: statusValidos,
+  };
+};
+
 exports.getUserId = getUserId;

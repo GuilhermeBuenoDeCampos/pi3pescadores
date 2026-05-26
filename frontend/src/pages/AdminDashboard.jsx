@@ -19,7 +19,7 @@ import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser, getAuthToken, API_URL } from '../services/api';
+import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL } from '../services/api';
 import clockTowerBar from '../assets/admin/clock-tower-bar.png';
 import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
@@ -329,6 +329,8 @@ function AdminDashboard() {
   const [loadingTaxaConversao, setLoadingTaxaConversao] = useState(true);
   const [faturamentoMensal, setFaturamentoMensal] = useState([]);
   const [loadingFaturamento, setLoadingFaturamento] = useState(true);
+  const [taxaRecompra, setTaxaRecompra] = useState(null);
+  const [loadingTaxaRecompra, setLoadingTaxaRecompra] = useState(true);
   const [kpiConfig, setKpiConfig] = useState(null);
   const [showKpiModal, setShowKpiModal] = useState(false);
 
@@ -341,6 +343,7 @@ function AdminDashboard() {
         setLoadingSearches(true);
         setLoadingTaxaConversao(true);
         setLoadingFaturamento(true);
+        setLoadingTaxaRecompra(true);
         setAccuracyError('');
         
         const authToken = getAuthToken();
@@ -352,7 +355,7 @@ function AdminDashboard() {
           faturamentoHeaders['Authorization'] = `Bearer ${authToken}`;
         }
 
-        const [accuracyData, searchesData, taxaData, faturamentoData, configData] = await Promise.all([
+        const [accuracyData, searchesData, taxaData, faturamentoData, taxaRecompraData, configData] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
@@ -368,6 +371,7 @@ function AdminDashboard() {
           }).catch(err => {
             return [];
           }),
+          fetchTaxaRecompraAnual().catch(() => null),
           obterKpiConfig(),
         ]);
 
@@ -376,6 +380,7 @@ function AdminDashboard() {
           setTopSearches(searchesData);
           setTaxaConversao(taxaData || []);
           setFaturamentoMensal(faturamentoData);
+          setTaxaRecompra(taxaRecompraData);
           setKpiConfig(configData);
         }
       } catch (error) {
@@ -389,6 +394,7 @@ function AdminDashboard() {
           setLoadingSearches(false);
           setLoadingTaxaConversao(false);
           setLoadingFaturamento(false);
+          setLoadingTaxaRecompra(false);
         }
       }
     }
@@ -729,7 +735,11 @@ function AdminDashboard() {
           </article>
           <article className={styles.kpiCard}>
             <span>Taxa de recompra</span>
-            <strong>26,8%</strong>
+            <strong>
+              {loadingTaxaRecompra
+                ? 'Carregando...'
+                : `${Number(taxaRecompra?.taxa || 0).toFixed(2).replace('.', ',')}%`}
+            </strong>
           </article>
           <article className={`${styles.kpiCard} ${styles.searchKpi}`}>
             <span>Palavras mais pesquisadas</span>
