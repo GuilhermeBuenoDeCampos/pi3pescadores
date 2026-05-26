@@ -45,6 +45,7 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
   const { faturamento_baixo, faturamento_alto } = req.body;
 
   console.log('[kpiConfigController] atualizarConfig - dados recebidos:', { faturamento_baixo, faturamento_alto });
+  console.log('[kpiConfigController] req.user:', req.user);
 
   // Validações
   if (typeof faturamento_baixo !== 'number' || faturamento_baixo < 0) {
@@ -59,7 +60,9 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
     throw new AppError('faturamento_baixo deve ser menor que faturamento_alto', 400);
   }
 
+  console.log('[kpiConfigController] Buscando config existente...');
   let config = await db.KpiConfig.findOne();
+  console.log('[kpiConfigController] Config encontrada:', !!config);
 
   if (!config) {
     console.log('[kpiConfigController] Criando nova config');
@@ -68,15 +71,21 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
       faturamento_baixo,
       faturamento_alto,
     });
+    console.log('[kpiConfigController] Nova config criada:', config.id);
   } else {
     console.log('[kpiConfigController] Atualizando config existente:', config.id);
-    await config.update({
-      faturamento_baixo,
-      faturamento_alto,
-    });
+    try {
+      config = await config.update({
+        faturamento_baixo,
+        faturamento_alto,
+      });
+      console.log('[kpiConfigController] Update bem-sucedido');
+    } catch (updateError) {
+      console.error('[kpiConfigController] Erro no update:', updateError.message);
+      console.error('[kpiConfigController] SQL:', updateError.sql);
+      throw updateError;
+    }
   }
-
-  console.log('[kpiConfigController] Config salva:', config.toJSON());
 
   res.json({
     data: {
