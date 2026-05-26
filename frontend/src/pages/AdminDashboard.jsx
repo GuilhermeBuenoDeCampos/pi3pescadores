@@ -379,7 +379,13 @@ function AdminDashboard() {
         <section className={styles.kpiGrid} aria-label="Indicadores principais">
           <article className={styles.kpiCard}>
             <span>Faturamento mensal</span>
-            <strong>R$ 198.450,90</strong>
+            <strong>
+              {loadingFaturamento ? 'Carregando...' : `R$ ${
+                faturamentoMensal && faturamentoMensal.length > 0
+                  ? faturamentoMensal[faturamentoMensal.length - 1]?.faturamento || '0,00'
+                  : '0,00'
+              }`}
+            </strong>
           </article>
           <article className={styles.kpiCard}>
             <span>Ticket medio</span>
