@@ -44,6 +44,8 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
   const { v4: uuidv4 } = require('uuid');
   const { faturamento_baixo, faturamento_alto } = req.body;
 
+  console.log('[kpiConfigController] atualizarConfig - dados recebidos:', { faturamento_baixo, faturamento_alto });
+
   // Validações
   if (typeof faturamento_baixo !== 'number' || faturamento_baixo < 0) {
     throw new AppError('faturamento_baixo deve ser um número positivo', 400);
@@ -57,36 +59,30 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
     throw new AppError('faturamento_baixo deve ser menor que faturamento_alto', 400);
   }
 
-  try {
-    let config = await db.KpiConfig.findOne();
+  let config = await db.KpiConfig.findOne();
 
-    if (!config) {
-      config = await db.KpiConfig.create({
-        id: uuidv4(),
-        faturamento_baixo,
-        faturamento_alto,
-      });
-    } else {
-      config = await config.update({
-        faturamento_baixo,
-        faturamento_alto,
-      });
-    }
-
-    res.json({
-      data: {
-        id: config.id,
-        faturamento_baixo: parseFloat(config.faturamento_baixo),
-        faturamento_alto: parseFloat(config.faturamento_alto),
-      },
+  if (!config) {
+    console.log('[kpiConfigController] Criando nova config');
+    config = await db.KpiConfig.create({
+      id: uuidv4(),
+      faturamento_baixo,
+      faturamento_alto,
     });
-  } catch (error) {
-    console.error('[kpiConfigController] Erro ao atualizar config:', error.message);
-    console.error('Stack trace:', error.stack);
-    // Se a tabela não existir, apenas retornar os valores recebidos
-    res.status(500).json({
-      error: 'Erro ao atualizar configuração',
-      message: error.message,
+  } else {
+    console.log('[kpiConfigController] Atualizando config existente:', config.id);
+    await config.update({
+      faturamento_baixo,
+      faturamento_alto,
     });
   }
+
+  console.log('[kpiConfigController] Config salva:', config.toJSON());
+
+  res.json({
+    data: {
+      id: config.id,
+      faturamento_baixo: parseFloat(config.faturamento_baixo),
+      faturamento_alto: parseFloat(config.faturamento_alto),
+    },
+  });
 });
