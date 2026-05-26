@@ -5,6 +5,7 @@ const AppError = require('../middlewares/appError');
 
 exports.teste = asyncHandler(async (req, res) => {
   const db = require('../database/models');
+  const { v4: uuidv4 } = require('uuid');
   
   console.log('[kpiConfigController.teste] Modelos disponíveis:', Object.keys(db).filter(k => k !== 'sequelize' && k !== 'Sequelize'));
   console.log('[kpiConfigController.teste] Verificando KpiConfig:', !!db.KpiConfig);
@@ -17,15 +18,43 @@ exports.teste = asyncHandler(async (req, res) => {
   }
 
   try {
+    // Teste 1: Query raw
+    console.log('[teste] Executando query raw...');
     const result = await db.sequelize.query('SELECT * FROM kpi_config LIMIT 1');
+    console.log('[teste] Query raw result:', result[0]);
+    
+    // Teste 2: FindOne
+    console.log('[teste] Executando findOne...');
+    const config = await db.KpiConfig.findOne();
+    console.log('[teste] FindOne result:', config);
+    
+    // Teste 3: Tentar CREATE
+    console.log('[teste] Tentando CREATE...');
+    const testId = uuidv4();
+    console.log('[teste] Novo UUID:', testId);
+    
+    const newConfig = await db.KpiConfig.create({
+      id: testId,
+      faturamento_baixo: 100,
+      faturamento_alto: 1000,
+    });
+    
+    console.log('[teste] CREATE bem-sucedido:', newConfig.toJSON());
+    
     res.json({
-      message: 'Query successful',
-      result: result[0]
+      message: 'Todos os testes passaram',
+      created: newConfig.toJSON()
     });
   } catch (error) {
+    console.error('[teste] ERRO:', error.message);
+    console.error('[teste] SQL:', error.sql);
+    console.error('[teste] Stack:', error.stack);
+    
     res.status(500).json({
-      error: 'Query failed',
-      message: error.message
+      error: 'Test failed',
+      message: error.message,
+      sql: error.sql,
+      details: error.original?.message || error.message
     });
   }
 });
