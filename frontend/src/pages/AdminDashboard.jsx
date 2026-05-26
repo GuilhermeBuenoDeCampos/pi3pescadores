@@ -104,13 +104,17 @@ function AdminDashboard() {
               throw new Error(`Erro ao carregar faturamento: ${res.status}`);
             }
             return res.json();
-          }).then(data => data.data || []).catch(err => {
+          }).then(data => {
+            console.log('[AdminDashboard] Faturamento carregado:', data);
+            return data.data || [];
+          }).catch(err => {
             console.error('Erro ao carregar faturamento mensal:', err);
             return [];
           }),
         ]);
 
         if (isMounted) {
+          console.log('[AdminDashboard] Dados carregados:', { faturamentoData });
           setAccuracy(accuracyData);
           setTopSearches(searchesData);
           setTaxaConversao(taxaData || []);
