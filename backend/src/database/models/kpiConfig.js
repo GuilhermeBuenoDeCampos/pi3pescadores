@@ -6,30 +6,33 @@ module.exports = (sequelize, DataTypes) => {
     {
       id: {
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
       faturamento_baixo: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 500,
-        comment: 'Valor mínimo de faturamento',
       },
       faturamento_alto: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 5000,
-        comment: 'Valor máximo de faturamento',
       },
-      criado_em: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
+      ticketbaixo: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
       },
-      atualizado_em: {
+      ticketalto: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      created_at: {
         type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
+        field: 'created_at',
+      },
+      update_at: {
+        type: DataTypes.DATE,
+        field: 'update_at',
       },
     },
     {

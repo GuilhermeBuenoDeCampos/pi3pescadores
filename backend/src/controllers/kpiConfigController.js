@@ -66,7 +66,7 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
       config = await config.update({
         faturamento_baixo,
         faturamento_alto,
-        atualizado_em: new Date(),
+        update_at: new Date(),
       });
     }
 
