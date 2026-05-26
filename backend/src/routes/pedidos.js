@@ -10,6 +10,7 @@ router.use(authenticate);
 router.post('/', pedidoController.criar);
 router.get('/meus', pedidoController.listarMeus);
 router.get('/meus/:id', pedidoController.detalharMeu);
+router.get('/admin/faturamento-mensal', authorize('admin', 'funcionario'), pedidoController.faturamentoMensal);
 router.get('/', authorize('admin', 'funcionario'), pedidoController.listarTodos);
 
 router.get('/:id', authorize('admin', 'funcionario'), pedidoController.detalharAdmin);

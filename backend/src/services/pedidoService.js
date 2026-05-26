@@ -623,4 +623,69 @@ exports.atualizarStatusPedido = async (idPedido, status) => {
   return formatPedido(completo);
 };
 
+exports.obterFaturamentoMensal = async (meses = 12) => {
+  try {
+    const statusValidos = ['preparando', 'enviado', 'confirmado', 'concluido'];
+    
+    // Buscar todos os pedidos com os status especificados
+    const pedidos = await db.Pedido.findAll({
+      where: {
+        status: {
+          [Op.in]: statusValidos,
+        },
+      },
+      attributes: ['total', 'criado_em'],
+      order: [['criado_em', 'DESC']],
+    });
+
+    // Agrupar por mês
+    const faturamentoPorMes = {};
+    const hoje = new Date();
+    
+    // Inicializar os últimos N meses com 0
+    for (let i = meses - 1; i >= 0; i--) {
+      const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const chave = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+      faturamentoPorMes[chave] = 0;
+    }
+
+    // Somar os totais
+    pedidos.forEach(pedido => {
+      const data = new Date(pedido.criado_em);
+      const chave = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+      
+      // Apenas considerar se estiver dentro do período de meses
+      if (faturamentoPorMes.hasOwnProperty(chave)) {
+        faturamentoPorMes[chave] = toMoney(
+          faturamentoPorMes[chave] + toMoney(pedido.total)
+        );
+      }
+    });
+
+    // Converter para array ordenado
+    const resultado = Object.entries(faturamentoPorMes)
+      .map(([mes, valor]) => ({
+        mes,
+        faturamento: formatMoney(valor),
+        faturamentoNumerico: toMoney(valor),
+      }))
+      .sort((a, b) => {
+        const [mesA, anoA] = a.mes.split('/').map(Number);
+        const [mesB, anoB] = b.mes.split('/').map(Number);
+        return anoA === anoB ? mesA - mesB : anoA - anoB;
+      });
+
+    console.log('[pedidoService] faturamento mensal calculado', {
+      meses,
+      totalMeses: resultado.length,
+      statusConsiderados: statusValidos,
+    });
+
+    return resultado;
+  } catch (error) {
+    console.error('[pedidoService] erro ao calcular faturamento mensal:', error.message);
+    throw error;
+  }
+};
+
 exports.getUserId = getUserId;

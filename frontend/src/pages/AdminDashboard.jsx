@@ -70,6 +70,8 @@ function AdminDashboard() {
   const [loadingSearches, setLoadingSearches] = useState(true);
   const [taxaConversao, setTaxaConversao] = useState([]);
   const [loadingTaxaConversao, setLoadingTaxaConversao] = useState(true);
+  const [faturamentoMensal, setFaturamentoMensal] = useState([]);
+  const [loadingFaturamento, setLoadingFaturamento] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -79,17 +81,25 @@ function AdminDashboard() {
         setLoadingAccuracy(true);
         setLoadingSearches(true);
         setLoadingTaxaConversao(true);
+        setLoadingFaturamento(true);
         setAccuracyError('');
-        const [accuracyData, searchesData, taxaData] = await Promise.all([
+        
+        const [accuracyData, searchesData, taxaData, faturamentoData] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
+          fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/pedidos/admin/faturamento-mensal?meses=12`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+          }).then(res => res.json()).then(data => data.data || []),
         ]);
 
         if (isMounted) {
           setAccuracy(accuracyData);
           setTopSearches(searchesData);
           setTaxaConversao(taxaData || []);
+          setFaturamentoMensal(faturamentoData);
         }
       } catch (error) {
         if (isMounted) {
@@ -101,6 +111,7 @@ function AdminDashboard() {
           setLoadingAccuracy(false);
           setLoadingSearches(false);
           setLoadingTaxaConversao(false);
+          setLoadingFaturamento(false);
         }
       }
     }
@@ -143,22 +154,47 @@ function AdminDashboard() {
 
   const accuracyMetrics = getAccuracyMetrics(accuracyValue);
 
-  const revenueData = useMemo(() => ({
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'],
-    datasets: [
-      {
-        label: 'Faturamento',
-        data: [12000, 15000, 18000, 24000, 19800, 21000, 23000],
-        borderColor: chartColors.navy,
-        backgroundColor: 'rgba(16, 24, 44, 0.08)',
-        pointBackgroundColor: chartColors.navy,
-        pointBorderColor: chartColors.navy,
-        pointRadius: 4,
-        tension: 0.35,
-        fill: true,
-      },
-    ],
-  }), []);
+  const revenueData = useMemo(() => {
+    if (!faturamentoMensal || faturamentoMensal.length === 0) {
+      return {
+        labels: [],
+        datasets: [
+          {
+            label: 'Faturamento',
+            data: [],
+            borderColor: chartColors.navy,
+            backgroundColor: 'rgba(16, 24, 44, 0.08)',
+            pointBackgroundColor: chartColors.navy,
+            pointBorderColor: chartColors.navy,
+            pointRadius: 4,
+            tension: 0.35,
+            fill: true,
+          },
+        ],
+      };
+    }
+
+    return {
+      labels: faturamentoMensal.map(item => {
+        const [mes, ano] = item.mes.split('/');
+        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        return `${meses[parseInt(mes) - 1]} ${ano.slice(-2)}`;
+      }),
+      datasets: [
+        {
+          label: 'Faturamento',
+          data: faturamentoMensal.map(item => parseFloat(item.faturamento)),
+          borderColor: chartColors.navy,
+          backgroundColor: 'rgba(16, 24, 44, 0.08)',
+          pointBackgroundColor: chartColors.navy,
+          pointBorderColor: chartColors.navy,
+          pointRadius: 4,
+          tension: 0.35,
+          fill: true,
+        },
+      ],
+    };
+  }, [faturamentoMensal]);
 
   const funnelData = useMemo(() => ({
     labels: ['Visitantes', 'Adicoes', 'Checkout', 'Compras'],

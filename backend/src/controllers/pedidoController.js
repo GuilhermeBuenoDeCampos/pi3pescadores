@@ -59,3 +59,14 @@ exports.atualizarStatus = asyncHandler(async (req, res) => {
     data: pedido,
   });
 });
+
+exports.faturamentoMensal = asyncHandler(async (req, res) => {
+  const meses = Math.min(Math.max(Number(req.query.meses) || 12, 1), 60);
+  
+  const faturamento = await pedidoService.obterFaturamentoMensal(meses);
+
+  res.json({
+    data: faturamento,
+    periodo_meses: meses,
+  });
+});
