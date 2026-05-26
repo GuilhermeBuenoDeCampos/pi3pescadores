@@ -20,6 +20,8 @@ import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
 import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser, getAuthToken, API_URL } from '../services/api';
+import clockTowerBar from '../assets/admin/clock-tower-bar.png';
+import cableCarPoint from '../assets/admin/cable-car-point.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import styles from './AdminDashboard.module.css';
 
@@ -60,6 +62,256 @@ const commonOptions = {
     },
   },
 };
+
+function roundedRect(ctx, x, y, width, height, radius) {
+  const safeRadius = Math.min(radius, width / 2, height / 2);
+
+  ctx.beginPath();
+  ctx.moveTo(x + safeRadius, y);
+  ctx.lineTo(x + width - safeRadius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + safeRadius);
+  ctx.lineTo(x + width, y + height - safeRadius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - safeRadius, y + height);
+  ctx.lineTo(x + safeRadius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - safeRadius);
+  ctx.lineTo(x, y + safeRadius);
+  ctx.quadraticCurveTo(x, y, x + safeRadius, y);
+  ctx.closePath();
+}
+
+function drawFlame(ctx, x, y, size, intensity) {
+  const flameColors = intensity < 0.2
+    ? {
+        middle: '#ff6a45',
+        edge: '#c62828',
+        glow: 'rgba(255, 95, 72, 0.58)',
+        glowSoft: 'rgba(255, 95, 72, 0.22)',
+        stroke: 'rgba(131, 35, 30, 0.26)',
+      }
+    : intensity > 0.9
+      ? {
+          middle: '#9eea8f',
+          edge: '#2f9d59',
+          glow: 'rgba(104, 218, 128, 0.55)',
+          glowSoft: 'rgba(104, 218, 128, 0.2)',
+          stroke: 'rgba(38, 111, 67, 0.24)',
+        }
+      : {
+          middle: '#ffd978',
+          edge: '#f4a43d',
+          glow: 'rgba(255, 210, 98, 0.58)',
+          glowSoft: 'rgba(255, 210, 98, 0.22)',
+          stroke: 'rgba(140, 88, 21, 0.24)',
+        };
+
+  const glow = ctx.createRadialGradient(x, y + size * 0.16, size * 0.12, x, y + size * 0.16, size * 1.45);
+  glow.addColorStop(0, flameColors.glow);
+  glow.addColorStop(0.45, flameColors.glowSoft);
+  glow.addColorStop(1, 'rgba(255, 210, 98, 0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(x, y + size * 0.2, size * 1.35, 0, Math.PI * 2);
+  ctx.fill();
+
+  const flameGradient = ctx.createLinearGradient(x, y - size * 0.9, x, y + size * 0.85);
+  flameGradient.addColorStop(0, '#fff7b8');
+  flameGradient.addColorStop(0.42, flameColors.middle);
+  flameGradient.addColorStop(1, flameColors.edge);
+
+  ctx.fillStyle = flameGradient;
+  ctx.strokeStyle = flameColors.stroke;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, y - size * 0.9);
+  ctx.bezierCurveTo(x + size * 0.62, y - size * 0.1, x + size * 0.48, y + size * 0.55, x, y + size * 0.86);
+  ctx.bezierCurveTo(x - size * 0.56, y + size * 0.5, x - size * 0.48, y - size * 0.1, x, y - size * 0.9);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255, 255, 230, 0.92)';
+  ctx.beginPath();
+  ctx.ellipse(x + size * 0.09, y + size * 0.05, size * 0.18, size * 0.42, 0.15, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawCandle(ctx, x, lineY, baseY, width, valueRatio) {
+  const minBodyHeight = 24;
+  const bodyWidth = width;
+  const bodyX = x - bodyWidth / 2;
+  const availableHeight = Math.max(minBodyHeight, baseY - lineY);
+  const flameSize = Math.max(12, Math.min(22, availableHeight * 0.14));
+  const flameCenterY = lineY + flameSize * 0.9;
+  const candleTop = Math.min(baseY - minBodyHeight, flameCenterY + flameSize * 0.72);
+  const bodyHeight = Math.max(minBodyHeight, baseY - candleTop);
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(95, 63, 25, 0.2)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 6;
+
+  const baseGradient = ctx.createLinearGradient(bodyX, baseY - 12, bodyX, baseY + 8);
+  baseGradient.addColorStop(0, '#9f6729');
+  baseGradient.addColorStop(0.5, '#f4ca75');
+  baseGradient.addColorStop(1, '#7c4718');
+  ctx.fillStyle = baseGradient;
+  roundedRect(ctx, bodyX - bodyWidth * 0.18, baseY - 13, bodyWidth * 1.36, 16, 8);
+  ctx.fill();
+
+  const bodyGradient = ctx.createLinearGradient(bodyX, candleTop, bodyX + bodyWidth, candleTop);
+  bodyGradient.addColorStop(0, '#b77a32');
+  bodyGradient.addColorStop(0.14, '#ffe5aa');
+  bodyGradient.addColorStop(0.48, '#fff2c9');
+  bodyGradient.addColorStop(0.78, '#e0a34d');
+  bodyGradient.addColorStop(1, '#8a541e');
+  ctx.fillStyle = bodyGradient;
+  roundedRect(ctx, bodyX, candleTop, bodyWidth, bodyHeight, 9);
+  ctx.fill();
+
+  ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = 'rgba(120, 77, 27, 0.34)';
+  ctx.lineWidth = 1.5;
+  roundedRect(ctx, bodyX + 1, candleTop + 1, bodyWidth - 2, bodyHeight - 2, 8);
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(119, 70, 23, 0.22)';
+  ctx.beginPath();
+  ctx.ellipse(x, candleTop + 2, bodyWidth * 0.43, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#ffdf98';
+  roundedRect(ctx, bodyX + bodyWidth * 0.1, candleTop - 3, bodyWidth * 0.8, 8, 5);
+  ctx.fill();
+
+  ctx.strokeStyle = '#332414';
+  ctx.lineWidth = 1.7;
+  ctx.beginPath();
+  ctx.moveTo(x, candleTop - 3);
+  ctx.quadraticCurveTo(x + 2, candleTop - 17, x, candleTop - 26);
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(143, 80, 28, 0.26)';
+  roundedRect(ctx, bodyX + bodyWidth * 0.14, candleTop + 4, bodyWidth * 0.12, Math.max(14, bodyHeight * 0.18), 6);
+  ctx.fill();
+  if (bodyHeight > 62) {
+    roundedRect(ctx, bodyX + bodyWidth * 0.72, candleTop + 8, bodyWidth * 0.12, Math.max(12, bodyHeight * 0.12), 6);
+    ctx.fill();
+  }
+
+  drawFlame(ctx, x, flameCenterY, flameSize, valueRatio);
+  ctx.restore();
+}
+
+const revenueCandlesPlugin = {
+  id: 'revenueCandles',
+  afterDatasetsDraw(chart) {
+    const meta = chart.getDatasetMeta(0);
+    const yScale = chart.scales.y;
+    const dataset = chart.data.datasets[0];
+
+    if (!meta?.data?.length || !yScale || !dataset?.data?.length) {
+      return;
+    }
+
+    const values = dataset.data.map(Number);
+    const maxValue = Math.max(...values);
+    const baseY = yScale.getPixelForValue(yScale.min);
+    const slotWidth = chart.chartArea.width / values.length;
+    const candleWidth = Math.max(20, Math.min(46, slotWidth * 0.28));
+
+    chart.ctx.save();
+    meta.data.forEach((point, index) => {
+      const value = values[index];
+      const valueRatio = maxValue > 0 ? value / maxValue : 0;
+      drawCandle(chart.ctx, point.x, point.y, baseY - 4, candleWidth, valueRatio);
+    });
+    chart.ctx.restore();
+  },
+};
+
+function createTowerBarsPlugin(imageSrc) {
+  const image = new Image();
+  image.src = imageSrc;
+
+  return {
+    id: 'towerBars',
+    beforeInit(chart) {
+      image.onload = () => chart.draw();
+    },
+    afterDatasetsDraw(chart) {
+      const meta = chart.getDatasetMeta(0);
+      const yScale = chart.scales.y;
+
+      if (!meta?.data?.length || !yScale || !image.complete || image.naturalWidth === 0) {
+        return;
+      }
+
+      const baseY = yScale.getPixelForValue(yScale.min);
+      const sourceX = image.naturalWidth * 0.1;
+      const sourceY = 0;
+      const sourceWidth = image.naturalWidth * 0.8;
+      const sourceHeight = image.naturalHeight;
+      const sourceRatio = sourceWidth / sourceHeight;
+
+      chart.ctx.save();
+      meta.data.forEach((bar) => {
+        const barHeight = Math.max(0, baseY - bar.y);
+        const towerHeight = barHeight * 0.92;
+        const towerWidth = towerHeight * sourceRatio;
+        const towerX = bar.x - towerWidth / 2;
+        const towerY = baseY - towerHeight;
+
+        chart.ctx.drawImage(
+          image,
+          sourceX,
+          sourceY,
+          sourceWidth,
+          sourceHeight,
+          towerX,
+          towerY,
+          towerWidth,
+          towerHeight
+        );
+      });
+      chart.ctx.restore();
+    },
+  };
+}
+
+function createCableCarPointsPlugin(imageSrc) {
+  const image = new Image();
+  image.src = imageSrc;
+
+  return {
+    id: 'cableCarPoints',
+    beforeInit(chart) {
+      image.onload = () => chart.draw();
+    },
+    afterDatasetsDraw(chart) {
+      const meta = chart.getDatasetMeta(0);
+
+      if (!meta?.data?.length || !image.complete || image.naturalWidth === 0) {
+        return;
+      }
+
+      const sourceRatio = image.naturalWidth / image.naturalHeight;
+      const pointHeight = Math.max(46, Math.min(82, chart.chartArea.height * 0.3));
+      const pointWidth = pointHeight * sourceRatio;
+
+      chart.ctx.save();
+      meta.data.forEach((point) => {
+        chart.ctx.drawImage(
+          image,
+          point.x - pointWidth / 2,
+          point.y,
+          pointWidth,
+          pointHeight
+        );
+      });
+      chart.ctx.restore();
+    },
+  };
+}
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -235,7 +487,8 @@ function AdminDashboard() {
           backgroundColor: 'rgba(8, 147, 111, 0.08)',
           pointBackgroundColor: chartColors.teal,
           pointBorderColor: chartColors.teal,
-          pointRadius: 4,
+          pointRadius: 0,
+          pointHoverRadius: 4,
           tension: 0.35,
           fill: true,
         }],
@@ -256,7 +509,8 @@ function AdminDashboard() {
           backgroundColor: 'rgba(8, 147, 111, 0.08)',
           pointBackgroundColor: chartColors.teal,
           pointBorderColor: chartColors.teal,
-          pointRadius: 4,
+          pointRadius: 0,
+          pointHoverRadius: 4,
           tension: 0.35,
           fill: true,
         },
@@ -270,13 +524,16 @@ function AdminDashboard() {
       {
         label: 'Unidades vendidas',
         data: [100, 42, 36, 31, 24, 18],
-        backgroundColor: 'rgba(16, 24, 44, 0.12)',
-        borderColor: chartColors.navy,
-        borderWidth: 2,
-        borderRadius: 6,
+        backgroundColor: 'rgba(16, 24, 44, 0)',
+        borderColor: 'rgba(16, 24, 44, 0)',
+        borderWidth: 0,
+        borderRadius: 0,
       },
     ],
   }), []);
+
+  const towerBarsPlugin = useMemo(() => createTowerBarsPlugin(clockTowerBar), []);
+  const cableCarPointsPlugin = useMemo(() => createCableCarPointsPlugin(cableCarPoint), []);
 
   const satisfactionData = useMemo(() => ({
     labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preco', 'Experiencia'],
@@ -458,7 +715,7 @@ function AdminDashboard() {
         <section className={styles.dashboardGrid}>
           <article className={`${styles.chartBlock} ${styles.wide}`}>
             <h2>Faturamento ao longo do tempo</h2>
-            <div className={styles.chartCanvas}>
+            <div className={`${styles.chartCanvas} ${styles.revenueChartCanvas}`}>
               <Line
                 data={revenueData}
                 options={{
@@ -467,13 +724,14 @@ function AdminDashboard() {
                   scales: {
                     x: { grid: { display: false } },
                     y: {
-                      min: 12000,
-                      max: 24000,
+                      min: 0,
+                      max: 26000,
                       ticks: { callback: (value) => `R$ ${value}` },
                       grid: { color: chartColors.grid },
                     },
                   },
                 }}
+                plugins={[revenueCandlesPlugin]}
               />
             </div>
           </article>
@@ -498,7 +756,37 @@ function AdminDashboard() {
                     y: { beginAtZero: true, grid: { color: chartColors.grid } },
                   },
                 }}
+                plugins={[towerBarsPlugin]}
               />
+            </div>
+          </article>
+
+          <article className={`${styles.chartBlock} ${styles.wide}`}>
+            <h2>Taxa de conversão por mês</h2>
+            <div className={styles.chartCanvas}>
+              {loadingTaxaConversao ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
+                  Carregando dados...
+                </div>
+              ) : (
+                <Line
+                  data={conversionRateData}
+                  options={{
+                    ...commonOptions,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                      x: { grid: { display: false } },
+                      y: {
+                        min: 0,
+                        max: 100,
+                        ticks: { callback: (value) => `${value}%` },
+                        grid: { color: chartColors.grid },
+                      },
+                    },
+                  }}
+                  plugins={[cableCarPointsPlugin]}
+                />
+              )}
             </div>
           </article>
 
