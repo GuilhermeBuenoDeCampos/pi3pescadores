@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers } from 'react-icons/fi';
+import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
@@ -22,7 +22,12 @@ import nsaVermelho from '../assets/logo/nsa-vermelho.png';
 import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser, getAuthToken, API_URL } from '../services/api';
 import clockTowerBar from '../assets/admin/clock-tower-bar.png';
 import cableCarPoint from '../assets/admin/cable-car-point.png';
+import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
+import faturamentoMedioImg from '../assets/admin/faturamentomedio.jpg';
+import faturamentoAltoImg from '../assets/admin/faturamentoalto.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
+import { obterKpiConfig } from '../services/kpiConfig';
+import KpiConfigModal from '../components/KpiConfigModal';
 import styles from './AdminDashboard.module.css';
 
 ChartJS.register(
@@ -324,6 +329,8 @@ function AdminDashboard() {
   const [loadingTaxaConversao, setLoadingTaxaConversao] = useState(true);
   const [faturamentoMensal, setFaturamentoMensal] = useState([]);
   const [loadingFaturamento, setLoadingFaturamento] = useState(true);
+  const [kpiConfig, setKpiConfig] = useState(null);
+  const [showKpiModal, setShowKpiModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -345,7 +352,7 @@ function AdminDashboard() {
           faturamentoHeaders['Authorization'] = `Bearer ${authToken}`;
         }
 
-        const [accuracyData, searchesData, taxaData, faturamentoData] = await Promise.all([
+        const [accuracyData, searchesData, taxaData, faturamentoData, configData] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
@@ -361,6 +368,7 @@ function AdminDashboard() {
           }).catch(err => {
             return [];
           }),
+          obterKpiConfig(),
         ]);
 
         if (isMounted) {
@@ -368,6 +376,7 @@ function AdminDashboard() {
           setTopSearches(searchesData);
           setTaxaConversao(taxaData || []);
           setFaturamentoMensal(faturamentoData);
+          setKpiConfig(configData);
         }
       } catch (error) {
         if (isMounted) {
@@ -421,6 +430,25 @@ function AdminDashboard() {
   };
 
   const accuracyMetrics = getAccuracyMetrics(accuracyValue);
+
+  // Determinar a imagem de fundo baseada no faturamento
+  const getFaturamentoBackgroundImage = () => {
+    if (!kpiConfig || !faturamentoMensal || faturamentoMensal.length === 0) {
+      return faturamentoMedioImg;
+    }
+
+    const currentRevenue = parseFloat(faturamentoMensal[faturamentoMensal.length - 1]?.faturamento || 0);
+    const baixo = parseFloat(kpiConfig.faturamento_baixo);
+    const alto = parseFloat(kpiConfig.faturamento_alto);
+
+    if (currentRevenue < baixo) {
+      return faturamentoBaixoImg;
+    } else if (currentRevenue > alto) {
+      return faturamentoAltoImg;
+    } else {
+      return faturamentoMedioImg;
+    }
+  };
 
   const revenueData = useMemo(() => {
     if (!faturamentoMensal || faturamentoMensal.length === 0) {
@@ -628,7 +656,43 @@ function AdminDashboard() {
         </header>
 
         <section className={styles.kpiGrid} aria-label="Indicadores principais">
-          <article className={styles.kpiCard}>
+          <article 
+            className={styles.kpiCard}
+            style={{
+              backgroundImage: `url(${getFaturamentoBackgroundImage()})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              position: 'relative',
+            }}
+          >
+            <div style={{ position: 'absolute', top: 10, right: 10 }}>
+              <button
+                onClick={() => setShowKpiModal(true)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+                title="Configurar faturamento"
+              >
+                <FiSettings size={16} color="#10182c" />
+              </button>
+            </div>
             <span>Faturamento mensal</span>
             <strong>
               {loadingFaturamento ? 'Carregando...' : `R$ ${
@@ -848,6 +912,13 @@ function AdminDashboard() {
           </article>
         </section>
       </section>
+
+      <KpiConfigModal
+        isOpen={showKpiModal}
+        onClose={() => setShowKpiModal(false)}
+        config={kpiConfig}
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
     </main>
   );
 }
