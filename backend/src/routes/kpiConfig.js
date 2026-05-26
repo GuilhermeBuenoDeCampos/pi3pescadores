@@ -5,6 +5,9 @@ const authorize = require('../middlewares/authorize');
 
 const router = Router();
 
+// Rota de teste (remover depois)
+router.get('/teste/debug', kpiConfigController.teste);
+
 // Rota pública para obter configuração
 router.get('/', kpiConfigController.obterConfig);
 

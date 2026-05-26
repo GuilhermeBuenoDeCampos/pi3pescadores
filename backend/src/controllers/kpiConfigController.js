@@ -3,6 +3,33 @@
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../middlewares/appError');
 
+exports.teste = asyncHandler(async (req, res) => {
+  const db = require('../database/models');
+  
+  console.log('[kpiConfigController.teste] Modelos disponíveis:', Object.keys(db).filter(k => k !== 'sequelize' && k !== 'Sequelize'));
+  console.log('[kpiConfigController.teste] Verificando KpiConfig:', !!db.KpiConfig);
+  
+  if (!db.KpiConfig) {
+    return res.status(500).json({
+      error: 'KpiConfig model not found',
+      available_models: Object.keys(db).filter(k => k !== 'sequelize' && k !== 'Sequelize')
+    });
+  }
+
+  try {
+    const result = await db.sequelize.query('SELECT * FROM kpi_config LIMIT 1');
+    res.json({
+      message: 'Query successful',
+      result: result[0]
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Query failed',
+      message: error.message
+    });
+  }
+});
+
 exports.obterConfig = asyncHandler(async (req, res) => {
   const db = require('../database/models');
   const { v4: uuidv4 } = require('uuid');
