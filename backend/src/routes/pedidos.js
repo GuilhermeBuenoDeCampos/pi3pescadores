@@ -5,6 +5,9 @@ const authorize = require('../middlewares/authorize');
 
 const router = Router();
 
+// Rota de debug pública - sem autenticação
+router.get('/public/debug-pedidos', pedidoController.debugPedidos);
+
 router.use(authenticate);
 
 router.post('/', pedidoController.criar);
