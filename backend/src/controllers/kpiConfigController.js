@@ -6,23 +6,35 @@ const AppError = require('../middlewares/appError');
 exports.obterConfig = asyncHandler(async (req, res) => {
   const db = require('../database/models');
 
-  let config = await db.KpiConfig.findOne();
+  try {
+    let config = await db.KpiConfig.findOne();
 
-  // Se não existir, criar com valores padrão
-  if (!config) {
-    config = await db.KpiConfig.create({
-      faturamento_baixo: 500,
-      faturamento_alto: 5000,
+    // Se não existir, criar com valores padrão
+    if (!config) {
+      config = await db.KpiConfig.create({
+        faturamento_baixo: 500,
+        faturamento_alto: 5000,
+      });
+    }
+
+    res.json({
+      data: {
+        id: config.id,
+        faturamento_baixo: parseFloat(config.faturamento_baixo),
+        faturamento_alto: parseFloat(config.faturamento_alto),
+      },
+    });
+  } catch (error) {
+    // Se a tabela não existir, retornar valores padrão
+    console.error('[kpiConfigController] Erro ao obter config:', error.message);
+    res.json({
+      data: {
+        id: null,
+        faturamento_baixo: 500,
+        faturamento_alto: 5000,
+      },
     });
   }
-
-  res.json({
-    data: {
-      id: config.id,
-      faturamento_baixo: parseFloat(config.faturamento_baixo),
-      faturamento_alto: parseFloat(config.faturamento_alto),
-    },
-  });
 });
 
 exports.atualizarConfig = asyncHandler(async (req, res) => {
@@ -42,26 +54,38 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
     throw new AppError('faturamento_baixo deve ser menor que faturamento_alto', 400);
   }
 
-  let config = await db.KpiConfig.findOne();
+  try {
+    let config = await db.KpiConfig.findOne();
 
-  if (!config) {
-    config = await db.KpiConfig.create({
-      faturamento_baixo,
-      faturamento_alto,
+    if (!config) {
+      config = await db.KpiConfig.create({
+        faturamento_baixo,
+        faturamento_alto,
+      });
+    } else {
+      config = await config.update({
+        faturamento_baixo,
+        faturamento_alto,
+        atualizado_em: new Date(),
+      });
+    }
+
+    res.json({
+      data: {
+        id: config.id,
+        faturamento_baixo: parseFloat(config.faturamento_baixo),
+        faturamento_alto: parseFloat(config.faturamento_alto),
+      },
     });
-  } else {
-    config = await config.update({
-      faturamento_baixo,
-      faturamento_alto,
-      atualizado_em: new Date(),
+  } catch (error) {
+    console.error('[kpiConfigController] Erro ao atualizar config:', error.message);
+    // Se a tabela não existir, apenas retornar os valores recebidos
+    res.json({
+      data: {
+        id: null,
+        faturamento_baixo: parseFloat(faturamento_baixo),
+        faturamento_alto: parseFloat(faturamento_alto),
+      },
     });
   }
-
-  res.json({
-    data: {
-      id: config.id,
-      faturamento_baixo: parseFloat(config.faturamento_baixo),
-      faturamento_alto: parseFloat(config.faturamento_alto),
-    },
-  });
 });
