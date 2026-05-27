@@ -83,8 +83,9 @@
 }
 
 .kpiCard strong {
-  font-size: 1.65rem;
+  font-size: clamp(1.35rem, 2vw, 1.65rem);
   line-height: 1;
+  white-space: nowrap;
 }
 
 /* Estilos para cards com background dinâmico */

@@ -8,9 +8,12 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
   const [faturamentoAlto, setFaturamentoAlto] = useState(config?.faturamento_alto || 5000);
   const [recompraBaixa, setRecompraBaixa] = useState(config?.recomprabaixa || 20);
   const [recompraAlta, setRecompraAlta] = useState(config?.recompraalta || 50);
+  const [ticketBaixo, setTicketBaixo] = useState(config?.ticketbaixo || 75);
+  const [ticketAlto, setTicketAlto] = useState(config?.ticketalto || 200);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const isRecompra = type === 'recompra';
+  const isTicket = type === 'ticket';
 
   useEffect(() => {
     if (isOpen) {
@@ -18,6 +21,8 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       setFaturamentoAlto(config?.faturamento_alto || 5000);
       setRecompraBaixa(config?.recomprabaixa || 20);
       setRecompraAlta(config?.recompraalta || 50);
+      setTicketBaixo(config?.ticketbaixo || 75);
+      setTicketAlto(config?.ticketalto || 200);
       setError('');
     }
   }, [config, isOpen]);
@@ -30,7 +35,12 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
-    if (!isRecompra && (!faturamentoBaixo || !faturamentoAlto)) {
+    if (isTicket && (!ticketBaixo || !ticketAlto)) {
+      setError('Todos os campos sao obrigatorios');
+      return;
+    }
+
+    if (!isRecompra && !isTicket && (!faturamentoBaixo || !faturamentoAlto)) {
       setError('Todos os campos sao obrigatorios');
       return;
     }
@@ -40,7 +50,12 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
-    if (!isRecompra && parseFloat(faturamentoBaixo) >= parseFloat(faturamentoAlto)) {
+    if (isTicket && parseFloat(ticketBaixo) >= parseFloat(ticketAlto)) {
+      setError('Ticket baixo deve ser menor que ticket alto');
+      return;
+    }
+
+    if (!isRecompra && !isTicket && parseFloat(faturamentoBaixo) >= parseFloat(faturamentoAlto)) {
       setError('Faturamento baixo deve ser menor que faturamento alto');
       return;
     }
@@ -50,6 +65,8 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       const updated = await atualizarKpiConfig({
         faturamento_baixo: faturamentoBaixo,
         faturamento_alto: faturamentoAlto,
+        ticketbaixo: ticketBaixo,
+        ticketalto: ticketAlto,
         recomprabaixa: recompraBaixa,
         recompraalta: recompraAlta,
       });
@@ -68,7 +85,7 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>{isRecompra ? 'Configurar Recompra' : 'Configurar Faturamento'}</h2>
+          <h2>{isRecompra ? 'Configurar Recompra' : isTicket ? 'Configurar Ticket Medio' : 'Configurar Faturamento'}</h2>
           <button className={styles.closeBtn} onClick={onClose}>
             <FiX size={20} />
           </button>
@@ -113,6 +130,44 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
                 Entre {parseFloat(recompraBaixa || 0).toFixed(2)}% e {parseFloat(recompraAlta || 0).toFixed(2)}%: Recompra Media
                 <br />
                 Acima de {parseFloat(recompraAlta || 0).toFixed(2)}%: Recompra Alta
+              </p>
+            </>
+          ) : isTicket ? (
+            <>
+              <div className={styles.fieldGroup}>
+                <label htmlFor="ticket-baixo">Ticket Baixo (R$)</label>
+                <input
+                  id="ticket-baixo"
+                  type="number"
+                  step="0.01"
+                  value={ticketBaixo}
+                  onChange={(e) => setTicketBaixo(e.target.value)}
+                  placeholder="0.00"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label htmlFor="ticket-alto">Ticket Alto (R$)</label>
+                <input
+                  id="ticket-alto"
+                  type="number"
+                  step="0.01"
+                  value={ticketAlto}
+                  onChange={(e) => setTicketAlto(e.target.value)}
+                  placeholder="0.00"
+                  disabled={loading}
+                />
+              </div>
+
+              <p className={styles.info}>
+                O card exibira imagens diferentes baseado nesta configuracao:
+                <br />
+                Abaixo de R$ {parseFloat(ticketBaixo || 0).toFixed(2)}: Ticket Baixo
+                <br />
+                Entre R$ {parseFloat(ticketBaixo || 0).toFixed(2)} e R$ {parseFloat(ticketAlto || 0).toFixed(2)}: Ticket Medio
+                <br />
+                Acima de R$ {parseFloat(ticketAlto || 0).toFixed(2)}: Ticket Alto
               </p>
             </>
           ) : (

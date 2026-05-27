@@ -6,6 +6,7 @@ const AppError = require('../middlewares/appError');
 
 const ORDER_STATUSES = new Set(['pendente', 'confirmado', 'preparando', 'enviado', 'concluido', 'cancelado']);
 const PAYMENT_METHODS = new Set(['whatsapp', 'pix', 'cartao', 'dinheiro', 'boleto', 'outro']);
+const SALE_STATUSES = ['preparando', 'enviado', 'confirmado', 'concluido'];
 
 function toMoney(value) {
   const n = Number(value);
@@ -625,13 +626,11 @@ exports.atualizarStatusPedido = async (idPedido, status) => {
 
 exports.obterFaturamentoMensal = async (meses = 12) => {
   try {
-    const statusValidos = ['preparando', 'enviado', 'confirmado', 'concluido'];
-    
     // Buscar todos os pedidos com os status especificados
     const pedidos = await db.Pedido.findAll({
       where: {
         status: {
-          [Op.in]: statusValidos,
+          [Op.in]: SALE_STATUSES,
         },
       },
       attributes: ['total', 'criado_em'],
@@ -688,12 +687,11 @@ exports.obterTaxaRecompraAnual = async (ano = new Date().getFullYear()) => {
   const anoNumero = Number(ano) || new Date().getFullYear();
   const inicioAno = new Date(anoNumero, 0, 1);
   const inicioProximoAno = new Date(anoNumero + 1, 0, 1);
-  const statusValidos = ['confirmado', 'preparando', 'enviado', 'concluido'];
 
   const pedidos = await db.Pedido.findAll({
     where: {
       status: {
-        [Op.in]: statusValidos,
+        [Op.in]: SALE_STATUSES,
       },
       criado_em: {
         [Op.gte]: inicioAno,
@@ -720,8 +718,44 @@ exports.obterTaxaRecompraAnual = async (ano = new Date().getFullYear()) => {
     taxa: Number(taxa.toFixed(2)),
     totalClientes,
     clientesRecompra,
-    statusConsiderados: statusValidos,
+    statusConsiderados: SALE_STATUSES,
   };
+};
+
+exports.obterTicketMedio = async () => {
+  try {
+    const resultado = await db.Pedido.findOne({
+      where: {
+        status: {
+          [Op.in]: SALE_STATUSES,
+        },
+      },
+      attributes: [
+        [db.sequelize.fn('AVG', db.sequelize.col('total')), 'ticket_medio'],
+        [db.sequelize.fn('SUM', db.sequelize.col('total')), 'receita_total'],
+        [db.sequelize.fn('COUNT', db.sequelize.col('id')), 'total_vendas'],
+        [db.sequelize.fn('COUNT', db.sequelize.fn('DISTINCT', db.sequelize.col('id_usuario'))), 'clientes_unicos'],
+      ],
+      raw: true,
+    });
+
+    const ticketMedio = toMoney(resultado?.ticket_medio || 0);
+    const receitaTotal = toMoney(resultado?.receita_total || 0);
+    const totalVendas = Number(resultado?.total_vendas || 0);
+    const clientesUnicos = Number(resultado?.clientes_unicos || 0);
+
+    return {
+      ticket_medio: formatMoney(ticketMedio),
+      ticketMedioNumerico: ticketMedio,
+      receita_total: formatMoney(receitaTotal),
+      receitaTotalNumerico: receitaTotal,
+      total_vendas: totalVendas,
+      clientes_unicos: clientesUnicos,
+    };
+  } catch (error) {
+    console.error('[pedidoService] erro ao calcular ticket medio:', error.message);
+    throw error;
+  }
 };
 
 exports.getUserId = getUserId;

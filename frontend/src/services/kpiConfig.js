@@ -26,6 +26,8 @@ export const atualizarKpiConfig = async (config) => {
       body: JSON.stringify({
         faturamento_baixo: parseFloat(config.faturamento_baixo),
         faturamento_alto: parseFloat(config.faturamento_alto),
+        ticketbaixo: parseFloat(config.ticketbaixo),
+        ticketalto: parseFloat(config.ticketalto),
         recomprabaixa: parseFloat(config.recomprabaixa),
         recompraalta: parseFloat(config.recompraalta),
       }),

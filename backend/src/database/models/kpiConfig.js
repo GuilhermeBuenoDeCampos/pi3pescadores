@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       id: {
         type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
       faturamento_baixo: {
@@ -20,11 +21,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       ticketbaixo: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: true,
+        allowNull: false,
+        defaultValue: 75,
       },
       ticketalto: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: true,
+        allowNull: false,
+        defaultValue: 200,
       },
       recomprabaixa: {
         type: DataTypes.DECIMAL(10, 2),

@@ -19,7 +19,7 @@ import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL } from '../services/api';
+import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
 import clockTowerBar from '../assets/admin/clock-tower-bar.png';
 import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
@@ -148,10 +148,12 @@ function drawCandle(ctx, x, lineY, baseY, width, valueRatio) {
   const bodyWidth = width;
   const bodyX = x - bodyWidth / 2;
   const availableHeight = Math.max(minBodyHeight, baseY - lineY);
-  const flameSize = Math.max(12, Math.min(22, availableHeight * 0.14));
-  const flameCenterY = lineY + flameSize * 0.9;
-  const candleTop = Math.min(baseY - minBodyHeight, flameCenterY + flameSize * 0.72);
+
+  const flameSize = Math.max(12, Math.min(22, availableHeight * 0.1));
+  const wickHeight = Math.max(10, Math.min(18, availableHeight * 0.06));
+  const candleTop = lineY;
   const bodyHeight = Math.max(minBodyHeight, baseY - candleTop);
+  const flameCenterY = candleTop - wickHeight - flameSize * 0.5;
 
   ctx.save();
   ctx.shadowColor = 'rgba(95, 63, 25, 0.2)';
@@ -194,8 +196,8 @@ function drawCandle(ctx, x, lineY, baseY, width, valueRatio) {
   ctx.strokeStyle = '#332414';
   ctx.lineWidth = 1.7;
   ctx.beginPath();
-  ctx.moveTo(x, candleTop - 3);
-  ctx.quadraticCurveTo(x + 2, candleTop - 17, x, candleTop - 26);
+  ctx.moveTo(x, candleTop - 2);
+  ctx.quadraticCurveTo(x + 2, candleTop - wickHeight * 0.5, x, candleTop - wickHeight);
   ctx.stroke();
 
   ctx.fillStyle = 'rgba(143, 80, 28, 0.26)';
@@ -334,9 +336,12 @@ function AdminDashboard() {
   const [loadingFaturamento, setLoadingFaturamento] = useState(true);
   const [taxaRecompra, setTaxaRecompra] = useState(null);
   const [loadingTaxaRecompra, setLoadingTaxaRecompra] = useState(true);
+  const [ticketMedio, setTicketMedio] = useState(null);
+  const [loadingTicketMedio, setLoadingTicketMedio] = useState(true);
   const [kpiConfig, setKpiConfig] = useState(null);
   const [showKpiModal, setShowKpiModal] = useState(false);
   const [showRecompraModal, setShowRecompraModal] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -348,6 +353,7 @@ function AdminDashboard() {
         setLoadingTaxaConversao(true);
         setLoadingFaturamento(true);
         setLoadingTaxaRecompra(true);
+        setLoadingTicketMedio(true);
         setAccuracyError('');
         
         const authToken = getAuthToken();
@@ -359,7 +365,7 @@ function AdminDashboard() {
           faturamentoHeaders['Authorization'] = `Bearer ${authToken}`;
         }
 
-        const [accuracyData, searchesData, taxaData, faturamentoData, taxaRecompraData, configData] = await Promise.all([
+        const [accuracyData, searchesData, taxaData, faturamentoData, taxaRecompraData, ticketMedioData, configData] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
@@ -376,6 +382,18 @@ function AdminDashboard() {
             return [];
           }),
           fetchTaxaRecompraAnual().catch(() => null),
+          fetch(`${API_URL}/pedidos/admin/ticket-medio`, {
+            headers: faturamentoHeaders,
+          }).then(res => {
+            if (!res.ok) {
+              throw new Error(`Erro ao carregar ticket médio: ${res.status}`);
+            }
+            return res.json();
+          }).then(data => {
+            return data.data || null;
+          }).catch(err => {
+            return null;
+          }),
           obterKpiConfig(),
         ]);
 
@@ -385,6 +403,7 @@ function AdminDashboard() {
           setTaxaConversao(taxaData || []);
           setFaturamentoMensal(faturamentoData);
           setTaxaRecompra(taxaRecompraData);
+          setTicketMedio(ticketMedioData);
           setKpiConfig(configData);
         }
       } catch (error) {
@@ -399,6 +418,7 @@ function AdminDashboard() {
           setLoadingTaxaConversao(false);
           setLoadingFaturamento(false);
           setLoadingTaxaRecompra(false);
+          setLoadingTicketMedio(false);
         }
       }
     }
@@ -412,6 +432,23 @@ function AdminDashboard() {
 
   const accuracyValue = Math.max(0, Math.min(100, Number(accuracy?.media_acuracidade || 0)));
   const topSearch = topSearches[0];
+  const ticketMedioFormatado = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(Number(ticketMedio?.ticketMedioNumerico || 0));
+
+  const ticketBaixo = Number(kpiConfig?.ticketbaixo || 75);
+  const ticketAlto = Number(kpiConfig?.ticketalto || 200);
+  const ticketValor = Number(ticketMedio?.ticketMedioNumerico || 0);
+
+  let imagemTicket = '';
+  if (ticketValor < ticketBaixo) {
+    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-vazio.jpeg`;
+  } else if (ticketValor <= ticketAlto) {
+    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-medio.jpeg`;
+  } else {
+    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-cheio.jpeg`;
+  }
   
   // Pegar a taxa de conversão do mês mais recente
   const taxaMesAtual = taxaConversao.length > 0 ? taxaConversao[0] : null;
@@ -751,9 +788,35 @@ function AdminDashboard() {
               </strong>
             </div>
           </article>
-          <article className={styles.kpiCard}>
-            <span>Ticket medio</span>
-            <strong>R$ 243,65</strong>
+          <article
+            className={styles.kpiCard}
+            style={{
+              position: 'relative',
+              background: ticketValor > 0
+                ? `linear-gradient(rgba(83, 102, 170, 0.72), rgba(83, 102, 170, 0.72)), url("${imagemTicket}") center / cover`
+                : undefined,
+            }}
+          >
+            <button
+              onClick={() => setShowTicketModal(true)}
+              style={{
+                position: 'absolute', top: 8, right: 8,
+                background: 'rgba(255,255,255,0.2)', border: 'none',
+                borderRadius: 6, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: 4, color: '#fff',
+              }}
+              title="Configurar limites do ticket médio"
+            >
+              <FiSettings size={16} />
+            </button>
+            <span>Ticket médio</span>
+            <strong>{loadingTicketMedio ? 'Carregando...' : ticketMedioFormatado}</strong>
+            {ticketMedio && (
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
+                {ticketMedio.total_vendas} vendas confirmadas
+              </small>
+            )}
           </article>
           <article
             className={styles.kpiCard}
@@ -833,23 +896,23 @@ function AdminDashboard() {
 
         <section className={styles.conversionSection} aria-label="Taxa de conversão">
           <article className={styles.kpiCard}>
-            <span>Taxa de conversao</span>
+            <span>Taxa de conversão</span>
             <strong>
               {loadingTaxaConversao ? 'Carregando...' : `${taxaMesAtual?.taxa_conversao ?? 0}%`}
             </strong>
             {taxaMesAtual && (
-              <small style={{ fontSize: '11px', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
                 {taxaMesAtual.visitantes_unicos} visitantes | {taxaMesAtual.pedidos_confirmados} pedidos
               </small>
             )}
           </article>
           <article className={styles.kpiCard}>
-            <span>Visitantes unicos (mes)</span>
+            <span>Visitantes únicos (mês)</span>
             <strong>
               {loadingTaxaConversao ? 'Carregando...' : taxaMesAtual?.visitantes_unicos ?? 0}
             </strong>
             {taxaMesAtual && (
-              <small style={{ fontSize: '11px', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
                 IPs únicos que visitaram home
               </small>
             )}
@@ -1031,6 +1094,13 @@ function AdminDashboard() {
         onClose={() => setShowRecompraModal(false)}
         config={kpiConfig}
         type="recompra"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showTicketModal}
+        onClose={() => setShowTicketModal(false)}
+        config={kpiConfig}
+        type="ticket"
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
     </main>
