@@ -19,7 +19,7 @@ import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
+import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL } from '../services/api';
 import clockTowerBar from '../assets/admin/clock-tower-bar.png';
 import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
@@ -28,6 +28,9 @@ import faturamentoAltoImg from '../assets/admin/faturamentoalto.png';
 import recompraVermelhoImg from '../assets/admin/recompravermelho.png';
 import recompraAmareloImg from '../assets/admin/recompraamarelo.png';
 import recompraVerdeImg from '../assets/admin/recompraverde.png';
+import ticketBaixoImg from '../assets/admin/ticketbaixo.png';
+import ticketMedioImg from '../assets/admin/ticketmedio.png';
+import ticketAltoImg from '../assets/admin/ticketalto.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import KpiConfigModal from '../components/KpiConfigModal';
@@ -441,13 +444,11 @@ function AdminDashboard() {
   const ticketAlto = Number(kpiConfig?.ticketalto || 200);
   const ticketValor = Number(ticketMedio?.ticketMedioNumerico || 0);
 
-  let imagemTicket = '';
+  let imagemTicket = ticketMedioImg;
   if (ticketValor < ticketBaixo) {
-    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-vazio.jpeg`;
-  } else if (ticketValor <= ticketAlto) {
-    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-medio.jpeg`;
-  } else {
-    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-cheio.jpeg`;
+    imagemTicket = ticketBaixoImg;
+  } else if (ticketValor > ticketAlto) {
+    imagemTicket = ticketAltoImg;
   }
   
   // Pegar a taxa de conversão do mês mais recente
@@ -775,7 +776,6 @@ function AdminDashboard() {
             >
               <FiSettings size={18} color="#10182c" />
             </button>
-
             {/* Conteúdo do card */}
             <div className={styles.revenueKpiContent}>
               <span>Faturamento mensal</span>
@@ -791,32 +791,64 @@ function AdminDashboard() {
           <article
             className={styles.kpiCard}
             style={{
+              backgroundImage: `url(${imagemTicket})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
               position: 'relative',
-              background: ticketValor > 0
-                ? `linear-gradient(rgba(83, 102, 170, 0.72), rgba(83, 102, 170, 0.72)), url("${imagemTicket}") center / cover`
-                : undefined,
+              overflow: 'hidden',
             }}
           >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
             <button
               onClick={() => setShowTicketModal(true)}
               style={{
-                position: 'absolute', top: 8, right: 8,
-                background: 'rgba(255,255,255,0.2)', border: 'none',
-                borderRadius: 6, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: 4, color: '#fff',
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
               }}
               title="Configurar limites do ticket médio"
             >
-              <FiSettings size={16} />
+              <FiSettings size={18} color="#10182c" />
             </button>
+            <div className={styles.revenueKpiContent}>
             <span>Ticket médio</span>
             <strong>{loadingTicketMedio ? 'Carregando...' : ticketMedioFormatado}</strong>
             {ticketMedio && (
-              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
                 {ticketMedio.total_vendas} vendas confirmadas
               </small>
             )}
+            </div>
           </article>
           <article
             className={styles.kpiCard}
