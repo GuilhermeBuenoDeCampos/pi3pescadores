@@ -13,6 +13,7 @@ router.get('/meus/:id', pedidoController.detalharMeu);
 
 // Rotas admin (mais específicas, devem vir antes de /:id)
 router.get('/admin/faturamento-mensal', authorize('admin', 'funcionario'), pedidoController.faturamentoMensal);
+router.get('/admin/ticket-medio', authorize('admin', 'funcionario'), pedidoController.ticketMedio);
 
 // Rotas genéricas (menos específicas)
 router.get('/', authorize('admin', 'funcionario'), pedidoController.listarTodos);

@@ -70,3 +70,11 @@ exports.faturamentoMensal = asyncHandler(async (req, res) => {
   });
 });
 
+exports.ticketMedio = asyncHandler(async (req, res) => {
+  const ticketMedio = await pedidoService.obterTicketMedio();
+
+  res.json({
+    data: ticketMedio,
+  });
+});
+

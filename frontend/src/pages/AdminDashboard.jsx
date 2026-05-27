@@ -13,13 +13,13 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers } from 'react-icons/fi';
+import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiSettings, FiUser, FiUsers, FiX } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser, getAuthToken, API_URL } from '../services/api';
+import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
 import clockTowerBar from '../assets/admin/clock-tower-bar.png';
 import cableCarPoint from '../assets/admin/cable-car-point.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
@@ -140,10 +140,12 @@ function drawCandle(ctx, x, lineY, baseY, width, valueRatio) {
   const bodyWidth = width;
   const bodyX = x - bodyWidth / 2;
   const availableHeight = Math.max(minBodyHeight, baseY - lineY);
-  const flameSize = Math.max(12, Math.min(22, availableHeight * 0.14));
-  const flameCenterY = lineY + flameSize * 0.9;
-  const candleTop = Math.min(baseY - minBodyHeight, flameCenterY + flameSize * 0.72);
+
+  const flameSize = Math.max(12, Math.min(22, availableHeight * 0.1));
+  const wickHeight = Math.max(10, Math.min(18, availableHeight * 0.06));
+  const candleTop = lineY;
   const bodyHeight = Math.max(minBodyHeight, baseY - candleTop);
+  const flameCenterY = candleTop - wickHeight - flameSize * 0.5;
 
   ctx.save();
   ctx.shadowColor = 'rgba(95, 63, 25, 0.2)';
@@ -186,8 +188,8 @@ function drawCandle(ctx, x, lineY, baseY, width, valueRatio) {
   ctx.strokeStyle = '#332414';
   ctx.lineWidth = 1.7;
   ctx.beginPath();
-  ctx.moveTo(x, candleTop - 3);
-  ctx.quadraticCurveTo(x + 2, candleTop - 17, x, candleTop - 26);
+  ctx.moveTo(x, candleTop - 2);
+  ctx.quadraticCurveTo(x + 2, candleTop - wickHeight * 0.5, x, candleTop - wickHeight);
   ctx.stroke();
 
   ctx.fillStyle = 'rgba(143, 80, 28, 0.26)';
@@ -324,6 +326,13 @@ function AdminDashboard() {
   const [loadingTaxaConversao, setLoadingTaxaConversao] = useState(true);
   const [faturamentoMensal, setFaturamentoMensal] = useState([]);
   const [loadingFaturamento, setLoadingFaturamento] = useState(true);
+  const [ticketMedio, setTicketMedio] = useState(null);
+  const [loadingTicketMedio, setLoadingTicketMedio] = useState(true);
+  const [kpiConfig, setKpiConfig] = useState({ ticketbaixo: '75', ticketalto: '200' });
+  const [kpiModalOpen, setKpiModalOpen] = useState(false);
+  const [formBaixo, setFormBaixo] = useState('');
+  const [formAlto, setFormAlto] = useState('');
+  const [savingKpiConfig, setSavingKpiConfig] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -334,6 +343,7 @@ function AdminDashboard() {
         setLoadingSearches(true);
         setLoadingTaxaConversao(true);
         setLoadingFaturamento(true);
+        setLoadingTicketMedio(true);
         setAccuracyError('');
         
         const authToken = getAuthToken();
@@ -345,7 +355,7 @@ function AdminDashboard() {
           faturamentoHeaders['Authorization'] = `Bearer ${authToken}`;
         }
 
-        const [accuracyData, searchesData, taxaData, faturamentoData] = await Promise.all([
+        const [accuracyData, searchesData, taxaData, faturamentoData, ticketMedioData, kpiConfigData] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
@@ -361,6 +371,26 @@ function AdminDashboard() {
           }).catch(err => {
             return [];
           }),
+          fetch(`${API_URL}/pedidos/admin/ticket-medio`, {
+            headers: faturamentoHeaders,
+          }).then(res => {
+            if (!res.ok) {
+              throw new Error(`Erro ao carregar ticket médio: ${res.status}`);
+            }
+            return res.json();
+          }).then(data => {
+            return data.data || null;
+          }).catch(err => {
+            return null;
+          }),
+          fetch(`${API_URL}/kpi-config`, {
+            headers: faturamentoHeaders,
+          }).then(res => {
+            if (!res.ok) return null;
+            return res.json();
+          }).then(data => {
+            return data?.data || null;
+          }).catch(() => null),
         ]);
 
         if (isMounted) {
@@ -368,6 +398,10 @@ function AdminDashboard() {
           setTopSearches(searchesData);
           setTaxaConversao(taxaData || []);
           setFaturamentoMensal(faturamentoData);
+          setTicketMedio(ticketMedioData);
+          if (kpiConfigData) {
+            setKpiConfig(kpiConfigData);
+          }
         }
       } catch (error) {
         if (isMounted) {
@@ -380,6 +414,7 @@ function AdminDashboard() {
           setLoadingSearches(false);
           setLoadingTaxaConversao(false);
           setLoadingFaturamento(false);
+          setLoadingTicketMedio(false);
         }
       }
     }
@@ -393,9 +428,54 @@ function AdminDashboard() {
 
   const accuracyValue = Math.max(0, Math.min(100, Number(accuracy?.media_acuracidade || 0)));
   const topSearch = topSearches[0];
+  const ticketMedioFormatado = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(Number(ticketMedio?.ticketMedioNumerico || 0));
+
+  const ticketBaixo = Number(kpiConfig.ticketbaixo || 75);
+  const ticketAlto = Number(kpiConfig.ticketalto || 200);
+  const ticketValor = Number(ticketMedio?.ticketMedioNumerico || 0);
+
+  let imagemTicket = '';
+  if (ticketValor < ticketBaixo) {
+    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-vazio.jpeg`;
+  } else if (ticketValor <= ticketAlto) {
+    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-medio.jpeg`;
+  } else {
+    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-cheio.jpeg`;
+  }
   
   // Pegar a taxa de conversão do mês mais recente
   const taxaMesAtual = taxaConversao.length > 0 ? taxaConversao[0] : null;
+
+  async function handleSalvarKpiConfig() {
+    setSavingKpiConfig(true);
+    try {
+      const authToken = getAuthToken();
+      const response = await fetch(`${API_URL}/kpi-config`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
+        },
+        body: JSON.stringify({ ticketbaixo: formBaixo, ticketalto: formAlto }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body?.error?.message || `Erro ao salvar (${response.status})`);
+      }
+      const result = await response.json();
+      if (result.data) {
+        setKpiConfig(result.data);
+      }
+      setKpiModalOpen(false);
+    } catch (error) {
+      alert('Erro ao salvar: ' + error.message);
+    } finally {
+      setSavingKpiConfig(false);
+    }
+  }
 
   // Determine color and image based on accuracy percentage
   const getAccuracyMetrics = (value) => {
@@ -638,9 +718,35 @@ function AdminDashboard() {
               }`}
             </strong>
           </article>
-          <article className={styles.kpiCard}>
-            <span>Ticket medio</span>
-            <strong>R$ 243,65</strong>
+          <article
+            className={styles.kpiCard}
+            style={{
+              position: 'relative',
+              background: ticketValor > 0
+                ? `linear-gradient(rgba(83, 102, 170, 0.72), rgba(83, 102, 170, 0.72)), url("${imagemTicket}") center / cover`
+                : undefined,
+            }}
+          >
+            <button
+              onClick={() => { setFormBaixo(String(kpiConfig.ticketbaixo || '')); setFormAlto(String(kpiConfig.ticketalto || '')); setKpiModalOpen(true); }}
+              style={{
+                position: 'absolute', top: 8, right: 8,
+                background: 'rgba(255,255,255,0.2)', border: 'none',
+                borderRadius: 6, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: 4, color: '#fff',
+              }}
+              title="Configurar limites do ticket médio"
+            >
+              <FiSettings size={16} />
+            </button>
+            <span>Ticket médio</span>
+            <strong>{loadingTicketMedio ? 'Carregando...' : ticketMedioFormatado}</strong>
+            {ticketMedio && (
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
+                {ticketMedio.total_vendas} vendas confirmadas
+              </small>
+            )}
           </article>
           <article className={styles.kpiCard}>
             <span>Taxa de recompra</span>
@@ -662,23 +768,23 @@ function AdminDashboard() {
 
         <section className={styles.conversionSection} aria-label="Taxa de conversão">
           <article className={styles.kpiCard}>
-            <span>Taxa de conversao</span>
+            <span>Taxa de conversão</span>
             <strong>
               {loadingTaxaConversao ? 'Carregando...' : `${taxaMesAtual?.taxa_conversao ?? 0}%`}
             </strong>
             {taxaMesAtual && (
-              <small style={{ fontSize: '11px', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
                 {taxaMesAtual.visitantes_unicos} visitantes | {taxaMesAtual.pedidos_confirmados} pedidos
               </small>
             )}
           </article>
           <article className={styles.kpiCard}>
-            <span>Visitantes unicos (mes)</span>
+            <span>Visitantes únicos (mês)</span>
             <strong>
               {loadingTaxaConversao ? 'Carregando...' : taxaMesAtual?.visitantes_unicos ?? 0}
             </strong>
             {taxaMesAtual && (
-              <small style={{ fontSize: '11px', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
                 IPs únicos que visitaram home
               </small>
             )}
@@ -848,6 +954,90 @@ function AdminDashboard() {
           </article>
         </section>
       </section>
+
+      {kpiModalOpen && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0,0,0,0.5)',
+          }}
+          onClick={() => setKpiModalOpen(false)}
+        >
+          <div
+            style={{
+              background: '#fff', borderRadius: 16, padding: 32,
+              width: 400, maxWidth: '90vw', position: 'relative',
+              boxShadow: '0 24px 48px rgba(0,0,0,0.2)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setKpiModalOpen(false)}
+              style={{
+                position: 'absolute', top: 12, right: 12,
+                background: 'transparent', border: 'none',
+                cursor: 'pointer', color: '#666', padding: 4,
+              }}
+            >
+              <FiX size={20} />
+            </button>
+            <h2 style={{ margin: '0 0 20px', fontSize: '1.2rem', color: '#333' }}>
+              Configurar limites do ticket médio
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.85rem', color: '#555' }}>
+                Ticket baixo (R$)
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formBaixo}
+                  onChange={e => setFormBaixo(e.target.value)}
+                  style={{
+                    padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd',
+                    fontSize: '1rem', outline: 'none',
+                  }}
+                />
+              </label>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.85rem', color: '#555' }}>
+                Ticket alto (R$)
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formAlto}
+                  onChange={e => setFormAlto(e.target.value)}
+                  style={{
+                    padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd',
+                    fontSize: '1rem', outline: 'none',
+                  }}
+                />
+              </label>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+                <button
+                  onClick={() => setKpiModalOpen(false)}
+                  style={{
+                    padding: '10px 20px', borderRadius: 8, border: '1px solid #ddd',
+                    background: '#fff', cursor: 'pointer', fontSize: '0.9rem',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSalvarKpiConfig}
+                  disabled={savingKpiConfig}
+                  style={{
+                    padding: '10px 20px', borderRadius: 8, border: 'none',
+                    background: savingKpiConfig ? '#999' : '#5366aa',
+                    color: '#fff', cursor: 'pointer', fontSize: '0.9rem',
+                  }}
+                >
+                  {savingKpiConfig ? 'Salvando...' : 'Salvar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
