@@ -31,6 +31,7 @@ import recompraVerdeImg from '../assets/admin/recompraverde.png';
 import ticketBaixoImg from '../assets/admin/ticketbaixo.png';
 import ticketMedioImg from '../assets/admin/ticketmedio.png';
 import ticketAltoImg from '../assets/admin/ticketalto.png';
+import palavrasPesquisadasImg from '../assets/admin/palavraspesquisadas.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import KpiConfigModal from '../components/KpiConfigModal';
@@ -912,16 +913,39 @@ function AdminDashboard() {
               </strong>
             </div>
           </article>
-          <article className={`${styles.kpiCard} ${styles.searchKpi}`}>
-            <span>Palavras mais pesquisadas</span>
-            <strong>{loadingSearches ? 'Carregando...' : topSearch?.palavra || 'Sem dados'}</strong>
-            <div className={styles.searchList}>
-              {topSearches.slice(0, 4).map((item) => (
-                <small key={item.palavra}>
-                  <span>{item.palavra}</span>
-                  <b>{item.total}</b>
-                </small>
-              ))}
+          <article
+            className={`${styles.kpiCard} ${styles.searchKpi}`}
+            style={{
+              backgroundImage: `url(${palavrasPesquisadasImg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            <div className={styles.revenueKpiContent}>
+              <span>Palavras mais pesquisadas</span>
+              <strong>{loadingSearches ? 'Carregando...' : topSearch?.palavra || 'Sem dados'}</strong>
+              <div className={styles.searchList}>
+                {topSearches.slice(0, 4).map((item) => (
+                  <small key={item.palavra}>
+                    <span>{item.palavra}</span>
+                    <b>{item.total}</b>
+                  </small>
+                ))}
+              </div>
             </div>
           </article>
         </section>
