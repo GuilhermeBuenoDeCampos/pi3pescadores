@@ -6,6 +6,7 @@ import {
   FiTrash2,
   FiSearch,
   FiCheck,
+  FiClipboard,
   FiX,
   FiAlertCircle,
   FiUsers,
@@ -15,6 +16,18 @@ import {
   FiDownload,
   FiFileText,
   FiGrid,
+  FiActivity,
+  FiBriefcase,
+  FiChevronDown,
+  FiClock,
+  FiHome,
+  FiKey,
+  FiLock,
+  FiMoreVertical,
+  FiShield,
+  FiSliders,
+  FiUserCheck,
+  FiUserX,
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -54,6 +67,7 @@ function crudApp() {
   const [deleteModal, setDeleteModal] = useState({ open: false, userId: null, userName: '' });
   const [saving, setSaving] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
+  const [openActionUserId, setOpenActionUserId] = useState(null);
   const downloadRef = useRef(null);
 
   useEffect(() => {
@@ -67,6 +81,19 @@ function crudApp() {
     }
     return () => document.removeEventListener('mousedown', handleClick);
   }, [downloadOpen]);
+
+  useEffect(() => {
+    if (!openActionUserId) return undefined;
+
+    function closeActionsOnOutsideClick(e) {
+      if (!e.target.closest('[data-user-action-menu]')) {
+        setOpenActionUserId(null);
+      }
+    }
+
+    document.addEventListener('mousedown', closeActionsOnOutsideClick);
+    return () => document.removeEventListener('mousedown', closeActionsOnOutsideClick);
+  }, [openActionUserId]);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -322,111 +349,125 @@ function crudApp() {
     else if (format === 'xlsx') exportToXLSX(filteredUsers, `${fn}.xlsx`);
   }, [filteredUsers]);
 
+  const summary = useMemo(() => ({
+    total: users.length,
+    admins: users.filter(user => user.tipo_usuario === 'admin').length,
+    active: users.filter(user => user.ativo !== false).length,
+    inactive: users.filter(user => user.ativo === false).length,
+  }), [users]);
+
+  const getInitials = useCallback((name) => String(name || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part.charAt(0).toUpperCase())
+    .join('') || 'U', []);
+
+  const formatLastAccess = useCallback((iso) => {
+    if (!iso) return 'Nunca acessou';
+    return formatDate(iso);
+  }, [formatDate]);
+
   return (
     <div className={styles.container}>
-      <div className={styles.contentWrapper}>
-        {/* Header */}
-        <header className={styles.header}>
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}>
           <img src={logo} alt="Tres Pescadores Store Logo" className={styles.logo} />
+          <div>
+            <strong>Tres Pescadores</strong>
+            <span>Admin Console</span>
+          </div>
+        </div>
+        <nav className={styles.nav} aria-label="Administração de usuários">
+          <span className={styles.navLabel}>Painel</span>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/admin')}><FiHome /> Visão geral</button>
+          <span className={styles.navLabel}>Usuários</span>
+          <button className={`${styles.navItem} ${styles.navActive}`} type="button"><FiUsers /> Todos os usuários</button>
+        </nav>
+        <div className={styles.sidebarFooter}>
+          <div className={styles.signedUser}>
+            <FiUser />
+            <div>
+              <strong>{getAuthUser()?.nome || 'Usuário'}</strong>
+              <span>Administrador</span>
+            </div>
+          </div>
+          <button className={styles.logout} type="button" onClick={() => { clearAuthSession(); navigate('/login'); }}>
+            <FiLogOut /> Sair
+          </button>
+        </div>
+      </aside>
+
+      <div className={styles.mainArea}>
+        <header className={styles.header}>
           <div className={styles.titleContainer}>
-            <h1>Tres Pescadores Store</h1>
-            <div className={styles.subtitle}>Gerenciar Usuários</div>
+            <p className={styles.breadcrumb}>Administração / Usuários</p>
+            <h1>Gerenciamento de Usuários</h1>
+            <p className={styles.subtitle}>Gerencie usuários, cargos e permissões do sistema</p>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b' }}>
-              <FiUser size={14} />
-              {getAuthUser()?.nome || 'Usuário'}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <a href="/admin" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                color: '#5366aa', background: '#f0f2f8', textDecoration: 'none', cursor: 'pointer',
-              }}>
-                <FiArrowLeft size={14} />
-                Voltar
-              </a>
-              <button
-                onClick={() => { clearAuthSession(); navigate('/login'); }}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#b91c1c', background: '#fef2f2', border: 'none', cursor: 'pointer',
-                }}
-              >
-                <FiLogOut size={14} />
-                Sair
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <div className={styles.content}>
-
-          {/* Actions Bar */}
-          <div className={styles.actionsBar}>
-            <span className={styles.actionsLabel}>⚡ Ações Rápidas:</span>
-            <button className={`${styles.btn} ${styles.btnBlue}`} onClick={openNewForm}>
-              <FiUserPlus /> Novo Usuário
+          <div className={styles.headerActions}>
+            <button className={`${styles.btn} ${styles.btnLight}`} type="button" onClick={() => navigate('/admin')}>
+              <FiArrowLeft /> Voltar
             </button>
             <div className={styles.downloadContainer} ref={downloadRef}>
-              <button
-                className={`${styles.btn} ${styles.btnDownload}`}
-                onClick={() => setDownloadOpen(o => !o)}
-              >
-                <FiDownload /> Exportar
+              <button className={`${styles.btn} ${styles.btnLight}`} type="button" onClick={() => setDownloadOpen(open => !open)}>
+                <FiDownload /> Exportar <FiChevronDown />
               </button>
               {downloadOpen && (
                 <div className={styles.dropdownMenu}>
-                  <button className={styles.dropdownItem} onClick={() => handleDownload('pdf')}>
-                    <FiFileText /> PDF
-                  </button>
-                  <button className={styles.dropdownItem} onClick={() => handleDownload('svg')}>
-                    <FiGrid /> SVG
-                  </button>
-                  <button className={styles.dropdownItem} onClick={() => handleDownload('xlsx')}>
-                    <FiFileText /> XLSX
-                  </button>
+                  <button className={styles.dropdownItem} onClick={() => handleDownload('pdf')}><FiFileText /> PDF</button>
+                  <button className={styles.dropdownItem} onClick={() => handleDownload('svg')}><FiGrid /> SVG</button>
+                  <button className={styles.dropdownItem} onClick={() => handleDownload('xlsx')}><FiFileText /> XLSX</button>
                 </div>
               )}
             </div>
+            <button className={`${styles.btn} ${styles.btnBlue}`} type="button" onClick={openNewForm}>
+              <FiUserPlus /> Novo Usuário
+            </button>
           </div>
+        </header>
 
+        <main className={styles.content}>
+          <section className={styles.summaryGrid} aria-label="Resumo de usuários">
+            <article className={styles.summaryCard}>
+              <span className={`${styles.summaryIcon} ${styles.iconIndigo}`}><FiUsers /></span>
+              <div><p>Total de Usuários</p><strong>{summary.total}</strong><small>Cadastrados</small></div>
+            </article>
+            <article className={styles.summaryCard}>
+              <span className={`${styles.summaryIcon} ${styles.iconPurple}`}><FiKey /></span>
+              <div><p>Administradores</p><strong>{summary.admins}</strong><small>Acesso privilegiado</small></div>
+            </article>
+            <article className={styles.summaryCard}>
+              <span className={`${styles.summaryIcon} ${styles.iconGreen}`}><FiUserCheck /></span>
+              <div><p>Usuários Ativos</p><strong>{summary.active}</strong><small>Com acesso liberado</small></div>
+            </article>
+            <article className={styles.summaryCard}>
+              <span className={`${styles.summaryIcon} ${styles.iconRed}`}><FiUserX /></span>
+              <div><p>Usuários Inativos</p><strong>{summary.inactive}</strong><small>Sem acesso</small></div>
+            </article>
+          </section>
 
-          {/* Form Card */}
           {showForm && (
-            <div className={styles.card}>
+            <section className={styles.detailPanel} aria-label={editingId ? 'Editar usuário' : 'Novo usuário'}>
               <div className={styles.cardHeader}>
                 <div>
-                  <h2 className={styles.cardTitle}>
-                    {editingId ? 'Editar Usuário' : 'Novo Usuário'}
-                  </h2>
+                  <h2 className={styles.cardTitle}>{editingId ? 'Editar Usuário' : 'Novo Usuário'}</h2>
                   <p className={styles.cardSubtitle}>
-                    {editingId
-                      ? 'Altere os dados do usuário selecionado'
-                      : 'Preencha os dados para cadastrar um novo usuário'}
+                    {editingId ? 'Altere os dados do usuário selecionado' : 'Preencha os dados para cadastrar um novo usuário'}
                   </p>
                 </div>
-                <button
-                  className={styles.closeBtn}
-                  onClick={() => { setShowForm(false); resetForm(); }}
-                >
-                  &times;
-                </button>
+                <button className={styles.closeBtn} type="button" onClick={() => { setShowForm(false); resetForm(); }}><FiX /></button>
               </div>
-
+              <div className={styles.detailTabs} aria-label="Seções do usuário">
+                <span className={styles.detailTabActive}><FiUser /> Dados pessoais</span>
+                <span><FiShield /> Permissões</span>
+                <span><FiActivity /> Histórico de acesso</span>
+                <span><FiClipboard /> Auditoria</span>
+              </div>
               <form className={styles.form} onSubmit={saveUser}>
                 <div className={styles.formGroup}>
-                  <label>
-                    Tipo de Usuário <span className={styles.required}>*</span>
-                  </label>
-                  <select
-                    name="tipo"
-                    className={`${styles.formControl} ${errors.tipo ? styles.error : ''}`}
-                    value={form.tipo}
-                    onChange={handleChange}
-                  >
+                  <label>Tipo de Usuário <span className={styles.required}>*</span></label>
+                  <select name="tipo" className={`${styles.formControl} ${errors.tipo ? styles.error : ''}`} value={form.tipo} onChange={handleChange}>
                     <option value="">Selecione o tipo</option>
                     <option value="Cliente">Cliente</option>
                     <option value="Funcionário">Funcionário</option>
@@ -434,284 +475,154 @@ function crudApp() {
                   </select>
                   {errors.tipo && <span className={styles.errorText}>{errors.tipo}</span>}
                 </div>
-
                 <div className={styles.formGroup}>
-                  <label>
-                    Nome Completo <span className={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="nome"
-                    className={`${styles.formControl} ${errors.nome ? styles.error : ''}`}
-                    placeholder="Digite o nome completo"
-                    value={form.nome}
-                    onChange={handleChange}
-                  />
+                  <label>Nome Completo <span className={styles.required}>*</span></label>
+                  <input type="text" name="nome" className={`${styles.formControl} ${errors.nome ? styles.error : ''}`} placeholder="Digite o nome completo" value={form.nome} onChange={handleChange} />
                   {errors.nome && <span className={styles.errorText}>{errors.nome}</span>}
                 </div>
-
                 <div className={styles.formGroup}>
-                  <label>
-                    E-mail <span className={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    className={`${styles.formControl} ${errors.email ? styles.error : ''}`}
-                    placeholder="email@exemplo.com"
-                    value={form.email}
-                    onChange={handleChange}
-                  />
+                  <label>E-mail <span className={styles.required}>*</span></label>
+                  <input type="email" name="email" className={`${styles.formControl} ${errors.email ? styles.error : ''}`} placeholder="email@exemplo.com" value={form.email} onChange={handleChange} />
                   {errors.email && <span className={styles.errorText}>{errors.email}</span>}
                 </div>
-
                 <div className={styles.formGroup}>
-                  <label>
-                    Telefone <span className={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="telefone"
-                    className={`${styles.formControl} ${errors.telefone ? styles.error : ''}`}
-                    placeholder="(00) 00000-0000"
-                    maxLength={15}
-                    value={form.telefone}
-                    onChange={handlePhoneChange}
-                  />
+                  <label>Telefone <span className={styles.required}>*</span></label>
+                  <input type="text" name="telefone" className={`${styles.formControl} ${errors.telefone ? styles.error : ''}`} placeholder="(00) 00000-0000" maxLength={15} value={form.telefone} onChange={handlePhoneChange} />
                   {errors.telefone && <span className={styles.errorText}>{errors.telefone}</span>}
                 </div>
-
                 <div className={styles.formGroup}>
-                  <label>
-                    CPF <span className={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="cpf"
-                    className={`${styles.formControl} ${errors.cpf ? styles.error : ''}`}
-                    placeholder="000.000.000-00"
-                    maxLength={14}
-                    value={form.cpf}
-                    onChange={handleCpfChange}
-                  />
+                  <label>CPF <span className={styles.required}>*</span></label>
+                  <input type="text" name="cpf" className={`${styles.formControl} ${errors.cpf ? styles.error : ''}`} placeholder="000.000.000-00" maxLength={14} value={form.cpf} onChange={handleCpfChange} />
                   {errors.cpf && <span className={styles.errorText}>{errors.cpf}</span>}
                 </div>
-
                 <div className={styles.formGroup}>
-                  <label>
-                    Senha {!editingId && <span className={styles.required}>*</span>}
-                  </label>
-                  <input
-                    type="password"
-                    name="senha"
-                    className={`${styles.formControl} ${errors.senha ? styles.error : ''}`}
-                    placeholder={editingId ? 'Deixe em branco para manter' : 'Mínimo 6 caracteres'}
-                    value={form.senha}
-                    onChange={handleChange}
-                  />
+                  <label>Senha {!editingId && <span className={styles.required}>*</span>}</label>
+                  <input type="password" name="senha" className={`${styles.formControl} ${errors.senha ? styles.error : ''}`} placeholder={editingId ? 'Deixe em branco para manter' : 'Mínimo 6 caracteres'} value={form.senha} onChange={handleChange} />
                   {errors.senha && <span className={styles.errorText}>{errors.senha}</span>}
                 </div>
-
                 <div className={styles.formGroup}>
-                  <label>
-                    Confirmar Senha {!editingId && <span className={styles.required}>*</span>}
-                  </label>
-                  <input
-                    type="password"
-                    name="confirmarSenha"
-                    className={`${styles.formControl} ${errors.confirmarSenha ? styles.error : ''}`}
-                    placeholder="Repita a senha"
-                    value={form.confirmarSenha}
-                    onChange={handleChange}
-                  />
+                  <label>Confirmar Senha {!editingId && <span className={styles.required}>*</span>}</label>
+                  <input type="password" name="confirmarSenha" className={`${styles.formControl} ${errors.confirmarSenha ? styles.error : ''}`} placeholder="Repita a senha" value={form.confirmarSenha} onChange={handleChange} />
                   {errors.confirmarSenha && <span className={styles.errorText}>{errors.confirmarSenha}</span>}
                 </div>
-
                 <div className={styles.formActions}>
                   <button type="submit" className={`${styles.btn} ${styles.btnBlue}`} disabled={saving}>
-                    {saving ? <FiLoader className="animate-spin" /> : <FiCheck />}
+                    {saving ? <FiLoader className={styles.spinner} /> : <FiCheck />}
                     {saving ? 'Salvando...' : editingId ? 'Atualizar' : 'Salvar'}
                   </button>
-                  <button
-                    type="button"
-                    className={`${styles.btn} ${styles.btnLight}`}
-                    onClick={() => { setShowForm(false); resetForm(); }}
-                  >
-                    <FiX /> Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    className={`${styles.btn} ${styles.btnLight}`}
-                    onClick={resetForm}
-                  >
-                    Limpar
-                  </button>
+                  <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={() => { setShowForm(false); resetForm(); }}><FiX /> Cancelar</button>
+                  <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={resetForm}>Limpar</button>
                 </div>
               </form>
-            </div>
+            </section>
           )}
 
-          {/* Search Bar */}
-          <div className={styles.searchBar}>
-            <div>
-              <h3>Usuários Cadastrados</h3>
-              <p className={styles.hint}>Visualize e gerencie todos os usuários do sistema</p>
+          <section className={styles.usersPanel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <h2>Todos os Usuários</h2>
+                <p>Visualize e gerencie acessos cadastrados no sistema</p>
+              </div>
+              <span className={styles.results}>{filteredUsers.length} usuário{filteredUsers.length !== 1 && 's'}</span>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                type="text"
-                placeholder="Buscar por nome, email, CPF..."
-                className={styles.searchInput}
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-              />
-              <select
-                className={styles.searchInput}
-                value={typeFilter}
-                onChange={e => setTypeFilter(e.target.value)}
-                style={{ width: 160 }}
-              >
-                <option value="">Todos os tipos</option>
-                <option value="admin">Admin</option>
-                <option value="funcionario">Funcionário</option>
-                <option value="cliente">Cliente</option>
-              </select>
+            <div className={styles.toolbar}>
+              <label className={styles.searchField}>
+                <FiSearch />
+                <input type="text" placeholder="Buscar usuário por nome, e-mail ou CPF..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+              </label>
+              <label className={styles.selectField}>
+                <FiBriefcase />
+                <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+                  <option value="">Cargo</option>
+                  <option value="admin">Administrador</option>
+                  <option value="funcionario">Funcionário</option>
+                  <option value="cliente">Cliente</option>
+                </select>
+              </label>
+              <label className={`${styles.selectField} ${styles.unavailable}`} title="Filtro preparado para expansão futura">
+                <FiSliders />
+                <select disabled><option>Status</option></select>
+              </label>
+              <label className={`${styles.selectField} ${styles.unavailable}`} title="Ordenação preparada para expansão futura">
+                <FiChevronDown />
+                <select disabled><option>Ordenar</option></select>
+              </label>
             </div>
-          </div>
 
-          {/* Table */}
-          <div className={styles.tableWrap}>
             <div className={styles.tableScroll}>
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Tipo</th>
-                    <th>Nome</th>
-                    <th className={styles.hideTablet}>E-mail</th>
-                    <th className={styles.hideMobile}>Telefone</th>
-                    <th className={styles.hideDesktop}>CPF</th>
-                    <th className={styles.hideDesktop}>Cadastro</th>
-                    <th style={{ textAlign: 'center', width: 100 }}>Ações</th>
+                    <th>Usuário</th>
+                    <th>Cargo</th>
+                    <th>Status</th>
+                    <th>Telefone / CPF</th>
+                    <th>Último acesso</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr>
-                      <td colSpan={7}>
-                        <div className={styles.tableEmpty}>
-                          <FiLoader />
-                          <p>Carregando...</p>
-                        </div>
-                      </td>
-                    </tr>
+                    <tr><td colSpan={6}><div className={styles.tableEmpty}><FiLoader className={styles.spinner} /><p>Carregando...</p></div></td></tr>
                   ) : filteredUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={7}>
+                      <td colSpan={6}>
                         <div className={styles.tableEmpty}>
                           <FiUsers />
-                          <p>
-                            {users.length === 0
-                              ? 'Nenhum usuário cadastrado ainda.'
-                              : 'Nenhum resultado encontrado.'}
-                          </p>
-                          <small>
-                            {users.length === 0
-                              ? 'Clique em "Novo Usuário" para começar.'
-                              : 'Tente ajustar o termo de busca.'}
-                          </small>
+                          <p>{users.length === 0 ? 'Nenhum usuário cadastrado ainda.' : 'Nenhum resultado encontrado.'}</p>
+                          <small>{users.length === 0 ? 'Clique em "Novo Usuário" para começar.' : 'Tente ajustar o termo de busca.'}</small>
                         </div>
                       </td>
                     </tr>
-                  ) : (
-                      filteredUsers.map((u) => {
-                      const displayTipo = tipoDisplay(u.tipo_usuario);
-                      return (
-                      <tr key={u.id} style={u.ativo === false ? { opacity: 0.55 } : undefined}>
-                        <td>
-                          <span
-                            className={styles.badge}
-                            style={{
-                              background:
-                                u.tipo_usuario === 'admin'
-                                  ? '#eef2ff'
-                                  : u.tipo_usuario === 'funcionario'
-                                  ? '#f0fdf4'
-                                  : '#fefce8',
-                              color:
-                                u.tipo_usuario === 'admin'
-                                  ? '#4338ca'
-                                  : u.tipo_usuario === 'funcionario'
-                                  ? '#15803d'
-                                  : '#a16207',
-                            }}
-                          >
-                            {displayTipo}
-                          </span>
-                        </td>
-                        <td style={{ fontWeight: 500, color: '#1e293b' }}>
-                          {u.nome}
-                          {u.ativo === false && (
-                            <span className={styles.badge} style={{ marginLeft: 8, background: '#f1f5f9', color: '#64748b', fontSize: '0.72rem' }}>
-                              Inativo
-                            </span>
+                  ) : filteredUsers.map((u) => (
+                    <tr key={u.id} className={u.ativo === false ? styles.inactiveRow : undefined}>
+                      <td data-label="Usuário">
+                        <div className={styles.userIdentity}>
+                          <span className={styles.avatar}>{getInitials(u.nome)}</span>
+                          <div><strong>{u.nome}</strong><span>{u.email}</span></div>
+                        </div>
+                      </td>
+                      <td data-label="Cargo">
+                        <span className={`${styles.roleBadge} ${styles[`role_${u.tipo_usuario}`]}`}>{tipoDisplay(u.tipo_usuario)}</span>
+                      </td>
+                      <td data-label="Status">
+                        <span className={`${styles.statusBadge} ${u.ativo === false ? styles.statusInactive : styles.statusActive}`}>
+                          <i /> {u.ativo === false ? 'Inativo' : 'Ativo'}
+                        </span>
+                      </td>
+                      <td data-label="Telefone / CPF">
+                        <div className={styles.contact}><span>{u.telefone || '—'}</span><small>{u.cpf || '—'}</small></div>
+                      </td>
+                      <td data-label="Último acesso">
+                        <div className={styles.access}><FiClock /> <span>{formatLastAccess(u.ultimo_login_em)}<small>Cadastro: {formatDate(u.created_at)}</small></span></div>
+                      </td>
+                      <td data-label="Ações">
+                        <div className={styles.actionMenu} data-user-action-menu>
+                          <button className={styles.moreButton} type="button" aria-label={`Ações para ${u.nome}`} onClick={() => setOpenActionUserId(current => current === u.id ? null : u.id)}>
+                            <FiMoreVertical />
+                          </button>
+                          {openActionUserId === u.id && (
+                            <div className={styles.actionDropdown}>
+                              <button type="button" disabled={u.ativo === false} onClick={() => { editUser(u.id); setOpenActionUserId(null); }}><FiEdit2 /> Editar usuário</button>
+                              <button type="button" disabled={u.ativo === false} onClick={() => { editUser(u.id); setOpenActionUserId(null); }}><FiLock /> Alterar senha</button>
+                              <button type="button" disabled={u.ativo === false} onClick={() => { editUser(u.id); setOpenActionUserId(null); }}><FiBriefcase /> Alterar cargo</button>
+                              <hr />
+                              <button type="button" className={styles.dangerAction} disabled={u.ativo === false} onClick={() => { askDelete(u); setOpenActionUserId(null); }}><FiTrash2 /> Desativar</button>
+                            </div>
                           )}
-                        </td>
-                        <td className={styles.hideTablet} style={{ color: '#475569' }}>
-                          {u.email}
-                        </td>
-                        <td className={styles.hideMobile} style={{ color: '#475569' }}>
-                          {u.telefone || '—'}
-                        </td>
-                        <td
-                          className={styles.hideDesktop}
-                          style={{ fontFamily: 'monospace', fontSize: 13, color: '#64748b' }}
-                        >
-                          {u.cpf}
-                        </td>
-                        <td className={styles.hideDesktop} style={{ fontSize: 13, color: '#64748b' }}>
-                          {formatDate(u.created_at)}
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
-                            <button
-                              className={`${styles.actionBtn} ${styles.actionBtnEdit}`}
-                              title={u.ativo === false ? 'Usuário inativo' : 'Editar'}
-                              disabled={u.ativo === false}
-                              onClick={() => editUser(u.id)}
-                              style={u.ativo === false ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
-                            >
-                              <FiEdit2 />
-                            </button>
-                            <button
-                              className={`${styles.actionBtn} ${styles.actionBtnDelete}`}
-                              title={u.ativo === false ? 'Usuário inativo' : 'Desativar'}
-                              disabled={u.ativo === false}
-                              onClick={() => askDelete(u)}
-                              style={u.ativo === false ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
-                            >
-                              <FiTrash2 />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                      );
-                    })
-                  )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-            <div className={styles.tableFooter}>
-              <span>
-                Total: {filteredUsers.length} usuário{filteredUsers.length !== 1 && 's'}
-              </span>
-              {searchQuery && filteredUsers.length !== users.length && (
-                <span style={{ color: '#94a3b8' }}>
-                  (filtrado de {users.length})
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
+            <footer className={styles.tableFooter}>
+              <span>Total: {filteredUsers.length} usuário{filteredUsers.length !== 1 && 's'}</span>
+              {(searchQuery || typeFilter) && filteredUsers.length !== users.length && <span>Filtrado de {users.length} usuários</span>}
+            </footer>
+          </section>
+        </main>
       </div>
 
       {/* Delete Modal */}

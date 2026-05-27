@@ -242,50 +242,6 @@ function Home() {
           </div>
         </section>
 
-        <section className={styles.bannerSection}>
-          <div className={styles.bannerGrid}>
-            <div className={styles.bannerMain}>
-              <span>✦ Seleção especial</span>
-              <h2>
-                Itens para o altar, a oração e o presente com significado
-              </h2>
-              <a href="#catalog">Ver produtos →</a>
-            </div>
-            <div className={styles.bannerStack}>
-              <article className={styles.bannerMini}>
-                <h3>Imagens e oratórios</h3>
-                <p>Peças para compor espaços de devoção com beleza e reverência.</p>
-                <a href="#catalog">Explorar →</a>
-              </article>
-              <article className={`${styles.bannerMini} ${styles.bannerMiniWarm}`}>
-                <h3>Bíblias e terços</h3>
-                <p>Clássicos da fé católica para estudo, oração diária e presentes.</p>
-                <a href="#catalog">Conhecer →</a>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.testimonialsSection}>
-          <span className={styles.sectionLabel}>Compromissos da loja</span>
-          <h2>Atendimento com respeito à sua devoção</h2>
-          <div className={styles.testimonialsGrid}>
-            <article className={styles.testimonialCard}>
-              <p>Curadoria focada em artigos religiosos católicos para diferentes momentos de fé.</p>
-              <span>Tres Pescadores Store</span>
-            </article>
-            <article className={styles.testimonialCard}>
-              <p>Produtos apresentados com imagens, categorias e preços reais do catálogo.</p>
-              <span>Catálogo atualizado</span>
-            </article>
-            <article className={styles.testimonialCard}>
-              <p>Navegação com busca, filtros por categoria e ordenação por preço preservados.</p>
-              <span>Experiência de compra</span>
-            </article>
-          </div>
-        </section>
-
-        
       </main>
 
       <Footer />
