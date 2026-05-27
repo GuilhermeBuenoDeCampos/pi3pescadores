@@ -14,7 +14,7 @@ export const obterKpiConfig = async () => {
   }
 };
 
-export const atualizarKpiConfig = async (faturamento_baixo, faturamento_alto) => {
+export const atualizarKpiConfig = async (config) => {
   try {
     const authToken = getAuthToken();
     const response = await fetch(`${API_URL}/kpi-config`, {
@@ -24,8 +24,10 @@ export const atualizarKpiConfig = async (faturamento_baixo, faturamento_alto) =>
         Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify({
-        faturamento_baixo: parseFloat(faturamento_baixo),
-        faturamento_alto: parseFloat(faturamento_alto),
+        faturamento_baixo: parseFloat(config.faturamento_baixo),
+        faturamento_alto: parseFloat(config.faturamento_alto),
+        recomprabaixa: parseFloat(config.recomprabaixa),
+        recompraalta: parseFloat(config.recompraalta),
       }),
     });
 

@@ -37,6 +37,8 @@ exports.teste = asyncHandler(async (req, res) => {
       id: testId,
       faturamento_baixo: 100,
       faturamento_alto: 1000,
+      recomprabaixa: 20,
+      recompraalta: 50,
     });
     
     console.log('[teste] CREATE bem-sucedido:', newConfig.toJSON());
@@ -72,6 +74,8 @@ exports.obterConfig = asyncHandler(async (req, res) => {
         id: uuidv4(),
         faturamento_baixo: 500,
         faturamento_alto: 5000,
+        recomprabaixa: 20,
+        recompraalta: 50,
       });
     }
 
@@ -80,6 +84,8 @@ exports.obterConfig = asyncHandler(async (req, res) => {
         id: config.id,
         faturamento_baixo: parseFloat(config.faturamento_baixo),
         faturamento_alto: parseFloat(config.faturamento_alto),
+        recomprabaixa: parseFloat(config.recomprabaixa ?? 20),
+        recompraalta: parseFloat(config.recompraalta ?? 50),
       },
     });
   } catch (error) {
@@ -90,6 +96,8 @@ exports.obterConfig = asyncHandler(async (req, res) => {
         id: null,
         faturamento_baixo: 500,
         faturamento_alto: 5000,
+        recomprabaixa: 20,
+        recompraalta: 50,
       },
     });
   }
@@ -98,9 +106,14 @@ exports.obterConfig = asyncHandler(async (req, res) => {
 exports.atualizarConfig = asyncHandler(async (req, res) => {
   const db = require('../database/models');
   const { v4: uuidv4 } = require('uuid');
-  const { faturamento_baixo, faturamento_alto } = req.body;
+  const { faturamento_baixo, faturamento_alto, recomprabaixa, recompraalta } = req.body;
 
-  console.log('[kpiConfigController] atualizarConfig - dados recebidos:', { faturamento_baixo, faturamento_alto });
+  console.log('[kpiConfigController] atualizarConfig - dados recebidos:', {
+    faturamento_baixo,
+    faturamento_alto,
+    recomprabaixa,
+    recompraalta,
+  });
   console.log('[kpiConfigController] req.user:', req.user);
 
   // Validações
@@ -116,6 +129,18 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
     throw new AppError('faturamento_baixo deve ser menor que faturamento_alto', 400);
   }
 
+  if (typeof recomprabaixa !== 'number' || recomprabaixa < 0) {
+    throw new AppError('recomprabaixa deve ser um nÃºmero positivo', 400);
+  }
+
+  if (typeof recompraalta !== 'number' || recompraalta < 0) {
+    throw new AppError('recompraalta deve ser um nÃºmero positivo', 400);
+  }
+
+  if (recomprabaixa >= recompraalta) {
+    throw new AppError('recomprabaixa deve ser menor que recompraalta', 400);
+  }
+
   console.log('[kpiConfigController] Buscando config existente...');
   let config = await db.KpiConfig.findOne();
   console.log('[kpiConfigController] Config encontrada:', !!config);
@@ -126,6 +151,8 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
       id: uuidv4(),
       faturamento_baixo,
       faturamento_alto,
+      recomprabaixa,
+      recompraalta,
     });
     console.log('[kpiConfigController] Nova config criada:', config.id);
   } else {
@@ -134,6 +161,8 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
       config = await config.update({
         faturamento_baixo,
         faturamento_alto,
+        recomprabaixa,
+        recompraalta,
       });
       console.log('[kpiConfigController] Update bem-sucedido');
     } catch (updateError) {
@@ -148,6 +177,8 @@ exports.atualizarConfig = asyncHandler(async (req, res) => {
       id: config.id,
       faturamento_baixo: parseFloat(config.faturamento_baixo),
       faturamento_alto: parseFloat(config.faturamento_alto),
+      recomprabaixa: parseFloat(config.recomprabaixa),
+      recompraalta: parseFloat(config.recompraalta),
     },
   });
 });

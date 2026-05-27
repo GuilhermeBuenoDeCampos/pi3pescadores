@@ -25,6 +25,9 @@ import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
 import faturamentoMedioImg from '../assets/admin/faturamentomedio.jpg';
 import faturamentoAltoImg from '../assets/admin/faturamentoalto.png';
+import recompraVermelhoImg from '../assets/admin/recompravermelho.png';
+import recompraAmareloImg from '../assets/admin/recompraamarelo.png';
+import recompraVerdeImg from '../assets/admin/recompraverde.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import KpiConfigModal from '../components/KpiConfigModal';
@@ -333,6 +336,7 @@ function AdminDashboard() {
   const [loadingTaxaRecompra, setLoadingTaxaRecompra] = useState(true);
   const [kpiConfig, setKpiConfig] = useState(null);
   const [showKpiModal, setShowKpiModal] = useState(false);
+  const [showRecompraModal, setShowRecompraModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -453,6 +457,24 @@ function AdminDashboard() {
       return faturamentoAltoImg;
     } else {
       return faturamentoMedioImg;
+    }
+  };
+
+  const getRecompraBackgroundImage = () => {
+    if (!kpiConfig || !taxaRecompra) {
+      return recompraAmareloImg;
+    }
+
+    const currentRate = Number(taxaRecompra?.taxa || 0);
+    const baixo = Number(kpiConfig.recomprabaixa ?? 20);
+    const alto = Number(kpiConfig.recompraalta ?? 50);
+
+    if (currentRate < baixo) {
+      return recompraVermelhoImg;
+    } else if (currentRate > alto) {
+      return recompraVerdeImg;
+    } else {
+      return recompraAmareloImg;
     }
   };
 
@@ -733,13 +755,67 @@ function AdminDashboard() {
             <span>Ticket medio</span>
             <strong>R$ 243,65</strong>
           </article>
-          <article className={styles.kpiCard}>
-            <span>Taxa de recompra</span>
-            <strong>
-              {loadingTaxaRecompra
-                ? 'Carregando...'
-                : `${Number(taxaRecompra?.taxa || 0).toFixed(2).replace('.', ',')}%`}
-            </strong>
+          <article
+            className={styles.kpiCard}
+            style={{
+              backgroundImage: `url(${getRecompraBackgroundImage()})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            <button
+              onClick={() => setShowRecompraModal(true)}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="Configurar recompra"
+            >
+              <FiSettings size={18} color="#10182c" />
+            </button>
+
+            <div className={styles.revenueKpiContent}>
+              <span>Taxa de recompra</span>
+              <strong>
+                {loadingTaxaRecompra
+                  ? 'Carregando...'
+                  : `${Number(taxaRecompra?.taxa || 0).toFixed(2).replace('.', ',')}%`}
+              </strong>
+            </div>
           </article>
           <article className={`${styles.kpiCard} ${styles.searchKpi}`}>
             <span>Palavras mais pesquisadas</span>
@@ -948,6 +1024,13 @@ function AdminDashboard() {
         isOpen={showKpiModal}
         onClose={() => setShowKpiModal(false)}
         config={kpiConfig}
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showRecompraModal}
+        onClose={() => setShowRecompraModal(false)}
+        config={kpiConfig}
+        type="recompra"
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
     </main>
