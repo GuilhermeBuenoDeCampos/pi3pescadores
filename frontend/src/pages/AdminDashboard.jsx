@@ -32,6 +32,9 @@ import ticketBaixoImg from '../assets/admin/ticketbaixo.png';
 import ticketMedioImg from '../assets/admin/ticketmedio.png';
 import ticketAltoImg from '../assets/admin/ticketalto.png';
 import palavrasPesquisadasImg from '../assets/admin/palavraspesquisadas.png';
+import visitanteBaixoImg from '../assets/admin/visitantebaixo.png';
+import visitanteMedioImg from '../assets/admin/visitantemedio.png';
+import visitanteAltoImg from '../assets/admin/visitantealto.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import KpiConfigModal from '../components/KpiConfigModal';
@@ -346,6 +349,7 @@ function AdminDashboard() {
   const [showKpiModal, setShowKpiModal] = useState(false);
   const [showRecompraModal, setShowRecompraModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
+  const [showVisitanteModal, setShowVisitanteModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -454,6 +458,15 @@ function AdminDashboard() {
   
   // Pegar a taxa de conversão do mês mais recente
   const taxaMesAtual = taxaConversao.length > 0 ? taxaConversao[0] : null;
+  const visitantesValor = Number(taxaMesAtual?.visitantes_unicos || 0);
+  const visitanteBaixo = Number(kpiConfig?.visitantebaixo || 100);
+  const visitanteAlto = Number(kpiConfig?.visitantealto || 500);
+  let imagemVisitante = visitanteMedioImg;
+  if (visitantesValor < visitanteBaixo) {
+    imagemVisitante = visitanteBaixoImg;
+  } else if (visitantesValor > visitanteAlto) {
+    imagemVisitante = visitanteAltoImg;
+  }
 
   // Determine color and image based on accuracy percentage
   const getAccuracyMetrics = (value) => {
@@ -962,16 +975,70 @@ function AdminDashboard() {
               </small>
             )}
           </article>
-          <article className={styles.kpiCard}>
-            <span>Visitantes únicos (mês)</span>
-            <strong>
-              {loadingTaxaConversao ? 'Carregando...' : taxaMesAtual?.visitantes_unicos ?? 0}
-            </strong>
-            {taxaMesAtual && (
-              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
-                IPs únicos que visitaram home
-              </small>
-            )}
+          <article
+            className={styles.kpiCard}
+            style={{
+              backgroundImage: `url(${imagemVisitante})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            <button
+              onClick={() => setShowVisitanteModal(true)}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="Configurar visitantes"
+            >
+              <FiSettings size={18} color="#10182c" />
+            </button>
+
+            <div className={styles.revenueKpiContent}>
+              <span>Visitantes unicos (mes)</span>
+              <strong>
+                {loadingTaxaConversao ? 'Carregando...' : taxaMesAtual?.visitantes_unicos ?? 0}
+              </strong>
+              {taxaMesAtual && (
+                <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
+                  IPs unicos que visitaram home
+                </small>
+              )}
+            </div>
           </article>
           <article className={styles.chartBlock}>
             <h2>Taxa de conversão por mês</h2>
@@ -1157,6 +1224,13 @@ function AdminDashboard() {
         onClose={() => setShowTicketModal(false)}
         config={kpiConfig}
         type="ticket"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showVisitanteModal}
+        onClose={() => setShowVisitanteModal(false)}
+        config={kpiConfig}
+        type="visitante"
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
     </main>

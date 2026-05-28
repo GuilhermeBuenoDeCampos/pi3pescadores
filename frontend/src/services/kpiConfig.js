@@ -30,6 +30,8 @@ export const atualizarKpiConfig = async (config) => {
         ticketalto: parseFloat(config.ticketalto),
         recomprabaixa: parseFloat(config.recomprabaixa),
         recompraalta: parseFloat(config.recompraalta),
+        visitantebaixo: parseFloat(config.visitantebaixo),
+        visitantealto: parseFloat(config.visitantealto),
       }),
     });
 

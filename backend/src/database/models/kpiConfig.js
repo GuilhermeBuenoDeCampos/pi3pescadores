@@ -39,6 +39,16 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 50,
       },
+      visitantebaixo: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 100,
+      },
+      visitantealto: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 500,
+      },
     },
     {
       tableName: 'kpi_config',

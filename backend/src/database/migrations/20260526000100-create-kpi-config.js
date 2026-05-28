@@ -77,6 +77,16 @@ module.exports = {
           allowNull: false,
           defaultValue: 50,
         },
+        visitantebaixo: {
+          type: Sequelize.DECIMAL(10, 2),
+          allowNull: false,
+          defaultValue: 100,
+        },
+        visitantealto: {
+          type: Sequelize.DECIMAL(10, 2),
+          allowNull: false,
+          defaultValue: 500,
+        },
         created_at: {
           allowNull: false,
           type: Sequelize.DATE,
@@ -111,6 +121,16 @@ module.exports = {
       allowNull: false,
       defaultValue: 50,
     });
+    await addColumnIfMissing(queryInterface, Sequelize, 'kpi_config', 'visitantebaixo', {
+      type: Sequelize.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 100,
+    });
+    await addColumnIfMissing(queryInterface, Sequelize, 'kpi_config', 'visitantealto', {
+      type: Sequelize.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 500,
+    });
   },
 
   async down(queryInterface) {
@@ -118,5 +138,7 @@ module.exports = {
     await queryInterface.removeColumn('kpi_config', 'ticketalto');
     await queryInterface.removeColumn('kpi_config', 'recomprabaixa');
     await queryInterface.removeColumn('kpi_config', 'recompraalta');
+    await queryInterface.removeColumn('kpi_config', 'visitantebaixo');
+    await queryInterface.removeColumn('kpi_config', 'visitantealto');
   },
 };

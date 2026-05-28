@@ -10,10 +10,13 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
   const [recompraAlta, setRecompraAlta] = useState(config?.recompraalta || 50);
   const [ticketBaixo, setTicketBaixo] = useState(config?.ticketbaixo || 75);
   const [ticketAlto, setTicketAlto] = useState(config?.ticketalto || 200);
+  const [visitanteBaixo, setVisitanteBaixo] = useState(config?.visitantebaixo || 100);
+  const [visitanteAlto, setVisitanteAlto] = useState(config?.visitantealto || 500);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const isRecompra = type === 'recompra';
   const isTicket = type === 'ticket';
+  const isVisitante = type === 'visitante';
 
   useEffect(() => {
     if (isOpen) {
@@ -23,6 +26,8 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       setRecompraAlta(config?.recompraalta || 50);
       setTicketBaixo(config?.ticketbaixo || 75);
       setTicketAlto(config?.ticketalto || 200);
+      setVisitanteBaixo(config?.visitantebaixo || 100);
+      setVisitanteAlto(config?.visitantealto || 500);
       setError('');
     }
   }, [config, isOpen]);
@@ -40,7 +45,12 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
-    if (!isRecompra && !isTicket && (!faturamentoBaixo || !faturamentoAlto)) {
+    if (isVisitante && (!visitanteBaixo || !visitanteAlto)) {
+      setError('Todos os campos sao obrigatorios');
+      return;
+    }
+
+    if (!isRecompra && !isTicket && !isVisitante && (!faturamentoBaixo || !faturamentoAlto)) {
       setError('Todos os campos sao obrigatorios');
       return;
     }
@@ -55,7 +65,12 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
-    if (!isRecompra && !isTicket && parseFloat(faturamentoBaixo) >= parseFloat(faturamentoAlto)) {
+    if (isVisitante && parseFloat(visitanteBaixo) >= parseFloat(visitanteAlto)) {
+      setError('Visitante baixo deve ser menor que visitante alto');
+      return;
+    }
+
+    if (!isRecompra && !isTicket && !isVisitante && parseFloat(faturamentoBaixo) >= parseFloat(faturamentoAlto)) {
       setError('Faturamento baixo deve ser menor que faturamento alto');
       return;
     }
@@ -69,6 +84,8 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
         ticketalto: ticketAlto,
         recomprabaixa: recompraBaixa,
         recompraalta: recompraAlta,
+        visitantebaixo: visitanteBaixo,
+        visitantealto: visitanteAlto,
       });
       onConfigUpdated(updated);
       onClose();
@@ -85,7 +102,7 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>{isRecompra ? 'Configurar Recompra' : isTicket ? 'Configurar Ticket Medio' : 'Configurar Faturamento'}</h2>
+          <h2>{isRecompra ? 'Configurar Recompra' : isTicket ? 'Configurar Ticket Medio' : isVisitante ? 'Configurar Visitantes' : 'Configurar Faturamento'}</h2>
           <button className={styles.closeBtn} onClick={onClose}>
             <FiX size={20} />
           </button>
@@ -168,6 +185,44 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
                 Entre R$ {parseFloat(ticketBaixo || 0).toFixed(2)} e R$ {parseFloat(ticketAlto || 0).toFixed(2)}: Ticket Medio
                 <br />
                 Acima de R$ {parseFloat(ticketAlto || 0).toFixed(2)}: Ticket Alto
+              </p>
+            </>
+          ) : isVisitante ? (
+            <>
+              <div className={styles.fieldGroup}>
+                <label htmlFor="visitante-baixo">Visitante Baixo</label>
+                <input
+                  id="visitante-baixo"
+                  type="number"
+                  step="1"
+                  value={visitanteBaixo}
+                  onChange={(e) => setVisitanteBaixo(e.target.value)}
+                  placeholder="0"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label htmlFor="visitante-alto">Visitante Alto</label>
+                <input
+                  id="visitante-alto"
+                  type="number"
+                  step="1"
+                  value={visitanteAlto}
+                  onChange={(e) => setVisitanteAlto(e.target.value)}
+                  placeholder="0"
+                  disabled={loading}
+                />
+              </div>
+
+              <p className={styles.info}>
+                O card exibira imagens diferentes baseado nesta configuracao:
+                <br />
+                Abaixo de {parseFloat(visitanteBaixo || 0).toFixed(0)} visitantes: Visitante Baixo
+                <br />
+                Entre {parseFloat(visitanteBaixo || 0).toFixed(0)} e {parseFloat(visitanteAlto || 0).toFixed(0)} visitantes: Visitante Medio
+                <br />
+                Acima de {parseFloat(visitanteAlto || 0).toFixed(0)} visitantes: Visitante Alto
               </p>
             </>
           ) : (

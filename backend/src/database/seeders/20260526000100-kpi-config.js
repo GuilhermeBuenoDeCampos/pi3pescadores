@@ -13,6 +13,8 @@ module.exports = {
           ticketalto: 200,
           recomprabaixa: 20,
           recompraalta: 50,
+          visitantebaixo: 100,
+          visitantealto: 500,
           created_at: new Date(),
           update_at: new Date(),
         },
