@@ -91,7 +91,7 @@
 
 .kpiCard[style*="backgroundImage"]:hover,
 .kpiCard[style*="background-image"]:hover {
-  box-shadow: 0 24px 44px rgba(16, 24, 44, 0.24);
+  box-shadow: 0 32px 62px rgba(16, 24, 44, 0.34);
   filter: saturate(1.05);
   transform: translateY(-4px);
 }
@@ -165,7 +165,7 @@
 }
 
 .accuracyCard {
-  width: 240px;
+  width: 100%;
   min-height: 240px;
   background:
     linear-gradient(rgba(30, 24, 16, 0.38), rgba(30, 24, 16, 0.48)),
@@ -178,6 +178,10 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.conversionSection .accuracyCard {
+  min-height: 112px;
 }
 
 .chartBlock h2 {

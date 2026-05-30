@@ -1107,6 +1107,40 @@ function AdminDashboard() {
               )}
             </div>
           </article>
+          <article className={styles.accuracyCard}>
+            <div className={styles.accuracyHeader}>
+              <div className={styles.headerContent}>
+                <div>
+                  <h2>Acuracidade</h2>
+                  <span>{accuracy?.total_auditorias || 0} produtos auditados</span>
+                </div>
+                <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.headerNsaImage} />
+              </div>
+              {loadingAccuracy && <FiRefreshCw className={styles.loadingIcon} />}
+            </div>
+            <div className={styles.accuracyChart}>
+              <Doughnut
+                data={accuracyData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: (context) => `${context.label}: ${Number(context.raw).toFixed(2)}%`,
+                      },
+                    },
+                  },
+                }}
+              />
+              <div className={styles.accuracyValue}>
+                <strong>{loadingAccuracy ? '--' : `${accuracyValue.toFixed(2)}%`}</strong>
+                <span>Acuracidade media</span>
+              </div>
+            </div>
+            {accuracyError && <p className={styles.errorText}>{accuracyError}</p>}
+          </article>
         </section>
 
         <section className={styles.dashboardGrid}>
@@ -1209,40 +1243,6 @@ function AdminDashboard() {
             </div>
           </article>
 
-          <article className={styles.accuracyCard}>
-            <div className={styles.accuracyHeader}>
-              <div className={styles.headerContent}>
-                <div>
-                  <h2>Acuracidade</h2>
-                  <span>{accuracy?.total_auditorias || 0} produtos auditados</span>
-                </div>
-                <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.headerNsaImage} />
-              </div>
-              {loadingAccuracy && <FiRefreshCw className={styles.loadingIcon} />}
-            </div>
-            <div className={styles.accuracyChart}>
-              <Doughnut
-                data={accuracyData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                      callbacks: {
-                        label: (context) => `${context.label}: ${Number(context.raw).toFixed(2)}%`,
-                      },
-                    },
-                  },
-                }}
-              />
-              <div className={styles.accuracyValue}>
-                <strong>{loadingAccuracy ? '--' : `${accuracyValue.toFixed(2)}%`}</strong>
-                <span>Acuracidade media</span>
-              </div>
-            </div>
-            {accuracyError && <p className={styles.errorText}>{accuracyError}</p>}
-          </article>
         </section>
       </section>
 
