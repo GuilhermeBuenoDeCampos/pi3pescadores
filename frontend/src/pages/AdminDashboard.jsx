@@ -19,7 +19,7 @@ import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
+import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL } from '../services/api';
 import clockTowerBar from '../assets/admin/clock-tower-bar.png';
 import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
@@ -28,6 +28,16 @@ import faturamentoAltoImg from '../assets/admin/faturamentoalto.png';
 import recompraVermelhoImg from '../assets/admin/recompravermelho.png';
 import recompraAmareloImg from '../assets/admin/recompraamarelo.png';
 import recompraVerdeImg from '../assets/admin/recompraverde.png';
+import ticketBaixoImg from '../assets/admin/ticketbaixo.png';
+import ticketMedioImg from '../assets/admin/ticketmedio.png';
+import ticketAltoImg from '../assets/admin/ticketalto.png';
+import palavrasPesquisadasImg from '../assets/admin/palavraspesquisadas.png';
+import visitanteBaixoImg from '../assets/admin/visitantebaixo.png';
+import visitanteMedioImg from '../assets/admin/visitantemedio.png';
+import visitanteAltoImg from '../assets/admin/visitantealto.png';
+import conversaoBaixaImg from '../assets/admin/SBruim.png';
+import conversaoMediaImg from '../assets/admin/SBnormal.png';
+import conversaoAltaImg from '../assets/admin/SBbom.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import KpiConfigModal from '../components/KpiConfigModal';
@@ -342,6 +352,8 @@ function AdminDashboard() {
   const [showKpiModal, setShowKpiModal] = useState(false);
   const [showRecompraModal, setShowRecompraModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
+  const [showVisitanteModal, setShowVisitanteModal] = useState(false);
+  const [showConversaoModal, setShowConversaoModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -441,17 +453,33 @@ function AdminDashboard() {
   const ticketAlto = Number(kpiConfig?.ticketalto || 200);
   const ticketValor = Number(ticketMedio?.ticketMedioNumerico || 0);
 
-  let imagemTicket = '';
+  let imagemTicket = ticketMedioImg;
   if (ticketValor < ticketBaixo) {
-    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-vazio.jpeg`;
-  } else if (ticketValor <= ticketAlto) {
-    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-medio.jpeg`;
-  } else {
-    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-cheio.jpeg`;
+    imagemTicket = ticketBaixoImg;
+  } else if (ticketValor > ticketAlto) {
+    imagemTicket = ticketAltoImg;
   }
   
   // Pegar a taxa de conversão do mês mais recente
   const taxaMesAtual = taxaConversao.length > 0 ? taxaConversao[0] : null;
+  const conversaoValor = Number(taxaMesAtual?.taxa_conversao || 0);
+  const conversaoBaixa = Number(kpiConfig?.conversaobaixa || 2);
+  const conversaoAlta = Number(kpiConfig?.conversaoalta || 8);
+  let imagemConversao = conversaoMediaImg;
+  if (conversaoValor < conversaoBaixa) {
+    imagemConversao = conversaoBaixaImg;
+  } else if (conversaoValor > conversaoAlta) {
+    imagemConversao = conversaoAltaImg;
+  }
+  const visitantesValor = Number(taxaMesAtual?.visitantes_unicos || 0);
+  const visitanteBaixo = Number(kpiConfig?.visitantebaixo || 100);
+  const visitanteAlto = Number(kpiConfig?.visitantealto || 500);
+  let imagemVisitante = visitanteMedioImg;
+  if (visitantesValor < visitanteBaixo) {
+    imagemVisitante = visitanteBaixoImg;
+  } else if (visitantesValor > visitanteAlto) {
+    imagemVisitante = visitanteAltoImg;
+  }
 
   // Determine color and image based on accuracy percentage
   const getAccuracyMetrics = (value) => {
@@ -787,7 +815,6 @@ function AdminDashboard() {
             >
               <FiSettings size={18} color="#10182c" />
             </button>
-
             {/* Conteúdo do card */}
             <div className={styles.revenueKpiContent}>
               <span>Faturamento mensal</span>
@@ -803,32 +830,64 @@ function AdminDashboard() {
           <article
             className={styles.kpiCard}
             style={{
+              backgroundImage: `url(${imagemTicket})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
               position: 'relative',
-              background: ticketValor > 0
-                ? `linear-gradient(rgba(83, 102, 170, 0.72), rgba(83, 102, 170, 0.72)), url("${imagemTicket}") center / cover`
-                : undefined,
+              overflow: 'hidden',
             }}
           >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
             <button
               onClick={() => setShowTicketModal(true)}
               style={{
-                position: 'absolute', top: 8, right: 8,
-                background: 'rgba(255,255,255,0.2)', border: 'none',
-                borderRadius: 6, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: 4, color: '#fff',
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
               }}
               title="Configurar limites do ticket médio"
             >
-              <FiSettings size={16} />
+              <FiSettings size={18} color="#10182c" />
             </button>
+            <div className={styles.revenueKpiContent}>
             <span>Ticket médio</span>
             <strong>{loadingTicketMedio ? 'Carregando...' : ticketMedioFormatado}</strong>
             {ticketMedio && (
-              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
                 {ticketMedio.total_vendas} vendas confirmadas
               </small>
             )}
+            </div>
           </article>
           <article
             className={styles.kpiCard}
@@ -892,69 +951,207 @@ function AdminDashboard() {
               </strong>
             </div>
           </article>
-          <article className={`${styles.kpiCard} ${styles.searchKpi}`}>
-            <span>Palavras mais pesquisadas</span>
-            <strong>{loadingSearches ? 'Carregando...' : topSearch?.palavra || 'Sem dados'}</strong>
-            <div className={styles.searchList}>
-              {topSearches.slice(0, 4).map((item) => (
-                <small key={item.palavra}>
-                  <span>{item.palavra}</span>
-                  <b>{item.total}</b>
-                </small>
-              ))}
+          <article
+            className={`${styles.kpiCard} ${styles.searchKpi}`}
+            style={{
+              backgroundImage: `url(${palavrasPesquisadasImg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            <div className={styles.revenueKpiContent}>
+              <span>Palavras mais pesquisadas</span>
+              <strong>{loadingSearches ? 'Carregando...' : topSearch?.palavra || 'Sem dados'}</strong>
+              <div className={styles.searchList}>
+                {topSearches.slice(0, 4).map((item) => (
+                  <small key={item.palavra}>
+                    <span>{item.palavra}</span>
+                    <b>{item.total}</b>
+                  </small>
+                ))}
+              </div>
             </div>
           </article>
         </section>
 
         <section className={styles.conversionSection} aria-label="Taxa de conversão">
-          <article className={styles.kpiCard}>
+          <article
+            className={styles.kpiCard}
+            style={{
+              backgroundImage: `url(${imagemConversao})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            <button
+              onClick={() => setShowConversaoModal(true)}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="Configurar taxa de conversao"
+            >
+              <FiSettings size={18} color="#10182c" />
+            </button>
+
+            <div className={styles.revenueKpiContent}>
             <span>Taxa de conversão</span>
             <strong>
               {loadingTaxaConversao ? 'Carregando...' : `${taxaMesAtual?.taxa_conversao ?? 0}%`}
             </strong>
             {taxaMesAtual && (
-              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
                 {taxaMesAtual.visitantes_unicos} visitantes | {taxaMesAtual.pedidos_confirmados} pedidos
               </small>
             )}
+            </div>
           </article>
-          <article className={styles.kpiCard}>
-            <span>Visitantes únicos (mês)</span>
-            <strong>
-              {loadingTaxaConversao ? 'Carregando...' : taxaMesAtual?.visitantes_unicos ?? 0}
-            </strong>
-            {taxaMesAtual && (
-              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
-                IPs únicos que visitaram home
-              </small>
-            )}
-          </article>
-          <article className={styles.chartBlock}>
-            <h2>Taxa de conversão por mês</h2>
-            <div className={styles.chartCanvas}>
-              {loadingTaxaConversao ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
-                  Carregando dados...
-                </div>
-              ) : (
-                <Line
-                  data={conversionRateData}
-                  options={{
-                    ...commonOptions,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      x: { grid: { display: false } },
-                      y: {
-                        min: 0,
-                        max: 100,
-                        ticks: { callback: (value) => `${value}%` },
-                        grid: { color: chartColors.grid },
-                      },
-                    },
-                  }}
-                />
+          <article
+            className={styles.kpiCard}
+            style={{
+              backgroundImage: `url(${imagemVisitante})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            <button
+              onClick={() => setShowVisitanteModal(true)}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="Configurar visitantes"
+            >
+              <FiSettings size={18} color="#10182c" />
+            </button>
+
+            <div className={styles.revenueKpiContent}>
+              <span>Visitantes unicos (mes)</span>
+              <strong>
+                {loadingTaxaConversao ? 'Carregando...' : taxaMesAtual?.visitantes_unicos ?? 0}
+              </strong>
+              {taxaMesAtual && (
+                <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
+                  IPs unicos que visitaram home
+                </small>
               )}
             </div>
+          </article>
+          <article className={styles.accuracyCard}>
+            <div className={styles.accuracyHeader}>
+              <div className={styles.headerContent}>
+                <div>
+                  <h2>Acuracidade</h2>
+                  <span>{accuracy?.total_auditorias || 0} produtos auditados</span>
+                </div>
+                <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.headerNsaImage} />
+              </div>
+              {loadingAccuracy && <FiRefreshCw className={styles.loadingIcon} />}
+            </div>
+            <div className={styles.accuracyChart}>
+              <Doughnut
+                data={accuracyData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: (context) => `${context.label}: ${Number(context.raw).toFixed(2)}%`,
+                      },
+                    },
+                  },
+                }}
+              />
+              <div className={styles.accuracyValue}>
+                <strong>{loadingAccuracy ? '--' : `${accuracyValue.toFixed(2)}%`}</strong>
+                <span>Acuracidade media</span>
+              </div>
+            </div>
+            {accuracyError && <p className={styles.errorText}>{accuracyError}</p>}
           </article>
         </section>
 
@@ -1058,40 +1255,6 @@ function AdminDashboard() {
             </div>
           </article>
 
-          <article className={styles.accuracyCard}>
-            <div className={styles.accuracyHeader}>
-              <div className={styles.headerContent}>
-                <div>
-                  <h2>Acuracidade</h2>
-                  <span>{accuracy?.total_auditorias || 0} produtos auditados</span>
-                </div>
-                <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.headerNsaImage} />
-              </div>
-              {loadingAccuracy && <FiRefreshCw className={styles.loadingIcon} />}
-            </div>
-            <div className={styles.accuracyChart}>
-              <Doughnut
-                data={accuracyData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                      callbacks: {
-                        label: (context) => `${context.label}: ${Number(context.raw).toFixed(2)}%`,
-                      },
-                    },
-                  },
-                }}
-              />
-              <div className={styles.accuracyValue}>
-                <strong>{loadingAccuracy ? '--' : `${accuracyValue.toFixed(2)}%`}</strong>
-                <span>Acuracidade media</span>
-              </div>
-            </div>
-            {accuracyError && <p className={styles.errorText}>{accuracyError}</p>}
-          </article>
         </section>
       </section>
 
@@ -1113,6 +1276,20 @@ function AdminDashboard() {
         onClose={() => setShowTicketModal(false)}
         config={kpiConfig}
         type="ticket"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showVisitanteModal}
+        onClose={() => setShowVisitanteModal(false)}
+        config={kpiConfig}
+        type="visitante"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showConversaoModal}
+        onClose={() => setShowConversaoModal(false)}
+        config={kpiConfig}
+        type="conversao"
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
     </main>
