@@ -58,6 +58,10 @@
   min-height: 112px;
 }
 
+.conversionSection .kpiCard {
+  min-height: 140px;
+}
+
 .conversionSection .chartCanvas {
   height: 70px;
 }
