@@ -49,21 +49,9 @@
 
 .conversionSection {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
   margin-bottom: 18px;
-}
-
-.conversionSection .chartBlock {
-  min-height: 112px;
-}
-
-.conversionSection .kpiCard {
-  min-height: 140px;
-}
-
-.conversionSection .chartCanvas {
-  height: 70px;
 }
 
 .kpiCard {
@@ -93,10 +81,19 @@
 }
 
 /* Estilos para cards com background dinâmico */
-.kpiCard[style*="backgroundImage"] {
+.kpiCard[style*="backgroundImage"],
+.kpiCard[style*="background-image"] {
   background-color: transparent !important;
   justify-content: flex-end;
   padding-bottom: 32px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.kpiCard[style*="backgroundImage"]:hover,
+.kpiCard[style*="background-image"]:hover {
+  box-shadow: 0 24px 44px rgba(16, 24, 44, 0.24);
+  filter: saturate(1.05);
+  transform: translateY(-4px);
 }
 
 .revenueKpiContent {

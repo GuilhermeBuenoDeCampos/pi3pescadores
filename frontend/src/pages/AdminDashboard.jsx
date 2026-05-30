@@ -1107,33 +1107,6 @@ function AdminDashboard() {
               )}
             </div>
           </article>
-          <article className={styles.chartBlock}>
-            <h2>Taxa de conversão por mês</h2>
-            <div className={styles.chartCanvas}>
-              {loadingTaxaConversao ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
-                  Carregando dados...
-                </div>
-              ) : (
-                <Line
-                  data={conversionRateData}
-                  options={{
-                    ...commonOptions,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      x: { grid: { display: false } },
-                      y: {
-                        min: 0,
-                        max: 100,
-                        ticks: { callback: (value) => `${value}%` },
-                        grid: { color: chartColors.grid },
-                      },
-                    },
-                  }}
-                />
-              )}
-            </div>
-          </article>
         </section>
 
         <section className={styles.dashboardGrid}>
