@@ -10,6 +10,7 @@ const usuariosRoutes = require('./usuarios');
 const pedidosRoutes = require('./pedidos');
 const visitanteEventoRoutes = require('./visitanteEvento');
 const kpiConfigRoutes = require('./kpiConfig');
+const faturamentoCompletoRoutes = require('./faturamentoCompleto');
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use('/usuarios', usuariosRoutes);
 router.use('/pedidos', pedidosRoutes);
 router.use('/visitante-evento', visitanteEventoRoutes);
 router.use('/kpi-config', kpiConfigRoutes);
+router.use('/faturamento-completo', faturamentoCompletoRoutes);
 
 module.exports = router;

@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings } from 'react-icons/fi';
+import { FiArrowLeft, FiDollarSign, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
@@ -704,6 +704,18 @@ function AdminDashboard() {
               >
                 <FiPackage size={14} />
                 Gerenciar Estoque
+              </Link>
+              <Link
+                to="/admin/faturamento-completo"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#5366aa', background: '#f0f2f8',
+                  textDecoration: 'none',
+                }}
+              >
+                <FiDollarSign size={14} />
+                Faturamento
               </Link>
               <button
                 onClick={() => { clearAuthSession(); navigate('/login'); }}
