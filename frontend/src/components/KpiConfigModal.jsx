@@ -12,11 +12,14 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
   const [ticketAlto, setTicketAlto] = useState(config?.ticketalto || 200);
   const [visitanteBaixo, setVisitanteBaixo] = useState(config?.visitantebaixo || 100);
   const [visitanteAlto, setVisitanteAlto] = useState(config?.visitantealto || 500);
+  const [conversaoBaixa, setConversaoBaixa] = useState(config?.conversaobaixa || 2);
+  const [conversaoAlta, setConversaoAlta] = useState(config?.conversaoalta || 8);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const isRecompra = type === 'recompra';
   const isTicket = type === 'ticket';
   const isVisitante = type === 'visitante';
+  const isConversao = type === 'conversao';
 
   useEffect(() => {
     if (isOpen) {
@@ -28,6 +31,8 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       setTicketAlto(config?.ticketalto || 200);
       setVisitanteBaixo(config?.visitantebaixo || 100);
       setVisitanteAlto(config?.visitantealto || 500);
+      setConversaoBaixa(config?.conversaobaixa || 2);
+      setConversaoAlta(config?.conversaoalta || 8);
       setError('');
     }
   }, [config, isOpen]);
@@ -50,7 +55,12 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
-    if (!isRecompra && !isTicket && !isVisitante && (!faturamentoBaixo || !faturamentoAlto)) {
+    if (isConversao && (!conversaoBaixa || !conversaoAlta)) {
+      setError('Todos os campos sao obrigatorios');
+      return;
+    }
+
+    if (!isRecompra && !isTicket && !isVisitante && !isConversao && (!faturamentoBaixo || !faturamentoAlto)) {
       setError('Todos os campos sao obrigatorios');
       return;
     }
@@ -70,7 +80,12 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
-    if (!isRecompra && !isTicket && !isVisitante && parseFloat(faturamentoBaixo) >= parseFloat(faturamentoAlto)) {
+    if (isConversao && parseFloat(conversaoBaixa) >= parseFloat(conversaoAlta)) {
+      setError('Conversao baixa deve ser menor que conversao alta');
+      return;
+    }
+
+    if (!isRecompra && !isTicket && !isVisitante && !isConversao && parseFloat(faturamentoBaixo) >= parseFloat(faturamentoAlto)) {
       setError('Faturamento baixo deve ser menor que faturamento alto');
       return;
     }
@@ -86,6 +101,8 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
         recompraalta: recompraAlta,
         visitantebaixo: visitanteBaixo,
         visitantealto: visitanteAlto,
+        conversaobaixa: conversaoBaixa,
+        conversaoalta: conversaoAlta,
       });
       onConfigUpdated(updated);
       onClose();
@@ -102,7 +119,7 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>{isRecompra ? 'Configurar Recompra' : isTicket ? 'Configurar Ticket Medio' : isVisitante ? 'Configurar Visitantes' : 'Configurar Faturamento'}</h2>
+          <h2>{isRecompra ? 'Configurar Recompra' : isTicket ? 'Configurar Ticket Medio' : isVisitante ? 'Configurar Visitantes' : isConversao ? 'Configurar Conversao' : 'Configurar Faturamento'}</h2>
           <button className={styles.closeBtn} onClick={onClose}>
             <FiX size={20} />
           </button>
@@ -223,6 +240,44 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
                 Entre {parseFloat(visitanteBaixo || 0).toFixed(0)} e {parseFloat(visitanteAlto || 0).toFixed(0)} visitantes: Visitante Medio
                 <br />
                 Acima de {parseFloat(visitanteAlto || 0).toFixed(0)} visitantes: Visitante Alto
+              </p>
+            </>
+          ) : isConversao ? (
+            <>
+              <div className={styles.fieldGroup}>
+                <label htmlFor="conversao-baixa">Conversao Baixa (%)</label>
+                <input
+                  id="conversao-baixa"
+                  type="number"
+                  step="0.01"
+                  value={conversaoBaixa}
+                  onChange={(e) => setConversaoBaixa(e.target.value)}
+                  placeholder="0.00"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label htmlFor="conversao-alta">Conversao Alta (%)</label>
+                <input
+                  id="conversao-alta"
+                  type="number"
+                  step="0.01"
+                  value={conversaoAlta}
+                  onChange={(e) => setConversaoAlta(e.target.value)}
+                  placeholder="0.00"
+                  disabled={loading}
+                />
+              </div>
+
+              <p className={styles.info}>
+                O card exibira imagens diferentes baseado nesta configuracao:
+                <br />
+                Abaixo de {parseFloat(conversaoBaixa || 0).toFixed(2)}%: Conversao Baixa
+                <br />
+                Entre {parseFloat(conversaoBaixa || 0).toFixed(2)}% e {parseFloat(conversaoAlta || 0).toFixed(2)}%: Conversao Media
+                <br />
+                Acima de {parseFloat(conversaoAlta || 0).toFixed(2)}%: Conversao Alta
               </p>
             </>
           ) : (

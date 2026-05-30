@@ -15,6 +15,8 @@ module.exports = {
           recompraalta: 50,
           visitantebaixo: 100,
           visitantealto: 500,
+          conversaobaixa: 2,
+          conversaoalta: 8,
           created_at: new Date(),
           update_at: new Date(),
         },

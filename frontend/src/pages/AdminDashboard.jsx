@@ -35,6 +35,9 @@ import palavrasPesquisadasImg from '../assets/admin/palavraspesquisadas.png';
 import visitanteBaixoImg from '../assets/admin/visitantebaixo.png';
 import visitanteMedioImg from '../assets/admin/visitantemedio.png';
 import visitanteAltoImg from '../assets/admin/visitantealto.png';
+import conversaoBaixaImg from '../assets/admin/SBruim.png';
+import conversaoMediaImg from '../assets/admin/SBnormal.png';
+import conversaoAltaImg from '../assets/admin/SBbom.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import KpiConfigModal from '../components/KpiConfigModal';
@@ -350,6 +353,7 @@ function AdminDashboard() {
   const [showRecompraModal, setShowRecompraModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [showVisitanteModal, setShowVisitanteModal] = useState(false);
+  const [showConversaoModal, setShowConversaoModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -458,6 +462,15 @@ function AdminDashboard() {
   
   // Pegar a taxa de conversão do mês mais recente
   const taxaMesAtual = taxaConversao.length > 0 ? taxaConversao[0] : null;
+  const conversaoValor = Number(taxaMesAtual?.taxa_conversao || 0);
+  const conversaoBaixa = Number(kpiConfig?.conversaobaixa || 2);
+  const conversaoAlta = Number(kpiConfig?.conversaoalta || 8);
+  let imagemConversao = conversaoMediaImg;
+  if (conversaoValor < conversaoBaixa) {
+    imagemConversao = conversaoBaixaImg;
+  } else if (conversaoValor > conversaoAlta) {
+    imagemConversao = conversaoAltaImg;
+  }
   const visitantesValor = Number(taxaMesAtual?.visitantes_unicos || 0);
   const visitanteBaixo = Number(kpiConfig?.visitantebaixo || 100);
   const visitanteAlto = Number(kpiConfig?.visitantealto || 500);
@@ -964,16 +977,70 @@ function AdminDashboard() {
         </section>
 
         <section className={styles.conversionSection} aria-label="Taxa de conversão">
-          <article className={styles.kpiCard}>
+          <article
+            className={styles.kpiCard}
+            style={{
+              backgroundImage: `url(${imagemConversao})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            <button
+              onClick={() => setShowConversaoModal(true)}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="Configurar taxa de conversao"
+            >
+              <FiSettings size={18} color="#10182c" />
+            </button>
+
+            <div className={styles.revenueKpiContent}>
             <span>Taxa de conversão</span>
             <strong>
               {loadingTaxaConversao ? 'Carregando...' : `${taxaMesAtual?.taxa_conversao ?? 0}%`}
             </strong>
             {taxaMesAtual && (
-              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
                 {taxaMesAtual.visitantes_unicos} visitantes | {taxaMesAtual.pedidos_confirmados} pedidos
               </small>
             )}
+            </div>
           </article>
           <article
             className={styles.kpiCard}
@@ -1231,6 +1298,13 @@ function AdminDashboard() {
         onClose={() => setShowVisitanteModal(false)}
         config={kpiConfig}
         type="visitante"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showConversaoModal}
+        onClose={() => setShowConversaoModal(false)}
+        config={kpiConfig}
+        type="conversao"
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
     </main>
