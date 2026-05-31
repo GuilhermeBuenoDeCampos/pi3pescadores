@@ -13,8 +13,8 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { FiArrowLeft, FiDollarSign, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { FiBarChart2, FiDollarSign, FiGrid, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
@@ -690,79 +690,46 @@ function AdminDashboard() {
 
   return (
     <main className={styles.page}>
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}>
+          <img src={logo} alt="Tres Pescadores Store" />
+          <div>
+            <strong>Tres Pescadores</strong>
+            <span>Admin Console</span>
+          </div>
+        </div>
+
+        <nav className={styles.sidebarNav} aria-label="Menu administrativo">
+          <span className={styles.navLabel}>Principal</span>
+          <button className={`${styles.navItem} ${styles.navItemActive}`} type="button"><FiGrid /> Visao geral</button>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/vendas')}><FiBarChart2 /> Vendas</button>
+          <span className={styles.navLabel}>Gestao</span>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/admin/usuarios')}><FiUsers /> Usuarios</button>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/estoque')}><FiPackage /> Estoque</button>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/admin/faturamento-completo')}><FiDollarSign /> Faturamento</button>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/')}><FiHome /> Loja</button>
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <div className={styles.userCard}>
+            <FiUser />
+            <div>
+              <strong>{getAuthUser()?.nome || 'Usuario'}</strong>
+              <span>Administrador</span>
+            </div>
+          </div>
+          <button className={styles.logoutButton} type="button" onClick={() => { clearAuthSession(); navigate('/login'); }}>
+            <FiLogOut /> Sair
+          </button>
+        </div>
+      </aside>
+
       <section className={styles.shell}>
         <header className={styles.hero}>
           <img src={logo} alt="Tres Pescadores Store" />
           <div>
             <h1>Painel Administrativo</h1>
             <p>Visao geral e gestao rapida</p>
-          </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b' }}>
-              <FiUser size={14} />
-              {getAuthUser()?.nome || 'Usuário'}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button
-                onClick={() => navigate('/')}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#5366aa', background: '#f0f2f8', border: 'none', cursor: 'pointer',
-                }}
-              >
-                <FiArrowLeft size={14} />
-                Voltar
-              </button>
-              <Link
-                to="/admin/usuarios"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#fff', background: '#5366aa',
-                  boxShadow: '0 8px 20px rgba(83,102,170,0.25)',
-                  textDecoration: 'none',
-                }}
-              >
-                <FiUsers size={14} />
-                Gerenciar Usuários
-              </Link>
-              <Link
-                to="/estoque"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#08936f', background: '#e6f5f0',
-                  textDecoration: 'none',
-                }}
-              >
-                <FiPackage size={14} />
-                Gerenciar Estoque
-              </Link>
-              <Link
-                to="/admin/faturamento-completo"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#5366aa', background: '#f0f2f8',
-                  textDecoration: 'none',
-                }}
-              >
-                <FiDollarSign size={14} />
-                Faturamento
-              </Link>
-              <button
-                onClick={() => { clearAuthSession(); navigate('/login'); }}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#b91c1c', background: '#fef2f2', border: 'none', cursor: 'pointer',
-                }}
-              >
-                <FiLogOut size={14} />
-                Sair
-              </button>
-            </div>
           </div>
         </header>
 

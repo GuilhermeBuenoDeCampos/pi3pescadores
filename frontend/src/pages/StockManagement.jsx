@@ -20,12 +20,14 @@ import {
   FiClipboard,
   FiEdit2,
   FiGrid,
+  FiHome,
   FiLayers,
   FiLogOut,
   FiPackage,
   FiPlus,
   FiSearch,
   FiSettings,
+  FiShoppingBag,
   FiSliders,
   FiTag,
   FiTrash2,
@@ -382,6 +384,14 @@ const StockManagement = () => {
           <button className={styles.navItem} type="button" onClick={() => navigate('/vendas')}>
             <FiBarChart2 /> Vendas
             {pendingOrdersCount > 0 && <span className={styles.navBadge}>{pendingOrdersCount}</span>}
+          </button>
+          {getAuthUser()?.tipo_usuario === 'admin' && (
+            <button className={styles.navItem} type="button" onClick={() => navigate('/admin')}>
+              <FiHome /> Painel admin
+            </button>
+          )}
+          <button className={styles.navItem} type="button" onClick={() => navigate('/')}>
+            <FiShoppingBag /> Loja
           </button>
           <span className={styles.navLabel}>Operações</span>
           <button className={styles.navItem} type="button" onClick={() => setActiveModal('categorias')}>
