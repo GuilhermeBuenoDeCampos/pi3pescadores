@@ -38,7 +38,6 @@ import visitanteAltoImg from '../assets/admin/visitantealto.png';
 import conversaoBaixaImg from '../assets/admin/SBruim.png';
 import conversaoMediaImg from '../assets/admin/SBnormal.png';
 import conversaoAltaImg from '../assets/admin/SBbom.png';
-import fishingNetSvg from '../assets/admin/fishing-net.svg';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import KpiConfigModal from '../components/KpiConfigModal';
@@ -1242,15 +1241,10 @@ function AdminDashboard() {
 
           <article className={`${styles.chartBlock} ${styles.satisfacaoCard}`}>
             <div className={styles.satisfacaoHeader}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <img src={fishingNetSvg} alt="" style={{ width: 28, height: 28, filter: 'brightness(0) saturate(1) invert(33%) sepia(87%) saturate(562%) hue-rotate(131deg) brightness(95%) contrast(97%)' }} />
-                <h2>Satisfação</h2>
-              </div>
+              <h2>Satisfação</h2>
               <span className={styles.satisfacaoBadge}>Rede de Pesca</span>
             </div>
-            <div style={{ position: 'relative' }}>
-              <img src={fishingNetSvg} alt="" className={styles.satisfacaoWatermark} />
-              <div className={styles.chartCanvas}>
+            <div className={styles.chartCanvas}>
                 <Radar
                 data={satisfactionData}
                 options={{
@@ -1291,7 +1285,6 @@ function AdminDashboard() {
                   },
                 }}
               />
-            </div>
             </div>
           </article>
 

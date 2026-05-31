@@ -174,35 +174,7 @@
   overflow: hidden;
 }
 
-.satisfacaoCard .chartCanvas {
-  position: relative;
-  z-index: 1;
-}
 
-.satisfacaoCard::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.05;
-  background-image:
-    linear-gradient(45deg, rgba(8, 147, 111, 0.5) 1px, transparent 1px),
-    linear-gradient(-45deg, rgba(8, 147, 111, 0.5) 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none;
-}
-
-.satisfacaoWatermark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 220px;
-  height: 220px;
-  opacity: 0.12;
-  pointer-events: none;
-  z-index: 0;
-}
 
 .satisfacaoHeader {
   display: flex;
