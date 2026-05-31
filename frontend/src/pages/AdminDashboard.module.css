@@ -165,11 +165,30 @@
 }
 
 .satisfacaoCard {
+  position: relative;
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(8, 147, 111, 0.04) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 80%, rgba(8, 147, 111, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 30% 20%, rgba(8, 147, 111, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(8, 147, 111, 0.04) 0%, transparent 50%),
     #ffffff;
-  border: 1px solid rgba(8, 147, 111, 0.08);
+  border: 1px solid rgba(8, 147, 111, 0.12);
+  overflow: hidden;
+}
+
+.satisfacaoCard .chartCanvas {
+  position: relative;
+  z-index: 1;
+}
+
+.satisfacaoCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image:
+    linear-gradient(45deg, rgba(8, 147, 111, 0.5) 1px, transparent 1px),
+    linear-gradient(-45deg, rgba(8, 147, 111, 0.5) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
 }
 
 .satisfacaoHeader {
