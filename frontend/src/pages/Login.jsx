@@ -45,6 +45,7 @@ const Login = () => {
         <div className={styles.container}>
             <div className={styles.leftPanel}>
                 <div className={styles.formContainer}>
+                    <img src={logo} alt="Tres Pescadores Store" className={styles.mobileLogo} />
                     <h1 className={styles.title}>Bem-vindo</h1>
                     <p className={styles.subtitle}>Entre com suas credenciais para acessar sua conta</p>
 

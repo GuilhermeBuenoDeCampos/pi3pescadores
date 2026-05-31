@@ -44,16 +44,16 @@ function Header() {
       <div className={styles.brand}>
         <img src={logo} alt="Logo Tres Pescadores" className={styles.logoMark} />
         <div>
-          <Link to="/" className={styles.title}>
+          <Link to="/" className={`${styles.title} ${user ? styles.loggedInTitle : ''}`}>
             Tres Pescadores Store
           </Link>
           <p className={styles.subtitle}>Artigos religiosos para fe e devocao</p>
         </div>
       </div>
       <nav className={styles.navLinks}>
-        <Link to="/">Inicio</Link>
-        <a href="#categories">Categorias</a>
-        <a href="#catalog">Catalogo</a>
+        <Link to="/" className={styles.desktopNavLink}>Inicio</Link>
+        <a href="#categories" className={styles.desktopNavLink}>Categorias</a>
+        <a href="#catalog" className={styles.desktopNavLink}>Catalogo</a>
         {user ? (
           <div className={styles.userMenu} ref={userMenuRef}>
             <button
