@@ -619,3 +619,278 @@
     margin-bottom: 20px;
   }
 }
+
+/* Operational layout aligned with the stock management screen. */
+.container {
+  padding: 0;
+  background: #f7f8fc;
+  color: #182230;
+}
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 20;
+  width: 272px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px 18px;
+  background: #ffffff;
+  border-right: 1px solid #eaecf0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px 30px;
+}
+
+.brand .logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  object-fit: cover;
+}
+
+.brand strong,
+.brand span {
+  display: block;
+}
+
+.brand strong {
+  color: var(--indigo-dark);
+  font-size: 1rem;
+}
+
+.brand span,
+.userCard span {
+  color: #667085;
+  font-size: 0.8rem;
+}
+
+.sidebarNav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navLabel {
+  margin: 0 10px 8px;
+  color: #98a2b3;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.navItem {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  color: #475467;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.94rem;
+  text-align: left;
+}
+
+.navItem:hover,
+.navItemActive {
+  color: var(--indigo-dark);
+  background: rgba(61, 78, 143, 0.08);
+}
+
+.sidebarFooter {
+  padding: 16px 6px 0;
+  border-top: 1px solid #eaecf0;
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 12px;
+  padding: 10px 8px;
+}
+
+.userCard > svg {
+  width: 36px;
+  height: 36px;
+  padding: 9px;
+  border-radius: 50%;
+  color: var(--indigo-dark);
+  background: rgba(61, 78, 143, 0.09);
+}
+
+.userCard strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.logoutButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border: 0;
+  border-radius: 12px;
+  color: #b42318;
+  background: transparent;
+  cursor: pointer;
+}
+
+.logoutButton:hover {
+  background: #fef3f2;
+}
+
+.mainArea {
+  min-height: 100vh;
+  margin-left: 272px;
+  padding: 28px 32px 34px;
+}
+
+.header {
+  max-width: 1420px;
+  margin: 0 auto 25px;
+  padding: 0;
+  align-items: flex-end;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.breadcrumb {
+  margin: 0;
+  color: #667085;
+  font-size: 0.85rem;
+}
+
+.titleContainer h1 {
+  margin: 4px 0;
+  color: #101828;
+  font-size: clamp(1.65rem, 2.2vw, 2rem);
+  letter-spacing: 0;
+}
+
+.content {
+  max-width: 1420px;
+  margin: 0 auto;
+  gap: 22px;
+}
+
+.dashboardCards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.card {
+  min-height: 128px;
+  display: flex;
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid #eaecf0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.03), 0 10px 25px rgba(16, 24, 40, 0.035);
+}
+
+.cardIcon {
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+}
+
+.iconBlue { color: var(--indigo-dark); background: rgba(61, 78, 143, 0.1); }
+.iconYellow { color: #b54708; background: #fffaeb; }
+.iconGreen { color: #067647; background: #ecfdf3; }
+.iconTeal { color: var(--teal-dark); background: rgba(46, 158, 130, 0.12); }
+.iconRed { color: #b42318; background: #fef3f2; }
+
+.card h3 {
+  margin: 0 0 8px;
+  color: #667085;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.card strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #101828;
+  font-size: 1.55rem;
+}
+
+.card span {
+  color: #667085;
+  font-size: 0.78rem;
+}
+
+.searchSection,
+.filtersSection,
+.tableWrapper,
+.paginationSection {
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+}
+
+.searchSection,
+.filtersSection {
+  padding: 16px 24px;
+}
+
+.table th {
+  background: #fcfcfd;
+  color: #667085;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 1180px) {
+  .dashboardCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: static;
+    width: 100%;
+    padding: 14px 16px;
+  }
+
+  .brand {
+    padding: 0 0 14px;
+  }
+
+  .sidebarNav {
+    flex-direction: row;
+  }
+
+  .navLabel,
+  .sidebarFooter {
+    display: none;
+  }
+
+  .mainArea {
+    margin-left: 0;
+    padding: 22px 16px 30px;
+  }
+}
+
+@media (max-width: 620px) {
+  .dashboardCards {
+    grid-template-columns: 1fr;
+  }
+}
