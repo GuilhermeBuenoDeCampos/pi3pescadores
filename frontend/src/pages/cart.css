@@ -606,6 +606,224 @@ body {
   font-weight: 600;
 }
 
+/* Timeline / Step Indicator */
+.checkout-timeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 32px;
+  padding: 20px 0;
+  background: var(--tp-white);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  width: 100%;
+}
+
+.timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+  user-select: none;
+}
+
+.timeline-step.completed {
+  cursor: pointer;
+}
+
+.timeline-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  background: #e0e0e0;
+  color: #999;
+  transition: all 0.3s ease;
+}
+
+.timeline-step.active .timeline-number {
+  background: var(--tp-yellow);
+  color: var(--tp-white);
+  box-shadow: 0 0 0 4px rgba(46, 158, 130, 0.2);
+}
+
+.timeline-step.completed .timeline-number {
+  background: var(--tp-yellow);
+  color: var(--tp-white);
+}
+
+.timeline-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+}
+
+.timeline-step.active .timeline-label {
+  color: var(--tp-navy);
+}
+
+.timeline-step.completed .timeline-label {
+  color: var(--tp-yellow);
+}
+
+.timeline-connector {
+  width: 60px;
+  height: 3px;
+  background: #e0e0e0;
+  margin: 0 8px;
+  margin-bottom: 26px;
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.timeline-connector.completed {
+  background: var(--tp-yellow);
+}
+
+/* Checkout Content Layout */
+.checkout-content {
+  width: 100%;
+}
+
+.checkout-step-1 {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.checkout-step-2,
+.checkout-step-3,
+.checkout-step-4 {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* Delivery and Payment Cards */
+.delivery-card,
+.payment-card,
+.review-card {
+  flex: 2;
+}
+
+.mini-summary {
+  flex: 1;
+}
+
+/* Step Navigation Buttons */
+.step-navigation {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-back {
+  padding: 12px 24px;
+  background: var(--tp-white);
+  color: var(--tp-navy);
+  border: 2px solid var(--tp-border-light);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.btn-back:hover {
+  border-color: var(--tp-yellow);
+  background: rgba(46, 158, 130, 0.05);
+}
+
+.btn-next {
+  flex: 1;
+  padding: 12px 24px;
+  background: var(--tp-yellow);
+  color: var(--tp-white);
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.btn-next:hover:not(:disabled) {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(46, 158, 130, 0.2);
+}
+
+.btn-next:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Review Section */
+.review-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--tp-border-light);
+}
+
+.review-section h4 {
+  color: var(--tp-navy);
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.review-section p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: var(--tp-text-main);
+  line-height: 1.5;
+}
+
+.review-section p strong {
+  color: var(--tp-navy);
+}
+
+/* Responsive for Steps */
+@media (max-width: 768px) {
+  .checkout-step-1,
+  .checkout-step-2,
+  .checkout-step-3,
+  .checkout-step-4 {
+    flex-direction: column;
+  }
+
+  .timeline-connector {
+    width: 30px;
+  }
+
+  .checkout-timeline {
+    padding: 16px 8px;
+  }
+
+  .step-navigation {
+    flex-direction: column;
+  }
+
+  .btn-back,
+  .btn-next {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;

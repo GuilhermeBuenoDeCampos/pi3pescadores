@@ -6,6 +6,7 @@ const AppError = require('../middlewares/appError');
 
 const ORDER_STATUSES = new Set(['pendente', 'confirmado', 'preparando', 'enviado', 'concluido', 'cancelado']);
 const PAYMENT_METHODS = new Set(['whatsapp', 'pix', 'cartao', 'dinheiro', 'boleto', 'outro']);
+const SALE_STATUSES = ['preparando', 'enviado', 'confirmado', 'concluido'];
 
 function toMoney(value) {
   const n = Number(value);
@@ -172,6 +173,7 @@ function formatItem(item) {
     nome_produto: plain.nome_produto,
     quantidade: plain.quantidade,
     preco_unitario: formatMoney(plain.preco_unitario),
+    preco: formatMoney(plain.preco_unitario),
     subtotal: formatMoney(plain.subtotal),
     produto: produto
       ? {
@@ -195,11 +197,14 @@ function formatPedido(pedido) {
     id: plain.id,
     id_usuario: plain.id_usuario,
     numero_pedido: plain.numero_pedido,
+    nome_cliente: plain.nome_cliente || plain.endereco_entrega?.nome_destinatario || 'N/A',
     status: plain.status,
     subtotal: formatMoney(plain.subtotal),
     valor_frete: formatMoney(plain.valor_frete),
+    tipo_frete: plain.tipo_frete || 'N/A',
     desconto: formatMoney(plain.desconto),
     total: formatMoney(plain.total),
+    valor_total: formatMoney(plain.total),
     endereco_entrega: plain.endereco_entrega,
     metodo_pagamento: plain.metodo_pagamento,
     observacoes: plain.observacoes,
@@ -322,11 +327,12 @@ exports.criarPedido = async (usuarioId, payload) => {
         status: 'pendente',
         subtotal: formatMoney(subtotal),
         valor_frete: formatMoney(valorFrete),
+        tipo_frete: frete.servico || null,
         desconto: formatMoney(desconto),
         total: formatMoney(total),
         endereco_entrega: enderecoEntrega,
         metodo_pagamento: metodoPagamento,
-        observacoes: frete.servico ? [observacoes, `Frete selecionado: ${frete.servico}`].filter(Boolean).join('\n') : observacoes,
+        observacoes: observacoes,
         criado_em: now,
         atualizado_em: now,
       },
@@ -462,6 +468,93 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
   }
 };
 
+exports.listarTodosPedidos = async (query = {}) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 50);
+  const offset = (page - 1) * limit;
+  const where = {};
+
+  if (query.status && ORDER_STATUSES.has(String(query.status))) {
+    where.status = String(query.status);
+  }
+
+  if (query.search) {
+    where.numero_pedido = {
+      [Op.iLike]: `%${String(query.search).trim()}%`,
+    };
+  }
+
+  try {
+    console.log('[pedidoService] listarTodosPedidos iniciado', {
+      where,
+      page,
+      limit,
+      offset,
+    });
+
+    if (!db.Pedido) {
+      const errorMsg = 'Database model "Pedido" not found';
+      console.error(`[pedidoService] ${errorMsg}`);
+      throw new AppError(500, errorMsg);
+    }
+
+    const { count, rows } = await db.Pedido.findAndCountAll({
+      where,
+      distinct: true,
+      order: [['criado_em', 'DESC']],
+      limit,
+      offset,
+    });
+
+    console.log('[pedidoService] listarTodosPedidos sucesso', {
+      total: count,
+      rowsReturned: rows.length,
+    });
+
+    if (rows.length > 0 && db.PedidoItem) {
+      console.log('[pedidoService] carregando itens para todos os pedidos...');
+      for (const pedido of rows) {
+        try {
+          const itens = await db.PedidoItem.findAll({
+            where: { id_pedido: pedido.id },
+            raw: true,
+          });
+          pedido.dataValues.itens = itens;
+        } catch (itemError) {
+          console.error(`[pedidoService] erro ao carregar itens para pedido ${pedido.id}:`, itemError.message);
+          pedido.dataValues.itens = [];
+        }
+      }
+    }
+
+    return {
+      data: rows.map(formatPedido),
+      pagination: {
+        total: count,
+        page,
+        limit,
+        pages: Math.ceil(count / limit),
+      },
+    };
+  } catch (error) {
+    console.error('[pedidoService] erro crítico em listarTodosPedidos:', {
+      errorType: error.constructor.name,
+      errorMessage: error.message,
+      errorCode: error.code || error.original?.code,
+      stack: error.stack,
+    });
+
+    if (error.original) {
+      console.error('[pedidoService] erro original (banco de dados):', {
+        message: error.original.message,
+        code: error.original.code,
+      });
+    }
+
+    throw error;
+  }
+};
+
 exports.buscarPedidoDoUsuario = async (usuarioId, idPedido) => {
   const id = Number(idPedido);
 
@@ -529,6 +622,140 @@ exports.atualizarStatusPedido = async (idPedido, status) => {
 
   const completo = await buscarPedidoCompleto({ id: pedidoAtualizado.id });
   return formatPedido(completo);
+};
+
+exports.obterFaturamentoMensal = async (meses = 12) => {
+  try {
+    // Buscar todos os pedidos com os status especificados
+    const pedidos = await db.Pedido.findAll({
+      where: {
+        status: {
+          [Op.in]: SALE_STATUSES,
+        },
+      },
+      attributes: ['total', 'criado_em'],
+      order: [['criado_em', 'DESC']],
+    });
+
+    // Agrupar por mês
+    const faturamentoPorMes = {};
+    const hoje = new Date();
+    
+    // Inicializar os últimos N meses com 0
+    for (let i = meses - 1; i >= 0; i--) {
+      const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const chave = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+      faturamentoPorMes[chave] = 0;
+    }
+
+    // Somar os totais
+    pedidos.forEach(pedido => {
+      const data = new Date(pedido.criado_em);
+      const chave = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+      
+      // Apenas considerar se estiver dentro do período de meses
+      if (faturamentoPorMes.hasOwnProperty(chave)) {
+        faturamentoPorMes[chave] = toMoney(
+          faturamentoPorMes[chave] + toMoney(pedido.total)
+        );
+      }
+    });
+
+    // Converter para array ordenado
+    const resultado = Object.entries(faturamentoPorMes)
+      .map(([mes, valor]) => ({
+        mes,
+        faturamento: formatMoney(valor),
+        faturamentoNumerico: toMoney(valor),
+      }))
+      .sort((a, b) => {
+        const [mesA, anoA] = a.mes.split('/').map(Number);
+        const [mesB, anoB] = b.mes.split('/').map(Number);
+        return anoA === anoB ? mesA - mesB : anoA - anoB;
+      });
+
+
+
+    return resultado;
+  } catch (error) {
+    console.error('[pedidoService] erro ao calcular faturamento mensal:', error.message);
+    throw error;
+  }
+};
+
+exports.obterTaxaRecompraAnual = async (ano = new Date().getFullYear()) => {
+  const anoNumero = Number(ano) || new Date().getFullYear();
+  const inicioAno = new Date(anoNumero, 0, 1);
+  const inicioProximoAno = new Date(anoNumero + 1, 0, 1);
+
+  const pedidos = await db.Pedido.findAll({
+    where: {
+      status: {
+        [Op.in]: SALE_STATUSES,
+      },
+      criado_em: {
+        [Op.gte]: inicioAno,
+        [Op.lt]: inicioProximoAno,
+      },
+    },
+    attributes: ['id_usuario'],
+  });
+
+  const comprasPorCliente = new Map();
+
+  pedidos.forEach((pedido) => {
+    const clienteId = String(pedido.id_usuario);
+    comprasPorCliente.set(clienteId, (comprasPorCliente.get(clienteId) || 0) + 1);
+  });
+
+  const totalClientes = comprasPorCliente.size;
+  const clientesRecompra = Array.from(comprasPorCliente.values())
+    .filter((totalCompras) => totalCompras > 1).length;
+  const taxa = totalClientes > 0 ? (clientesRecompra / totalClientes) * 100 : 0;
+
+  return {
+    ano: anoNumero,
+    taxa: Number(taxa.toFixed(2)),
+    totalClientes,
+    clientesRecompra,
+    statusConsiderados: SALE_STATUSES,
+  };
+};
+
+exports.obterTicketMedio = async () => {
+  try {
+    const resultado = await db.Pedido.findOne({
+      where: {
+        status: {
+          [Op.in]: SALE_STATUSES,
+        },
+      },
+      attributes: [
+        [db.sequelize.fn('AVG', db.sequelize.col('total')), 'ticket_medio'],
+        [db.sequelize.fn('SUM', db.sequelize.col('total')), 'receita_total'],
+        [db.sequelize.fn('COUNT', db.sequelize.col('id')), 'total_vendas'],
+        [db.sequelize.fn('COUNT', db.sequelize.fn('DISTINCT', db.sequelize.col('id_usuario'))), 'clientes_unicos'],
+      ],
+      raw: true,
+    });
+
+    const ticketMedio = toMoney(resultado?.ticket_medio || 0);
+    const receitaTotal = toMoney(resultado?.receita_total || 0);
+    const totalVendas = Number(resultado?.total_vendas || 0);
+    const clientesUnicos = Number(resultado?.clientes_unicos || 0);
+
+    return {
+      ticket_medio: formatMoney(ticketMedio),
+      ticketMedioNumerico: ticketMedio,
+      receita_total: formatMoney(receitaTotal),
+      receitaTotalNumerico: receitaTotal,
+      total_vendas: totalVendas,
+      clientes_unicos: clientesUnicos,
+    };
+  } catch (error) {
+    console.error('[pedidoService] erro ao calcular ticket medio:', error.message);
+    throw error;
+  }
 };
 
 exports.getUserId = getUserId;

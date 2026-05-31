@@ -45,6 +45,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: false,
       },
+      tipo_frete: {
+        type: DataTypes.ENUM('PAC', 'SEDEX'),
+        allowNull: true,
+      },
       desconto: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: false,

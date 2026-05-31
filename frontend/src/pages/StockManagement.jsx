@@ -5,12 +5,33 @@ import {
   fetchCategories,
   fetchProducts,
   fetchProductById,
+  fetchTodosPedidos,
   getAuthHeaders,
   getAuthUser,
   getImageUrl,
   updateProductStatus,
 } from '../services/api';
-import { FiArrowLeft, FiLogOut, FiUser } from 'react-icons/fi';
+import {
+  FiAlertTriangle,
+  FiArchive,
+  FiArrowLeft,
+  FiBarChart2,
+  FiCheck,
+  FiClipboard,
+  FiEdit2,
+  FiGrid,
+  FiLayers,
+  FiLogOut,
+  FiPackage,
+  FiPlus,
+  FiSearch,
+  FiSettings,
+  FiSliders,
+  FiTag,
+  FiTrash2,
+  FiUser,
+  FiX,
+} from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import AuditoriaModal from '../components/AuditoriaModal';
@@ -27,6 +48,7 @@ const StockManagement = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [productFilter, setProductFilter] = useState('');
   const [editProduct, setEditProduct] = useState(null);
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
   // Single launch
   const [searchTerm, setSearchTerm] = useState('');
   const [launchQuantity, setLaunchQuantity] = useState(0);
@@ -59,8 +81,18 @@ const StockManagement = () => {
     }
   };
 
+  const loadPendingOrdersCount = async () => {
+    try {
+      const result = await fetchTodosPedidos({ status: 'pendente', limit: 1 });
+      setPendingOrdersCount(result.pagination?.total || 0);
+    } catch (err) {
+      console.error("Failed to load pending orders count", err);
+    }
+  };
+
   useEffect(() => {
     loadData();
+    loadPendingOrdersCount();
   }, []);
 
   // Auto-desativar produtos com estoque zero
@@ -324,155 +356,209 @@ const StockManagement = () => {
     }
   };
 
+  const lowStockProducts = products.filter((product) => Number(product.estoque_atual || 0) <= 5).length;
+  const filteredProducts = products.filter((product) => {
+    if (!productFilter) return true;
+    const query = productFilter.toString().toLowerCase();
+    return (product.nome && product.nome.toLowerCase().includes(query)) || product.id.toString().includes(query);
+  });
+
   return (
     <div className={styles.container}>
-      <div className={styles.contentWrapper}>
-        {/* Header */}
-        <header className={styles.header}>
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}>
           <img src={logo} alt="Tres Pescadores Store Logo" className={styles.logo} />
-          <div className={styles.titleContainer}>
-            <h1>Tres Pescadores Store</h1>
-            <div className={styles.subtitle}>Gerenciar Estoque</div>
+          <div>
+            <strong>Tres Pescadores</strong>
+            <span>Admin Console</span>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b' }}>
-              <FiUser size={14} />
-              {getAuthUser()?.nome || 'Usuário'}
+        </div>
+
+        <nav className={styles.sidebarNav} aria-label="Menu de estoque">
+          <span className={styles.navLabel}>Principal</span>
+          <button className={`${styles.navItem} ${styles.navItemActive}`} type="button">
+            <FiGrid /> Visão geral
+          </button>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/vendas')}>
+            <FiBarChart2 /> Vendas
+            {pendingOrdersCount > 0 && <span className={styles.navBadge}>{pendingOrdersCount}</span>}
+          </button>
+          <span className={styles.navLabel}>Operações</span>
+          <button className={styles.navItem} type="button" onClick={() => setActiveModal('categorias')}>
+            <FiTag /> Categorias
+          </button>
+          <button className={styles.navItem} type="button" onClick={() => setActiveModal('lancamento-massa')}>
+            <FiLayers /> Lançamento
+          </button>
+          <button className={styles.navItem} type="button" onClick={() => setIsAuditoriaOpen(true)}>
+            <FiClipboard /> Auditoria
+          </button>
+          <button className={styles.navItem} type="button" onClick={() => setActiveModal('configuracoes')}>
+            <FiSettings /> Configurações
+          </button>
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <div className={styles.userCard}>
+            <FiUser />
+            <div>
+              <strong>{getAuthUser()?.nome || 'Usuário'}</strong>
+              <span>Equipe de estoque</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button
-                onClick={() => navigate('/admin')}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#5366aa', background: '#f0f2f8', border: 'none', cursor: 'pointer',
-                }}
-              >
-                <FiArrowLeft size={14} />
-                Voltar
-              </button>
-              <button
-                onClick={() => { clearAuthSession(); navigate('/login'); }}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#b91c1c', background: '#fef2f2', border: 'none', cursor: 'pointer',
-                }}
-              >
-                <FiLogOut size={14} />
-                Sair
-              </button>
-            </div>
+          </div>
+          <button className={styles.logoutButton} type="button" onClick={() => { clearAuthSession(); navigate('/login'); }}>
+            <FiLogOut /> Sair
+          </button>
+        </div>
+      </aside>
+
+      <div className={styles.mainArea}>
+        <header className={styles.header}>
+          <div className={styles.titleContainer}>
+            <p className={styles.breadcrumb}>Painel / Estoque</p>
+            <h1>Gerenciamento de Estoque</h1>
+            <div className={styles.subtitle}>Acompanhe produtos, entradas e disponibilidade do inventário.</div>
+          </div>
+          <div className={styles.headerActions}>
+            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => navigate('/admin')}>
+              <FiArrowLeft /> Voltar
+            </button>
+            <button className={`${styles.btn} ${styles.btnBlue}`} onClick={() => { setEditProduct(null); setSelectedImages([]); setActiveModal('novo-produto'); }}>
+              <FiPlus /> Novo Produto
+            </button>
           </div>
         </header>
 
-        {/* Main Content */}
-        <div className={styles.content}>
+        <main className={styles.content}>
+          <section className={styles.dashboardCards} aria-label="Indicadores do estoque">
+            <article className={`${styles.card} ${styles.card1}`}>
+              <div className={styles.cardIcon}><FiPackage /></div>
+              <div>
+                <h3>Total de produtos</h3>
+                <div className={styles.value}>{products.length}</div>
+                <span className={styles.cardMeta}>Produtos cadastrados</span>
+              </div>
+            </article>
+            <article className={`${styles.card} ${styles.card2}`}>
+              <div className={styles.cardIcon}><FiArchive /></div>
+              <div>
+                <h3>Itens em estoque</h3>
+                <div className={styles.value}>{totalItems}</div>
+                <span className={styles.cardMeta}>Unidades disponíveis</span>
+              </div>
+            </article>
+            <article className={`${styles.card} ${styles.card3}`}>
+              <div className={styles.cardIcon}><FiAlertTriangle /></div>
+              <div>
+                <h3>Estoque baixo</h3>
+                <div className={styles.value}>{lowStockProducts}</div>
+                <span className={styles.cardMeta}>Até 5 unidades</span>
+              </div>
+            </article>
+            <article className={`${styles.card} ${styles.card4}`}>
+              <div className={styles.cardIcon}><FiTag /></div>
+              <div>
+                <h3>Categorias</h3>
+                <div className={styles.value}>{categories.length}</div>
+                <span className={styles.cardMeta}>Cadastradas</span>
+              </div>
+            </article>
+          </section>
 
-
-          {/* Actions Bar */}
-          <div className={styles.actionsBar}>
-            <span className={styles.actionsLabel}>⚡ Ações Rápidas:</span>
-            <button className={`${styles.btn} ${styles.btnBlue}`} onClick={() => { setEditProduct(null); setSelectedImages([]); setActiveModal('novo-produto'); }}>+ Novo Produto</button>
-            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => setActiveModal('categorias')}>📋 Categorias</button>
-            {/* botão 'Lançar Produtos' removido */}
-            <button className={`${styles.btn} ${styles.btnYellow}`} onClick={() => setActiveModal('lancamento-massa')}>&equiv; Lançar Produto</button>
-            <button className={`${styles.btn} ${styles.btnGreen}`} onClick={() => setIsAuditoriaOpen(true)}>✓ Auditoria</button>
-            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => setActiveModal('configuracoes')}>⚙️ Configurações</button>
-          </div>
-
-          {/* Dashboards */}
-          <div className={styles.dashboardCards}>
-            <div className={`${styles.card} ${styles.card1}`}>
-              <h3>Produtos</h3>
-              <div className={styles.value}>{products.length} <span>cadastrados</span></div>
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <h2>Produtos</h2>
+                <p className={styles.hint}>Visualize e gerencie todos os produtos cadastrados</p>
+              </div>
+              <div className={styles.actionsBar}>
+                <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => setActiveModal('categorias')}><FiTag /> Categorias</button>
+                <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => setActiveModal('lancamento-massa')}><FiLayers /> Lançar</button>
+                <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => setIsAuditoriaOpen(true)}><FiClipboard /> Auditoria</button>
+                <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => setActiveModal('configuracoes')}><FiSettings /> Ajustes</button>
+              </div>
             </div>
-            <div className={`${styles.card} ${styles.card2}`}>
-              <h3>Quantidade</h3>
-              <div className={styles.value}>{totalItems} <span>itens total</span></div>
-            </div>
-          </div>
 
-          {/* Info Box */}
+            <div className={styles.toolbar}>
+              <label className={styles.searchField}>
+                <FiSearch />
+                <input type="text" placeholder="Buscar por nome ou SKU..." className={styles.searchInput} value={productFilter} onChange={(e) => setProductFilter(e.target.value)} />
+              </label>
+              <button className={`${styles.btn} ${styles.btnLight}`} type="button"><FiSliders /> Filtros</button>
+              <span className={styles.resultCount}>{filteredProducts.length} produtos</span>
+            </div>
+
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>SKU</th>
+                    <th>Unidade</th>
+                    <th>Quantidade</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProducts.map(product => (
+                    <tr key={product.id} className={styles.tableBodyRow}>
+                      <td data-label="Produto"><div className={styles.productName}><FiPackage /> {product.nome}</div></td>
+                      <td data-label="SKU"><span className={styles.sku}>#{product.id}</span></td>
+                      <td data-label="Unidade">un</td>
+                      <td data-label="Quantidade">
+                        <div className={styles.stockCell}>
+                          <strong>{product.estoque_atual || 0}</strong>
+                          {Number(product.estoque_atual || 0) <= 5 && <span className={styles.lowBadge}>Estoque baixo</span>}
+                        </div>
+                      </td>
+                      <td data-label="Status">
+                        <div className={styles.statusCell}>
+                          <span className={`${styles.statusBadge} ${product.ativo ? styles.statusActive : styles.statusInactive}`}>
+                            {product.ativo ? 'Ativo' : 'Inativo'}
+                          </span>
+                          <label className={styles.toggleSwitch} aria-label={`${product.ativo ? 'Desativar' : 'Ativar'} produto ${product.nome}`}>
+                            <input
+                              type="checkbox"
+                              checked={product.ativo}
+                              onChange={() => handleToggleActive(product.id, product.ativo)}
+                              className={styles.toggleCheckbox}
+                            />
+                            <span className={styles.toggleSlider}></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td data-label="Ações">
+                        <button className={styles.editButton} onClick={async () => {
+                          try {
+                            const prod = await fetchProductById(product.id);
+                            setEditProduct(prod);
+                            const imgs = (prod.imagens || []).map(im => ({ file: null, preview: getImageUrl(im.url) }));
+                            setSelectedImages(imgs);
+                            setActiveModal('novo-produto');
+                          } catch (err) {
+                            console.error('Failed to fetch product for edit', err);
+                            alert('Erro ao carregar produto para edição: ' + (err.message || ''));
+                          }
+                        }}><FiEdit2 /> Editar</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredProducts.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className={styles.emptyState}>Nenhum produto encontrado.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
           <div className={styles.infoBox}>
-            <span style={{fontSize: '18px'}}>ℹ️</span> Dica Prática: Organize seus produtos por estoques separados para facilitar o gerenciamento de diferentes centros de distribuição.
+            <FiAlertTriangle />
+            <span><strong>Dica prática:</strong> Organize seus produtos por estoques separados para facilitar o gerenciamento de diferentes centros de distribuição.</span>
           </div>
-
-          {/* Table Area */}
-          <div className={styles.searchBar}>
-            <div>
-              <h3>Catálogo de Produtos</h3>
-              <p className={styles.hint}>Visualize e gerencie todos os seus produtos</p>
-            </div>
-            <div>
-              <input type="text" placeholder="Buscar por nome ou SKU..." className={styles.searchInput} value={productFilter} onChange={(e) => setProductFilter(e.target.value)} />
-              <button className={`${styles.btn} ${styles.btnLight}`} style={{marginLeft: '12px'}}>Filtros</button>
-            </div>
-          </div>
-
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Produto</th>
-                <th>SKU</th>
-                <th>Unidade</th>
-                <th>Quantidade</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.filter(p => {
-                if (!productFilter) return true;
-                const q = productFilter.toString().toLowerCase();
-                return (p.nome && p.nome.toLowerCase().includes(q)) || p.id.toString().includes(q);
-              }).map(product => (
-                <tr key={product.id} className={styles.tableBodyRow}>
-                  <td>{product.nome}</td>
-                  <td>{product.id}</td>
-                  <td>un</td>
-                  <td>{product.estoque_atual || 0}</td>
-                  <td>
-                    <label className={styles.toggleSwitch}>
-                      <input 
-                        type="checkbox" 
-                        checked={product.ativo} 
-                        onChange={() => handleToggleActive(product.id, product.ativo)}
-                        className={styles.toggleCheckbox}
-                      />
-                      <span className={styles.toggleSlider}></span>
-                    </label>
-                  </td>
-                  <td>
-                    <button className={`${styles.btn} ${styles.btnLight}`} style={{padding:'4px 8px', fontSize:'12px'}} onClick={async () => {
-                      // open modal in edit mode, fetch full product data (including images)
-                      try {
-                        const prod = await fetchProductById(product.id);
-                        setEditProduct(prod);
-                        // map imagens to selectedImages previews (no File objects)
-                        const imgs = (prod.imagens || []).map(im => ({ file: null, preview: getImageUrl(im.url) }));
-                        setSelectedImages(imgs);
-                        setActiveModal('novo-produto');
-                      } catch (err) {
-                        console.error('Failed to fetch product for edit', err);
-                        alert('Erro ao carregar produto para edição: ' + (err.message || ''));
-                      }
-                    }}>Editar</button>
-                  </td>
-                </tr>
-              ))}
-              {products.length === 0 && (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
-                    Nenhum produto encontrado.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        </main>
 
       {/* Modals */}
       
@@ -601,8 +687,8 @@ const StockManagement = () => {
                 </div>
 
                 <div className={styles.modalFooter}>
-                   <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}>Cancelar</button>
-                   <button type="submit" className={`${styles.btn} ${styles.btnBlue}`}>Salvar Produto</button>
+                   <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}><FiX /> Cancelar</button>
+                   <button type="submit" className={`${styles.btn} ${styles.btnBlue}`}><FiCheck /> Salvar Produto</button>
                 </div>
               </form>
             </div>
@@ -637,7 +723,7 @@ const StockManagement = () => {
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <input type="text" value={searchTerm} onChange={(e) => handleSearchChange(e.target.value)} onKeyDown={handleSingleKeyDown} className={styles.formControl} placeholder="Digite para filtrar a lista abaixo" />
                         <input type="number" value={launchQuantity} onChange={(e) => setLaunchQuantity(e.target.value)} className={styles.formControl} placeholder="Quantidade" style={{ width: '140px' }} />
-                        <button type="button" className={`${styles.btn} ${styles.btnBlue}`} onClick={() => { if (singleSelectedProduct) { /* quickly launch single product */ addMassItem(singleSelectedProduct, launchQuantity); setLaunchQuantity(''); } }}>Adicionar (rápido)</button>
+                        <button type="button" className={`${styles.btn} ${styles.btnBlue}`} onClick={() => { if (singleSelectedProduct) { /* quickly launch single product */ addMassItem(singleSelectedProduct, launchQuantity); setLaunchQuantity(''); } }}><FiPlus /> Adicionar</button>
                       </div>
                       {singleSuggestions.length > 0 && (
                         <div style={{ position: 'absolute', left: 0, right: 0, background: 'white', border: '1px solid #e2e8f0', zIndex: 50, maxHeight: '220px', overflowY: 'auto' }}>
@@ -674,7 +760,7 @@ const StockManagement = () => {
                                 />
                               </td>
                               <td>
-                                <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={() => setMassItems(prev => prev.filter((_, i) => i !== idx))}>Remover</button>
+                                <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={() => setMassItems(prev => prev.filter((_, i) => i !== idx))}><FiTrash2 /> Remover</button>
                               </td>
                             </tr>
                           ))}
@@ -684,8 +770,8 @@ const StockManagement = () => {
                   )}
                 </div>
                 <div className={styles.modalFooter}>
-                   <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}>Cancelar</button>
-                   <button type="submit" className={`${styles.btn} ${styles.btnOrange}`}>Lançar em massa</button>
+                   <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}><FiX /> Cancelar</button>
+                   <button type="submit" className={`${styles.btn} ${styles.btnOrange}`}><FiLayers /> Lançar em massa</button>
                 </div>
               </form>
             </div>
@@ -731,8 +817,8 @@ const StockManagement = () => {
                   <input type="text" className={styles.formControl} placeholder="Selecione primeiro o estoque origem..." />
                 </div>
                 <div className={styles.modalFooter}>
-                   <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}>Cancelar</button>
-                   <button type="button" className={`${styles.btn} ${styles.btnBlue}`}>Transferir em massa</button>
+                   <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}><FiX /> Cancelar</button>
+                   <button type="button" className={`${styles.btn} ${styles.btnBlue}`}><FiLayers /> Transferir em massa</button>
                 </div>
               </form>
             </div>
@@ -778,8 +864,8 @@ const StockManagement = () => {
                   </div>
                 </div>
                 <div className={styles.modalFooter}>
-                   <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}>Cancelar</button>
-                   <button type="button" className={`${styles.btn} ${styles.btnGreenLight}`}>Salvar estoque</button>
+                   <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}><FiX /> Cancelar</button>
+                   <button type="button" className={`${styles.btn} ${styles.btnGreenLight}`}><FiCheck /> Salvar estoque</button>
                 </div>
               </form>
             </div>
@@ -820,7 +906,7 @@ const StockManagement = () => {
                       required
                     />
                   </div>
-                  <button type="submit" className={`${styles.btn} ${styles.btnBlue}`} style={{ height: '42px', padding: '0 20px' }}>Adicionar</button>
+                  <button type="submit" className={`${styles.btn} ${styles.btnBlue}`}><FiPlus /> Adicionar</button>
                 </form>
               </div>
 
@@ -852,7 +938,7 @@ const StockManagement = () => {
               </div>
 
               <div className={styles.modalFooter}>
-                <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}>Fechar</button>
+                <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}><FiX /> Fechar</button>
               </div>
             </div>
           </div>
@@ -911,7 +997,7 @@ const StockManagement = () => {
               </div>
 
               <div className={styles.modalFooter}>
-                <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}>Fechar</button>
+                <button type="button" className={`${styles.btn} ${styles.btnLight}`} onClick={closeModal}><FiX /> Fechar</button>
               </div>
             </div>
           </div>

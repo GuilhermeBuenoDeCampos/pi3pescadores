@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Home from './pages/Home';
 import ProductPage from './pages/ProductPage';
 import StockManagement from './pages/StockManagement';
+import SalesManagement from './pages/SalesManagement';
 import CartPage from './pages/CartPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -11,6 +12,7 @@ import AccountPage from './pages/AccountPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminFinanceDashboard from './pages/AdminFinanceDashboard';
 import AdminUsers from './pages/AdminUsers';
+import FaturamentoCompleto from './pages/FaturamentoCompleto';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import styles from './App.module.css';
@@ -40,6 +42,14 @@ function App() {
             }
           />
           <Route
+            path="/vendas"
+            element={
+              <ProtectedRoute roles={['admin', 'funcionario']}>
+                <SalesManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/admin"
             element={
               <ProtectedRoute roles={['admin']}>
@@ -60,6 +70,14 @@ function App() {
             element={
               <ProtectedRoute roles={['admin']}>
                 <AdminUsers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/faturamento-completo"
+            element={
+              <ProtectedRoute roles={['admin', 'funcionario']}>
+                <FaturamentoCompleto />
               </ProtectedRoute>
             }
           />

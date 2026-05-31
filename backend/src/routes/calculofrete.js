@@ -41,8 +41,11 @@ router.post('/', async (req, res) => {
       return res.status(500).json({ error: 'Fetch API not available in this runtime.' });
     }
 
-    // Remove "Bearer " prefix if it exists
     const token = (process.env.MELHOR_ENVIO_TOKEN || '').replace(/^Bearer\s+/i, '');
+
+    if (!token) {
+      return res.json([]);
+    }
 
     const response = await fetch('https://www.melhorenvio.com.br/api/v2/me/shipment/calculate', {
       method: 'POST',

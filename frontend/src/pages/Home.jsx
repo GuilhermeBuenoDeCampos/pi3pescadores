@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import BannerCarousel from '../components/BannerCarousel';
 import SearchBar from '../components/SearchBar';
@@ -8,6 +8,7 @@ import SectionTitle from '../components/SectionTitle';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
 import { fetchProducts, fetchCategories, registrarPalavraPesquisada } from '../services/api';
+import { registrarEventoVisitante } from '../services/visitanteEvento';
 import { sortProductsByPrice } from '../utils/productUtils';
 import styles from './Home.module.css';
 
@@ -22,6 +23,15 @@ function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const homeEventRegistered = useRef(false);
+
+  // Registrar evento de visitação à home (apenas uma vez)
+  useEffect(() => {
+    if (!homeEventRegistered.current) {
+      homeEventRegistered.current = true;
+      registrarEventoVisitante('visitou_home');
+    }
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -232,50 +242,6 @@ function Home() {
           </div>
         </section>
 
-        <section className={styles.bannerSection}>
-          <div className={styles.bannerGrid}>
-            <div className={styles.bannerMain}>
-              <span>✦ Seleção especial</span>
-              <h2>
-                Itens para o altar, a oração e o presente com significado
-              </h2>
-              <a href="#catalog">Ver produtos →</a>
-            </div>
-            <div className={styles.bannerStack}>
-              <article className={styles.bannerMini}>
-                <h3>Imagens e oratórios</h3>
-                <p>Peças para compor espaços de devoção com beleza e reverência.</p>
-                <a href="#catalog">Explorar →</a>
-              </article>
-              <article className={`${styles.bannerMini} ${styles.bannerMiniWarm}`}>
-                <h3>Bíblias e terços</h3>
-                <p>Clássicos da fé católica para estudo, oração diária e presentes.</p>
-                <a href="#catalog">Conhecer →</a>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.testimonialsSection}>
-          <span className={styles.sectionLabel}>Compromissos da loja</span>
-          <h2>Atendimento com respeito à sua devoção</h2>
-          <div className={styles.testimonialsGrid}>
-            <article className={styles.testimonialCard}>
-              <p>Curadoria focada em artigos religiosos católicos para diferentes momentos de fé.</p>
-              <span>Tres Pescadores Store</span>
-            </article>
-            <article className={styles.testimonialCard}>
-              <p>Produtos apresentados com imagens, categorias e preços reais do catálogo.</p>
-              <span>Catálogo atualizado</span>
-            </article>
-            <article className={styles.testimonialCard}>
-              <p>Navegação com busca, filtros por categoria e ordenação por preço preservados.</p>
-              <span>Experiência de compra</span>
-            </article>
-          </div>
-        </section>
-
-        
       </main>
 
       <Footer />
