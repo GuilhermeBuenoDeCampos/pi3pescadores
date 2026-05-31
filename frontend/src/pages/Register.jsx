@@ -5,6 +5,42 @@ import styles from './Auth.module.css';
 import logo from '../assets/logo/logo.png';
 import { registerUser } from '../services/api';
 
+const maskCpf = (value) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+
+    if (digits.length > 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+    if (digits.length > 6) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    if (digits.length > 3) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    return digits;
+};
+
+const maskTelefone = (value) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+
+    if (digits.length > 7) return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    if (digits.length > 2) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length > 0) return `(${digits}`;
+    return digits;
+};
+
+const isValidCpf = (value) => {
+    const digits = value.replace(/\D/g, '');
+
+    if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) return false;
+
+    const calculateDigit = (length) => {
+        const sum = digits
+            .slice(0, length)
+            .split('')
+            .reduce((total, digit, index) => total + Number(digit) * (length + 1 - index), 0);
+        const remainder = (sum * 10) % 11;
+        return remainder === 10 ? 0 : remainder;
+    };
+
+    return calculateDigit(9) === Number(digits[9])
+        && calculateDigit(10) === Number(digits[10]);
+};
+
 const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -23,10 +59,15 @@ const Register = () => {
 
     const handleChange = (event) => {
         const { name, value } = event.target;
+        const maskedValue = name === 'cpf'
+            ? maskCpf(value)
+            : name === 'telefone'
+                ? maskTelefone(value)
+                : value;
 
         setForm((current) => ({
             ...current,
-            [name]: value,
+            [name]: maskedValue,
         }));
     };
 
@@ -37,6 +78,11 @@ const Register = () => {
 
         if (form.senha !== form.confirmarSenha) {
             setError('As senhas precisam ser iguais.');
+            return;
+        }
+
+        if (!isValidCpf(form.cpf)) {
+            setError('Informe um CPF válido.');
             return;
         }
 
@@ -65,6 +111,7 @@ const Register = () => {
         <div className={styles.container}>
             <div className={styles.leftPanel}>
                 <div className={styles.formContainer}>
+                    <img src={logo} alt="Tres Pescadores Store" className={styles.mobileLogo} />
                     <h1 className={styles.title}>Criar Conta</h1>
                     <p className={styles.subtitle}>Preencha os dados para se cadastrar na plataforma</p>
 
@@ -104,6 +151,7 @@ const Register = () => {
                                 placeholder="000.000.000-00"
                                 value={form.cpf}
                                 onChange={handleChange}
+                                maxLength={14}
                                 required
                             />
                         </div>
@@ -117,6 +165,7 @@ const Register = () => {
                                 placeholder="(00) 00000-0000"
                                 value={form.telefone}
                                 onChange={handleChange}
+                                maxLength={15}
                             />
                         </div>
 
