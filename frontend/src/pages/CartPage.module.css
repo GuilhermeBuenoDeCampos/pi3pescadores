@@ -378,6 +378,12 @@
   border-color: var(--indigo-light);
 }
 
+.shippingOptionPreview,
+.shippingOptionPreview:hover {
+  border-color: #e2e8f0;
+  cursor: default;
+}
+
 .shippingOptionSelected {
   border-color: var(--indigo-dark);
   background: rgba(61, 78, 143, 0.05);
@@ -486,6 +492,12 @@
   outline: none;
   border-color: var(--indigo-dark);
   box-shadow: 0 0 0 3px rgba(61, 78, 143, 0.08);
+}
+
+.addressForm input:read-only {
+  color: #667085;
+  background: #f2f4f7;
+  cursor: not-allowed;
 }
 
 .addressForm textarea {

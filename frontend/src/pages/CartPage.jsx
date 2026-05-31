@@ -15,6 +15,11 @@ const STEPS = [
   { number: 4, label: 'Revisão' },
 ];
 
+const maskCep = (value) => {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+};
+
 function CartPage() {
   const { cart, removeFromCart, clearCart, addToCart, decreaseQuantity, isCartLoading, cartError } = useCart();
   const navigate = useNavigate();
@@ -25,6 +30,7 @@ function CartPage() {
   const [isLoadingShipping, setIsLoadingShipping] = useState(false);
   const [shippingError, setShippingError] = useState('');
   const [shippingSuccess, setShippingSuccess] = useState(false);
+  const [isDeliveryCepEdited, setIsDeliveryCepEdited] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('whatsapp');
@@ -78,6 +84,65 @@ function CartPage() {
   const total = subtotal + shippingCost;
   const totalItems = displayItems.reduce((total, item) => total + item.quantity, 0);
 
+  useEffect(() => {
+    if (currentStep !== 2 || !isDeliveryCepEdited) return undefined;
+
+    const cleanCep = deliveryAddress.cep.replace(/\D/g, '');
+    setCep(cleanCep);
+
+    if (cleanCep.length !== 8 || displayItems.length === 0) return undefined;
+
+    let isCancelled = false;
+    const timer = setTimeout(async () => {
+      setIsLoadingShipping(true);
+
+      try {
+        const [addressResponse, options] = await Promise.all([
+          fetch(`https://viacep.com.br/ws/${cleanCep}/json/`).then((response) => response.json()),
+          calculateShipping({
+            to_postal_code: cleanCep,
+            products: displayItems.map(item => ({ ...item.product, quantity: item.quantity })),
+          }),
+        ]);
+
+        if (isCancelled) return;
+
+        if (!addressResponse.erro) {
+          setDeliveryAddress((current) => ({
+            ...current,
+            cep: maskCep(addressResponse.cep),
+            rua: addressResponse.logradouro || '',
+            bairro: addressResponse.bairro || '',
+            cidade: addressResponse.localidade || '',
+            estado: addressResponse.uf || '',
+          }));
+        }
+
+        if (options && options.length > 0) {
+          setShippingOptions(options);
+          setShippingSuccess(true);
+        } else {
+          setShippingError('Nenhuma opção de frete disponível para este CEP.');
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          console.error('Erro ao recalcular frete:', error);
+          setShippingError('Erro ao calcular frete. Verifique o CEP e tente novamente.');
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingShipping(false);
+          setIsDeliveryCepEdited(false);
+        }
+      }
+    }, 500);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
+  }, [deliveryAddress.cep, currentStep, isDeliveryCepEdited]);
+
   if (isCartLoading) {
     return (
       <div>
@@ -120,7 +185,7 @@ function CartPage() {
       if (!endereco.erro) {
         setDeliveryAddress((current) => ({
           ...current,
-          cep: endereco.cep.replace(/\D/g, ''),
+          cep: maskCep(endereco.cep),
           rua: endereco.logradouro || '',
           bairro: endereco.bairro || '',
           cidade: endereco.localidade || '',
@@ -170,9 +235,17 @@ function CartPage() {
   };
 
   const updateDeliveryAddress = (field, value) => {
+    if (field === 'cep') {
+      setIsDeliveryCepEdited(true);
+      setSelectedShipping(null);
+      setShippingOptions([]);
+      setShippingSuccess(false);
+      setShippingError('');
+    }
+
     setDeliveryAddress((current) => ({
       ...current,
-      [field]: field === 'cep' ? value.replace(/\D/g, '').slice(0, 8) : value,
+      [field]: field === 'cep' ? maskCep(value) : value,
     }));
   };
 
@@ -221,7 +294,7 @@ function CartPage() {
   const nextStep = () => {
     if (currentStep >= 4) return;
     if (currentStep === 1 && displayItems.length === 0) return;
-    if (currentStep === 2 && (!deliveryAddress.nome_destinatario || !deliveryAddress.rua || !deliveryAddress.numero)) return;
+    if (currentStep === 2 && (!deliveryAddress.nome_destinatario || !deliveryAddress.rua || !deliveryAddress.numero || !selectedShipping)) return;
     setCurrentStep((prev) => prev + 1);
   };
 
@@ -345,18 +418,11 @@ function CartPage() {
                   {shippingOptions.length > 0 && (
                     <div className={styles.shippingOptions}>
                       {shippingOptions.map((option) => (
-                        <label key={option.name} className={`${styles.shippingOption} ${selectedShipping?.name === option.name ? styles.shippingOptionSelected : ''}`}>
-                          <input
-                            type="radio"
-                            name="shipping"
-                            value={option.name}
-                            checked={selectedShipping?.name === option.name}
-                            onChange={() => setSelectedShipping(option)}
-                          />
+                        <div key={option.name} className={`${styles.shippingOption} ${styles.shippingOptionPreview}`}>
                           <span>{option.name === 'PAC' ? '🚚' : '⚡'} {option.name}</span>
                           <strong>R$ {formatPrice(option.price)}</strong>
                           <small>({option.delivery_time} dias)</small>
-                        </label>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -390,6 +456,8 @@ function CartPage() {
                     value={deliveryAddress.cep}
                     onChange={(e) => updateDeliveryAddress('cep', e.target.value)}
                     placeholder="CEP"
+                    inputMode="numeric"
+                    maxLength="9"
                   />
                   <input
                     type="text"
@@ -401,8 +469,8 @@ function CartPage() {
                 <input
                   type="text"
                   value={deliveryAddress.rua}
-                  onChange={(e) => updateDeliveryAddress('rua', e.target.value)}
                   placeholder="Rua"
+                  readOnly
                 />
                 <div className={styles.row}>
                   <input
@@ -421,29 +489,57 @@ function CartPage() {
                 <input
                   type="text"
                   value={deliveryAddress.bairro}
-                  onChange={(e) => updateDeliveryAddress('bairro', e.target.value)}
                   placeholder="Bairro"
+                  readOnly
                 />
                 <div className={styles.row}>
                   <input
                     type="text"
                     value={deliveryAddress.cidade}
-                    onChange={(e) => updateDeliveryAddress('cidade', e.target.value)}
                     placeholder="Cidade"
+                    readOnly
                   />
                   <input
                     type="text"
                     value={deliveryAddress.estado}
-                    onChange={(e) => updateDeliveryAddress('estado', e.target.value.slice(0, 2).toUpperCase())}
                     placeholder="UF"
                     maxLength="2"
+                    readOnly
                   />
                 </div>
               </div>
 
+              <div className={styles.shippingBox}>
+                <h3>Escolha a opção de entrega</h3>
+                {shippingOptions.length > 0 ? (
+                  <div className={styles.shippingOptions}>
+                    {shippingOptions.map((option) => (
+                      <label key={option.name} className={`${styles.shippingOption} ${selectedShipping?.name === option.name ? styles.shippingOptionSelected : ''}`}>
+                        <input
+                          type="radio"
+                          name="shipping"
+                          value={option.name}
+                          checked={selectedShipping?.name === option.name}
+                          onChange={() => setSelectedShipping(option)}
+                        />
+                        <span>{option.name === 'PAC' ? '🚚' : '⚡'} {option.name}</span>
+                        <strong>R$ {formatPrice(option.price)}</strong>
+                        <small>({option.delivery_time} dias)</small>
+                      </label>
+                    ))}
+                  </div>
+                ) : shippingError ? (
+                  <span className={styles.errorMsg}>{shippingError}</span>
+                ) : deliveryAddress.cep.replace(/\D/g, '').length === 8 ? (
+                  <span className={styles.successMsg}>Recalculando frete...</span>
+                ) : (
+                  <span className={styles.errorMsg}>Digite o CEP para calcular e escolher uma opção de entrega.</span>
+                )}
+              </div>
+
               <div className={styles.btnRow}>
                 <button className={styles.secondaryBtn} onClick={prevStep}>Voltar</button>
-                <button className={styles.primaryBtn} onClick={nextStep} disabled={!isAddressValid}>
+                <button className={styles.primaryBtn} onClick={nextStep} disabled={!isAddressValid || !selectedShipping}>
                   Avançar para Pagamento
                 </button>
               </div>
