@@ -19,11 +19,17 @@ function Header() {
         setIsUserMenuOpen(false);
       }
     };
+    const handleAuthChange = () => {
+      setUser(getAuthToken() ? getAuthUser() : null);
+      setIsUserMenuOpen(false);
+    };
 
     document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('auth-session-changed', handleAuthChange);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('auth-session-changed', handleAuthChange);
     };
   }, []);
 
