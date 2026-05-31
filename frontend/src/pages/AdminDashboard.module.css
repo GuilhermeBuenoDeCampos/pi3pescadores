@@ -164,6 +164,39 @@
   padding: 16px;
 }
 
+.satisfacaoCard {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(8, 147, 111, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(8, 147, 111, 0.03) 0%, transparent 50%),
+    #ffffff;
+  border: 1px solid rgba(8, 147, 111, 0.08);
+}
+
+.satisfacaoHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.satisfacaoHeader h2 {
+  margin: 0 !important;
+}
+
+.satisfacaoBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #08936f;
+  background: rgba(8, 147, 111, 0.08);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
 .accuracyCard {
   width: 100%;
   min-height: 240px;

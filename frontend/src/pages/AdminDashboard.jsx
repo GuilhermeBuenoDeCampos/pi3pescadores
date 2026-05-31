@@ -660,11 +660,17 @@ function AdminDashboard() {
     labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preco', 'Experiencia'],
     datasets: [
       {
-        label: 'Satisfacao',
+        label: 'Satisfação',
         data: [0.75, 0.78, 0.92, 0.68, 0.82],
-        borderColor: '#a7824f',
-        backgroundColor: 'rgba(167, 130, 79, 0.22)',
-        pointBackgroundColor: '#a7824f',
+        borderColor: '#08936f',
+        backgroundColor: 'rgba(8, 147, 111, 0.18)',
+        pointBackgroundColor: '#08936f',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        borderWidth: 2.5,
+        pointStyle: 'circle',
       },
     ],
   }), []);
@@ -1233,21 +1239,52 @@ function AdminDashboard() {
             </div>
           </article>
 
-          <article className={styles.chartBlock}>
-            <h2>Satisfacao</h2>
+          <article className={`${styles.chartBlock} ${styles.satisfacaoCard}`}>
+            <div className={styles.satisfacaoHeader}>
+              <h2>Satisfação</h2>
+              <span className={styles.satisfacaoBadge}>Rede de Pesca</span>
+            </div>
             <div className={styles.chartCanvas}>
               <Radar
                 data={satisfactionData}
                 options={{
-                  ...commonOptions,
-                  plugins: { legend: { display: false } },
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: (ctx) => `${ctx.parsed.r >= 1 ? 100 : Math.round(ctx.parsed.r * 100)}%`,
+                      },
+                    },
+                  },
                   scales: {
                     r: {
                       min: 0,
                       max: 1,
-                      ticks: { stepSize: 0.2, backdropColor: 'transparent' },
-                      grid: { color: chartColors.grid },
-                      angleLines: { color: chartColors.grid },
+                      ticks: {
+                        stepSize: 0.2,
+                        backdropColor: 'transparent',
+                        color: '#94a3b8',
+                        font: { size: 8 },
+                        callback: (v) => `${Math.round(v * 100)}%`,
+                      },
+                      grid: {
+                        color: [
+                          'rgba(8, 147, 111, 0.06)',
+                          'rgba(8, 147, 111, 0.12)',
+                          'rgba(8, 147, 111, 0.20)',
+                          'rgba(8, 147, 111, 0.30)',
+                          'rgba(8, 147, 111, 0.40)',
+                        ],
+                      },
+                      angleLines: {
+                        color: 'rgba(8, 147, 111, 0.09)',
+                      },
+                      pointLabels: {
+                        color: '#1e293b',
+                        font: { size: 10, weight: '600' },
+                      },
                     },
                   },
                 }}
