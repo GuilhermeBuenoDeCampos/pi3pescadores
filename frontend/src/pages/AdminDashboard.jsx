@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { FiBarChart2, FiDollarSign, FiGrid, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings } from 'react-icons/fi';
+import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings, FiX } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
@@ -333,6 +333,77 @@ function createCableCarPointsPlugin(imageSrc) {
   };
 }
 
+const kpiCalculations = {
+  faturamento: {
+    title: 'Faturamento mensal',
+    description: 'Soma o valor total dos pedidos com status confirmado, preparando, enviado ou concluído criados no mês atual.',
+  },
+  ticket: {
+    title: 'Ticket médio mensal',
+    description: 'Divide a receita total pela quantidade de vendas com status confirmado, preparando, enviado ou concluído criadas no mês exibido no card.',
+  },
+  recompra: {
+    title: 'Taxa de recompra',
+    description: 'Divide a quantidade de clientes com mais de uma compra pela quantidade total de clientes que compraram no ano atual e multiplica por 100.',
+  },
+  pesquisas: {
+    title: 'Palavras mais pesquisadas',
+    description: 'Agrupa as buscas registradas por palavra e ordena da maior para a menor quantidade de pesquisas.',
+  },
+  conversao: {
+    title: 'Taxa de conversão',
+    description: 'Divide a quantidade de pedidos confirmados pela quantidade de visitantes únicos da home no mês e multiplica por 100.',
+  },
+  visitantes: {
+    title: 'Visitantes únicos',
+    description: 'Conta uma vez cada usuário logado ou, para visitantes sem login, cada IP que acessou a home durante o mês.',
+  },
+  acuracidade: {
+    title: 'Acuracidade média',
+    description: 'Para cada auditoria, calcula 100 menos o percentual da diferença absoluta entre o estoque físico e o registrado. O card exibe a média dos produtos auditados.',
+  },
+};
+
+function CalculationHelpButton({ calculation, onOpen, withSettings = false }) {
+  return (
+    <button
+      className={`${styles.calculationHelpButton} ${withSettings ? styles.calculationHelpButtonWithSettings : ''}`}
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        onOpen(calculation);
+      }}
+      title={`Como ${calculation.title.toLowerCase()} é calculado`}
+      aria-label={`Mostrar como ${calculation.title.toLowerCase()} é calculado`}
+    >
+      <FiHelpCircle size={18} />
+    </button>
+  );
+}
+
+function CalculationHelpModal({ calculation, onClose }) {
+  if (!calculation) return null;
+
+  return (
+    <div className={styles.calculationOverlay} onClick={onClose}>
+      <div
+        className={styles.calculationModal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="calculation-help-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className={styles.calculationCloseButton} type="button" onClick={onClose} aria-label="Fechar explicação">
+          <FiX size={18} />
+        </button>
+        <FiHelpCircle className={styles.calculationModalIcon} size={24} />
+        <h2 id="calculation-help-title">{calculation.title}</h2>
+        <p>{calculation.description}</p>
+      </div>
+    </div>
+  );
+}
+
 function AdminDashboard() {
   const navigate = useNavigate();
   const [accuracy, setAccuracy] = useState(null);
@@ -354,6 +425,7 @@ function AdminDashboard() {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [showVisitanteModal, setShowVisitanteModal] = useState(false);
   const [showConversaoModal, setShowConversaoModal] = useState(false);
+  const [calculationHelp, setCalculationHelp] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -775,7 +847,7 @@ function AdminDashboard() {
               }}
               style={{
                 position: 'absolute',
-                top: 12,
+                bottom: 12,
                 right: 12,
                 zIndex: 10,
                 background: 'rgba(255, 255, 255, 0.9)',
@@ -802,6 +874,7 @@ function AdminDashboard() {
               <FiSettings size={18} color="#10182c" />
             </button>
             {/* Conteúdo do card */}
+            <CalculationHelpButton calculation={kpiCalculations.faturamento} onOpen={setCalculationHelp} withSettings />
             <div className={styles.revenueKpiContent}>
               <span>Faturamento mensal</span>
               <strong>
@@ -852,7 +925,7 @@ function AdminDashboard() {
               }}
               style={{
                 position: 'absolute',
-                top: 12,
+                bottom: 12,
                 right: 12,
                 zIndex: 10,
                 background: 'rgba(255, 255, 255, 0.9)',
@@ -878,8 +951,9 @@ function AdminDashboard() {
             >
               <FiSettings size={18} color="#10182c" />
             </button>
+            <CalculationHelpButton calculation={kpiCalculations.ticket} onOpen={setCalculationHelp} withSettings />
             <div className={styles.revenueKpiContent}>
-            <span>Ticket médio</span>
+            <span>Ticket médio - {ticketMedio?.mesReferencia || 'mês atual'}</span>
             <strong>{loadingTicketMedio ? 'Carregando...' : ticketMedioFormatado}</strong>
             {ticketMedio && (
               <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
@@ -914,7 +988,7 @@ function AdminDashboard() {
               onClick={() => setShowRecompraModal(true)}
               style={{
                 position: 'absolute',
-                top: 12,
+                bottom: 12,
                 right: 12,
                 zIndex: 10,
                 background: 'rgba(255, 255, 255, 0.9)',
@@ -941,6 +1015,7 @@ function AdminDashboard() {
               <FiSettings size={18} color="#10182c" />
             </button>
 
+            <CalculationHelpButton calculation={kpiCalculations.recompra} onOpen={setCalculationHelp} withSettings />
             <div className={styles.revenueKpiContent}>
               <span>Taxa de recompra</span>
               <strong>
@@ -972,6 +1047,7 @@ function AdminDashboard() {
               pointerEvents: 'none',
             }} />
 
+            <CalculationHelpButton calculation={kpiCalculations.pesquisas} onOpen={setCalculationHelp} />
             <div className={styles.revenueKpiContent}>
               <span>Palavras mais pesquisadas</span>
               <strong>{loadingSearches ? 'Carregando...' : topSearch?.palavra || 'Sem dados'}</strong>
@@ -1014,7 +1090,7 @@ function AdminDashboard() {
               onClick={() => setShowConversaoModal(true)}
               style={{
                 position: 'absolute',
-                top: 12,
+                bottom: 12,
                 right: 12,
                 zIndex: 10,
                 background: 'rgba(255, 255, 255, 0.9)',
@@ -1041,6 +1117,7 @@ function AdminDashboard() {
               <FiSettings size={18} color="#10182c" />
             </button>
 
+            <CalculationHelpButton calculation={kpiCalculations.conversao} onOpen={setCalculationHelp} withSettings />
             <div className={styles.revenueKpiContent}>
             <span>Taxa de conversão</span>
             <strong>
@@ -1079,7 +1156,7 @@ function AdminDashboard() {
               onClick={() => setShowVisitanteModal(true)}
               style={{
                 position: 'absolute',
-                top: 12,
+                bottom: 12,
                 right: 12,
                 zIndex: 10,
                 background: 'rgba(255, 255, 255, 0.9)',
@@ -1106,6 +1183,7 @@ function AdminDashboard() {
               <FiSettings size={18} color="#10182c" />
             </button>
 
+            <CalculationHelpButton calculation={kpiCalculations.visitantes} onOpen={setCalculationHelp} withSettings />
             <div className={styles.revenueKpiContent}>
               <span>Visitantes unicos (mes)</span>
               <strong>
@@ -1119,6 +1197,7 @@ function AdminDashboard() {
             </div>
           </article>
           <article className={styles.accuracyCard}>
+            <CalculationHelpButton calculation={kpiCalculations.acuracidade} onOpen={setCalculationHelp} />
             <div className={styles.accuracyHeader}>
               <div className={styles.headerContent}>
                 <div>
@@ -1318,6 +1397,7 @@ function AdminDashboard() {
         type="conversao"
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
+      <CalculationHelpModal calculation={calculationHelp} onClose={() => setCalculationHelp(null)} />
     </main>
   );
 }

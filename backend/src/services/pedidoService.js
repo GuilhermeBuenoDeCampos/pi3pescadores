@@ -747,10 +747,33 @@ exports.obterTaxaRecompraAnual = async (ano = new Date().getFullYear()) => {
 
 exports.obterTicketMedio = async () => {
   try {
+    const hoje = new Date();
+    const partesMesAtual = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: 'numeric',
+    }).formatToParts(hoje);
+    const anoAtual = Number(partesMesAtual.find((parte) => parte.type === 'year')?.value);
+    const mesAtual = Number(partesMesAtual.find((parte) => parte.type === 'month')?.value);
+    const proximoMes = new Date(Date.UTC(anoAtual, mesAtual, 1));
+    const inicioMes = new Date(`${anoAtual}-${String(mesAtual).padStart(2, '0')}-01T00:00:00-03:00`);
+    const inicioProximoMes = new Date(
+      `${proximoMes.getUTCFullYear()}-${String(proximoMes.getUTCMonth() + 1).padStart(2, '0')}-01T00:00:00-03:00`
+    );
+    const mesReferencia = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      month: 'long',
+      year: 'numeric',
+    }).format(inicioMes);
+
     const resultado = await db.Pedido.findOne({
       where: {
         status: {
           [Op.in]: SALE_STATUSES,
+        },
+        criado_em: {
+          [Op.gte]: inicioMes,
+          [Op.lt]: inicioProximoMes,
         },
       },
       attributes: [
@@ -774,6 +797,7 @@ exports.obterTicketMedio = async () => {
       receitaTotalNumerico: receitaTotal,
       total_vendas: totalVendas,
       clientes_unicos: clientesUnicos,
+      mesReferencia,
     };
   } catch (error) {
     console.error('[pedidoService] erro ao calcular ticket medio:', error.message);

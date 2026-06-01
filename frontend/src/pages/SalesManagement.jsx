@@ -130,7 +130,7 @@ const SalesManagement = () => {
         <nav className={styles.sidebarNav} aria-label="Menu de vendas">
           <span className={styles.navLabel}>Principal</span>
           <button className={styles.navItem} type="button" onClick={() => navigate('/estoque')}>
-            <FiGrid /> Visao geral
+            <FiGrid /> Estoque
           </button>
           <button className={`${styles.navItem} ${styles.navItemActive}`} type="button">
             <FiBarChart2 /> Vendas
