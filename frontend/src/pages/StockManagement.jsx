@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   BACKEND_URL,
+  apiFetch,
   clearAuthSession,
   fetchCategories,
   fetchProducts,
@@ -181,13 +182,15 @@ const StockManagement = () => {
       let response;
       if (editProduct && editProduct.id) {
         // use POST to update when sending multipart FormData from the browser
-        response = await fetch(`${BACKEND_URL}/api/produtos/${editProduct.id}`, {
+        // Usa apiFetch para limpar sessão e redirecionar se o token expirar.
+        response = await apiFetch(`${BACKEND_URL}/api/produtos/${editProduct.id}`, {
           method: 'POST',
           headers,
           body: formData,
         });
       } else {
-        response = await fetch(`${BACKEND_URL}/api/produtos`, {
+        // Usa apiFetch para limpar sessão e redirecionar se o token expirar.
+        response = await apiFetch(`${BACKEND_URL}/api/produtos`, {
           method: 'POST',
           headers,
           body: formData,
@@ -223,7 +226,8 @@ const StockManagement = () => {
     if (!newCategoryName.trim()) return;
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/categorias`, {
+      // Usa apiFetch para limpar sessão e redirecionar se o token expirar.
+      const response = await apiFetch(`${BACKEND_URL}/api/categorias`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ nome: newCategoryName })
@@ -335,7 +339,8 @@ const StockManagement = () => {
     }
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/produtos/movimentacoes/massa`, {
+      // Usa apiFetch para limpar sessão e redirecionar se o token expirar.
+      const response = await apiFetch(`${BACKEND_URL}/api/produtos/movimentacoes/massa`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ movimentacoes: massItems.map(item => ({ id_produto: item.id_produto, tipo: 'entrada', quantidade: Number(item.quantidade), motivo: 'compra' })) }),

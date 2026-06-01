@@ -19,7 +19,7 @@ import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
+import { apiFetch, clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
 import clockTowerBar from '../assets/admin/clock-tower-bar.png';
 import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
@@ -369,7 +369,8 @@ function AdminDashboard() {
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
-          fetch(`${API_URL}/pedidos/admin/faturamento-mensal?meses=12`, {
+          // Usa apiFetch para aplicar o redirecionamento global em caso de 401.
+          apiFetch(`${API_URL}/pedidos/admin/faturamento-mensal?meses=12`, {
             headers: faturamentoHeaders,
           }).then(res => {
             if (!res.ok) {
@@ -382,7 +383,8 @@ function AdminDashboard() {
             return [];
           }),
           fetchTaxaRecompraAnual().catch(() => null),
-          fetch(`${API_URL}/pedidos/admin/ticket-medio`, {
+          // Usa apiFetch para aplicar o redirecionamento global em caso de 401.
+          apiFetch(`${API_URL}/pedidos/admin/ticket-medio`, {
             headers: faturamentoHeaders,
           }).then(res => {
             if (!res.ok) {

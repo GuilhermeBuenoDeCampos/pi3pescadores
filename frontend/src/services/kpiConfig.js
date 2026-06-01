@@ -1,8 +1,9 @@
-import { API_URL, getAuthToken } from './api';
+import { API_URL, apiFetch, getAuthToken } from './api';
 
 export const obterKpiConfig = async () => {
   try {
-    const response = await fetch(`${API_URL}/kpi-config`);
+    // Usa apiFetch para aplicar o tratamento global de 401.
+    const response = await apiFetch(`${API_URL}/kpi-config`);
     if (!response.ok) {
       throw new Error('Erro ao buscar configuração KPI');
     }
@@ -17,7 +18,8 @@ export const obterKpiConfig = async () => {
 export const atualizarKpiConfig = async (config) => {
   try {
     const authToken = getAuthToken();
-    const response = await fetch(`${API_URL}/kpi-config`, {
+    // Usa apiFetch para limpar sessão e redirecionar se o token expirar.
+    const response = await apiFetch(`${API_URL}/kpi-config`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

@@ -294,11 +294,13 @@ exports.autenticarUsuario = async (payload) => {
     updated_at: now,
   });
 
+  // Gera o token de sessão usando o secret configurado em process.env.JWT_SECRET
+  // dentro do utilitário JWT e uma expiração explícita de 7 dias.
   const token = jwt.sign({
     sub: usuario.id,
     email: usuario.email,
     tipo_usuario: usuario.tipo_usuario,
-  });
+  }, { expiresIn: '7d' });
 
   let carrinho = null;
 

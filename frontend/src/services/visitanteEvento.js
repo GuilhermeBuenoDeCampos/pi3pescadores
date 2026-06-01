@@ -1,4 +1,4 @@
-import { BACKEND_URL } from './api';
+import { BACKEND_URL, apiFetch } from './api';
 import { getAuthHeaders } from './api';
 
 /**
@@ -12,7 +12,8 @@ export async function registrarEventoVisitante(evento) {
       ...getAuthHeaders(), // Incluir token se disponível
     };
 
-    const response = await fetch(`${BACKEND_URL}/api/visitante-evento`, {
+    // Usa apiFetch para limpar a sessão caso o token opcional esteja expirado.
+    const response = await apiFetch(`${BACKEND_URL}/api/visitante-evento`, {
       method: 'POST',
       headers,
       body: JSON.stringify({ evento }),
@@ -35,7 +36,8 @@ export async function registrarEventoVisitante(evento) {
  */
 export async function obterEstatisticasEventos() {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/visitante-evento/stats`);
+    // Usa apiFetch para manter o tratamento de 401 centralizado.
+    const response = await apiFetch(`${BACKEND_URL}/api/visitante-evento/stats`);
     
     if (!response.ok) {
       throw new Error('Erro ao obter estatísticas');
@@ -53,7 +55,8 @@ export async function obterEstatisticasEventos() {
  */
 export async function obterEventosRecentes(dias = 7) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/visitante-evento/recentes?dias=${dias}`);
+    // Usa apiFetch para manter o tratamento de 401 centralizado.
+    const response = await apiFetch(`${BACKEND_URL}/api/visitante-evento/recentes?dias=${dias}`);
     
     if (!response.ok) {
       throw new Error('Erro ao obter eventos');
@@ -71,7 +74,8 @@ export async function obterEventosRecentes(dias = 7) {
  */
 export async function obterTaxaConversao() {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/visitante-evento/taxa-conversao`);
+    // Usa apiFetch para manter o tratamento de 401 centralizado.
+    const response = await apiFetch(`${BACKEND_URL}/api/visitante-evento/taxa-conversao`);
     
     if (!response.ok) {
       throw new Error('Erro ao obter taxa de conversão');

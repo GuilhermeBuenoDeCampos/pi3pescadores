@@ -62,9 +62,31 @@ export function getAuthHeaders() {
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
 
+export async function apiFetch(url, options = {}) {
+  // Centraliza todas as chamadas ao backend para interceptar sessão expirada.
+  const response = await fetch(url, options);
+
+  if (response.status === 401) {
+    // Remove token e usuário salvos para impedir novas chamadas autenticadas inválidas.
+    clearAuthSession();
+
+    // Redireciona automaticamente para a tela de login quando a sessão não é mais válida.
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      window.location.assign('/login');
+    }
+  }
+
+  return response;
+}
+
 async function parseApiError(response, fallbackMessage) {
   try {
     const body = await response.json();
+    // Suporta tanto { error: "Expired token" } quanto { error: { message } }.
+    if (typeof body?.error === 'string') {
+      return body.error;
+    }
+
     return body?.error?.message || body?.message || fallbackMessage;
   } catch {
     return fallbackMessage;
@@ -72,7 +94,7 @@ async function parseApiError(response, fallbackMessage) {
 }
 
 export async function registerUser(payload) {
-  const response = await fetch(`${API_URL}/auth/cadastro`, {
+  const response = await apiFetch(`${API_URL}/auth/cadastro`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -88,7 +110,7 @@ export async function registerUser(payload) {
 
 export async function loginUser(payload) {
   const guestToken = ensureGuestToken();
-  const response = await fetch(`${API_URL}/auth/login`, {
+  const response = await apiFetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -182,7 +204,7 @@ export async function fetchProducts(filters = {}) {
   const queryString = params.toString();
   const url = queryString ? `${API_URL}/produtos?${queryString}` : `${API_URL}/produtos`;
 
-  const response = await fetch(url);
+  const response = await apiFetch(url);
   
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Failed to fetch products: ${response.statusText}`));
@@ -201,7 +223,7 @@ export async function fetchProducts(filters = {}) {
  * @throws {Error} Se falhar requisição
  */
 export async function fetchProductById(id) {
-  const response = await fetch(`${API_URL}/produtos/${id}`);
+  const response = await apiFetch(`${API_URL}/produtos/${id}`);
   
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Failed to fetch product: ${response.statusText}`));
@@ -219,7 +241,7 @@ export async function fetchProductById(id) {
  * @throws {Error} Se falhar requisição ou produto não encontrado
  */
 export async function fetchProductByName(nome) {
-  const response = await fetch(`${API_URL}/produtos/nome/${encodeURIComponent(nome)}`);
+  const response = await apiFetch(`${API_URL}/produtos/nome/${encodeURIComponent(nome)}`);
   
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Produto não encontrado: ${response.statusText}`));
@@ -236,7 +258,7 @@ export async function fetchProductByName(nome) {
  * @throws {Error} Se falhar requisição
  */
 export async function fetchProdutosAleatorios() {
-  const response = await fetch(`${API_URL}/auditoria/aleatorios`, {
+  const response = await apiFetch(`${API_URL}/auditoria/aleatorios`, {
     headers: { ...getAuthHeaders() },
   });
   
@@ -256,7 +278,7 @@ export async function fetchProdutosAleatorios() {
  * @throws {Error} Se falhar requisição
  */
 export async function salvarAuditoria(auditorias) {
-  const response = await fetch(`${API_URL}/auditoria/salvar`, {
+  const response = await apiFetch(`${API_URL}/auditoria/salvar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ auditorias })
@@ -279,7 +301,7 @@ export async function salvarAuditoria(auditorias) {
  * @throws {Error} Se falhar requisição
  */
 export async function fetchHistoricoAuditoria(page = 1, limit = 10) {
-  const response = await fetch(`${API_URL}/auditoria/historico?page=${page}&limit=${limit}`, {
+  const response = await apiFetch(`${API_URL}/auditoria/historico?page=${page}&limit=${limit}`, {
     headers: { ...getAuthHeaders() },
   });
   
@@ -292,7 +314,7 @@ export async function fetchHistoricoAuditoria(page = 1, limit = 10) {
 }
 
 export async function fetchMediaAcuracidade() {
-  const response = await fetch(`${API_URL}/auditoria/acuracidade-media`, {
+  const response = await apiFetch(`${API_URL}/auditoria/acuracidade-media`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -305,7 +327,7 @@ export async function fetchMediaAcuracidade() {
 }
 
 export async function registrarPalavraPesquisada(palavra) {
-  const response = await fetch(`${API_URL}/pesquisas`, {
+  const response = await apiFetch(`${API_URL}/pesquisas`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ palavra }),
@@ -320,7 +342,7 @@ export async function registrarPalavraPesquisada(palavra) {
 }
 
 export async function fetchPalavrasMaisPesquisadas(limit = 5) {
-  const response = await fetch(`${API_URL}/pesquisas/mais-pesquisadas?limit=${limit}`, {
+  const response = await apiFetch(`${API_URL}/pesquisas/mais-pesquisadas?limit=${limit}`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -340,7 +362,7 @@ export async function fetchPalavrasMaisPesquisadas(limit = 5) {
  * @throws {Error} Se falhar requisição
  */
 export async function fetchCategories() {
-  const response = await fetch(`${API_URL}/categorias`);
+  const response = await apiFetch(`${API_URL}/categorias`);
   
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Failed to fetch categories: ${response.statusText}`));
@@ -359,7 +381,7 @@ export async function fetchCategories() {
  * @throws {Error} Se falhar requisição
  */
 export async function updateProductStatus(id, ativo) {
-  const response = await fetch(`${API_URL}/produtos/${id}`, {
+  const response = await apiFetch(`${API_URL}/produtos/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ ativo })
@@ -374,7 +396,7 @@ export async function updateProductStatus(id, ativo) {
 }
 
 export async function fetchCart() {
-  const response = await fetch(`${API_URL}/cart`, {
+  const response = await apiFetch(`${API_URL}/cart`, {
     headers: buildCartHeaders(),
   });
 
@@ -387,7 +409,7 @@ export async function fetchCart() {
 }
 
 export async function addCartItem(payload) {
-  const response = await fetch(`${API_URL}/cart/items`, {
+  const response = await apiFetch(`${API_URL}/cart/items`, {
     method: 'POST',
     headers: buildCartHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
@@ -402,7 +424,7 @@ export async function addCartItem(payload) {
 }
 
 export async function updateCartItem(itemId, payload) {
-  const response = await fetch(`${API_URL}/cart/items/${itemId}`, {
+  const response = await apiFetch(`${API_URL}/cart/items/${itemId}`, {
     method: 'PATCH',
     headers: buildCartHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
@@ -417,7 +439,7 @@ export async function updateCartItem(itemId, payload) {
 }
 
 export async function removeCartItem(itemId) {
-  const response = await fetch(`${API_URL}/cart/items/${itemId}`, {
+  const response = await apiFetch(`${API_URL}/cart/items/${itemId}`, {
     method: 'DELETE',
     headers: buildCartHeaders(),
   });
@@ -431,7 +453,7 @@ export async function removeCartItem(itemId) {
 }
 
 export async function calculateShipping(payload) {
-    const response = await fetch(`${API_URL}/frete`, {
+    const response = await apiFetch(`${API_URL}/frete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -449,7 +471,7 @@ export async function calculateShipping(payload) {
  */
 
 export async function fetchUsuarios() {
-  const response = await fetch(`${API_URL}/usuarios`, {
+  const response = await apiFetch(`${API_URL}/usuarios`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -462,7 +484,7 @@ export async function fetchUsuarios() {
 }
 
 export async function fetchUsuarioById(id) {
-  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+  const response = await apiFetch(`${API_URL}/usuarios/${id}`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -475,7 +497,7 @@ export async function fetchUsuarioById(id) {
 }
 
 export async function criarUsuario(payload) {
-  const response = await fetch(`${API_URL}/usuarios`, {
+  const response = await apiFetch(`${API_URL}/usuarios`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(payload),
@@ -490,7 +512,7 @@ export async function criarUsuario(payload) {
 }
 
 export async function atualizarUsuario(id, payload) {
-  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+  const response = await apiFetch(`${API_URL}/usuarios/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(payload),
@@ -505,7 +527,7 @@ export async function atualizarUsuario(id, payload) {
 }
 
 export async function excluirUsuario(id) {
-  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+  const response = await apiFetch(`${API_URL}/usuarios/${id}`, {
     method: 'DELETE',
     headers: { ...getAuthHeaders() },
   });
@@ -520,7 +542,7 @@ export async function excluirUsuario(id) {
  */
 
 export async function criarPedido(payload) {
-  const response = await fetch(`${API_URL}/pedidos`, {
+  const response = await apiFetch(`${API_URL}/pedidos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(payload),
@@ -543,7 +565,7 @@ export async function fetchMeusPedidos(params = {}) {
   if (params.search) query.append('search', params.search);
 
   const queryString = query.toString();
-  const response = await fetch(`${API_URL}/pedidos/meus${queryString ? `?${queryString}` : ''}`, {
+  const response = await apiFetch(`${API_URL}/pedidos/meus${queryString ? `?${queryString}` : ''}`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -555,7 +577,7 @@ export async function fetchMeusPedidos(params = {}) {
 }
 
 export async function fetchMeuPedido(id) {
-  const response = await fetch(`${API_URL}/pedidos/meus/${id}`, {
+  const response = await apiFetch(`${API_URL}/pedidos/meus/${id}`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -568,7 +590,7 @@ export async function fetchMeuPedido(id) {
 }
 
 export async function atualizarStatusPedido(id, status) {
-  const response = await fetch(`${API_URL}/pedidos/${id}/status`, {
+  const response = await apiFetch(`${API_URL}/pedidos/${id}/status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ status }),
@@ -591,7 +613,7 @@ export async function fetchTodosPedidos(params = {}) {
   if (params.search) query.append('search', params.search);
 
   const queryString = query.toString();
-  const response = await fetch(`${API_URL}/pedidos${queryString ? `?${queryString}` : ''}`, {
+  const response = await apiFetch(`${API_URL}/pedidos${queryString ? `?${queryString}` : ''}`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -604,7 +626,7 @@ export async function fetchTodosPedidos(params = {}) {
 
 export async function fetchTaxaRecompraAnual(ano) {
   const query = ano ? `?ano=${encodeURIComponent(ano)}` : '';
-  const response = await fetch(`${API_URL}/pedidos/admin/taxa-recompra-anual${query}`, {
+  const response = await apiFetch(`${API_URL}/pedidos/admin/taxa-recompra-anual${query}`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -617,7 +639,7 @@ export async function fetchTaxaRecompraAnual(ano) {
 }
 
 export async function fetchPedidoAdmin(id) {
-  const response = await fetch(`${API_URL}/pedidos/${id}`, {
+  const response = await apiFetch(`${API_URL}/pedidos/${id}`, {
     headers: { ...getAuthHeaders() },
   });
 

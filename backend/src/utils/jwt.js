@@ -12,6 +12,7 @@ function base64UrlJson(value) {
 }
 
 function getSecret() {
+  // Usa JWT_SECRET como secret principal, mantendo SESSION_SECRET só como fallback local.
   const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'pi3-pescadores-dev-secret';
   return String(secret);
 }
@@ -44,6 +45,7 @@ function parseExpiresIn(value) {
 
 function sign(payload, options = {}) {
   const now = Math.floor(Date.now() / 1000);
+  // Aceita expiresIn em segundos ou no formato curto usado pelo projeto, como "7d".
   const expiresIn = parseExpiresIn(options.expiresIn || process.env.JWT_EXPIRES_IN);
   const header = {
     alg: 'HS256',
@@ -66,6 +68,7 @@ function sign(payload, options = {}) {
 }
 
 function verify(token) {
+  // Um JWT válido precisa ter header, payload e assinatura.
   const parts = String(token || '').split('.');
 
   if (parts.length !== 3) {
@@ -82,6 +85,7 @@ function verify(token) {
   const signatureBuffer = Buffer.from(signature);
   const expectedBuffer = Buffer.from(expectedSignature);
 
+  // Compara assinaturas em tempo constante para evitar vazamento por timing.
   if (
     signatureBuffer.length !== expectedBuffer.length ||
     !crypto.timingSafeEqual(signatureBuffer, expectedBuffer)
@@ -97,6 +101,7 @@ function verify(token) {
     throw new AppError(401, 'Invalid token');
   }
 
+  // Retorna uma mensagem específica quando o token passou da data de expiração.
   if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
     throw new AppError(401, 'Expired token');
   }
