@@ -80,6 +80,15 @@
   white-space: nowrap;
 }
 
+.clickableKpiCard {
+  cursor: pointer;
+}
+
+.clickableKpiCard:focus-visible {
+  outline: 3px solid #f3d870;
+  outline-offset: 3px;
+}
+
 /* Estilos para cards com background dinâmico */
 .kpiCard[style*="backgroundImage"],
 .kpiCard[style*="background-image"] {

@@ -735,7 +735,17 @@ function AdminDashboard() {
 
         <section className={styles.kpiGrid} aria-label="Indicadores principais">
           <article 
-            className={styles.kpiCard}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard}`}
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate('/admin/faturamento-completo')}
+            onKeyDown={(event) => {
+              if (event.currentTarget !== event.target) return;
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate('/admin/faturamento-completo');
+              }
+            }}
             style={{
               backgroundImage: `url(${getFaturamentoBackgroundImage()})`,
               backgroundSize: 'cover',
@@ -759,7 +769,10 @@ function AdminDashboard() {
 
             {/* Engrenagem */}
             <button
-              onClick={() => setShowKpiModal(true)}
+              onClick={(event) => {
+                event.stopPropagation();
+                setShowKpiModal(true);
+              }}
               style={{
                 position: 'absolute',
                 top: 12,
@@ -801,7 +814,17 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={styles.kpiCard}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard}`}
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate('/vendas')}
+            onKeyDown={(event) => {
+              if (event.currentTarget !== event.target) return;
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate('/vendas');
+              }
+            }}
             style={{
               backgroundImage: `url(${imagemTicket})`,
               backgroundSize: 'cover',
@@ -823,7 +846,10 @@ function AdminDashboard() {
             }} />
 
             <button
-              onClick={() => setShowTicketModal(true)}
+              onClick={(event) => {
+                event.stopPropagation();
+                setShowTicketModal(true);
+              }}
               style={{
                 position: 'absolute',
                 top: 12,
