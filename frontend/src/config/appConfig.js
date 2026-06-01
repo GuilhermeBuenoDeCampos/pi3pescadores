@@ -17,8 +17,3 @@ export const API_URL = configuredApiUrl || `${configuredBackendUrl || defaultBac
 export const BACKEND_URL = configuredApiUrl
   ? removeApiSuffix(configuredApiUrl)
   : configuredBackendUrl || defaultBackendUrl;
-
-if (import.meta.env.DEV) {
-  console.info('[config] API_URL:', API_URL);
-  console.info('[config] BACKEND_URL:', BACKEND_URL);
-}

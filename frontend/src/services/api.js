@@ -93,6 +93,12 @@ async function parseApiError(response, fallbackMessage) {
   }
 }
 
+function clearExpiredAuthSession(response) {
+  if (response.status === 401 && getAuthToken()) {
+    clearAuthSession();
+  }
+}
+
 export async function registerUser(payload) {
   const response = await apiFetch(`${API_URL}/auth/cadastro`, {
     method: 'POST',
@@ -401,6 +407,7 @@ export async function fetchCart() {
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Nao foi possivel carregar o carrinho.'));
   }
 
@@ -416,6 +423,7 @@ export async function addCartItem(payload) {
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Nao foi possivel adicionar o item ao carrinho.'));
   }
 
@@ -431,6 +439,7 @@ export async function updateCartItem(itemId, payload) {
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Nao foi possivel atualizar o item do carrinho.'));
   }
 
@@ -445,6 +454,7 @@ export async function removeCartItem(itemId) {
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Nao foi possivel remover o item do carrinho.'));
   }
 
@@ -549,6 +559,7 @@ export async function criarPedido(payload) {
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Nao foi possivel criar o pedido.'));
   }
 
@@ -570,6 +581,7 @@ export async function fetchMeusPedidos(params = {}) {
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Nao foi possivel carregar seus pedidos.'));
   }
 
@@ -582,6 +594,7 @@ export async function fetchMeuPedido(id) {
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Pedido nao encontrado.'));
   }
 

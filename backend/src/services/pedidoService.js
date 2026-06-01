@@ -17,6 +17,18 @@ function formatMoney(value) {
   return toMoney(value).toFixed(2);
 }
 
+function normalizeImageUrl(url) {
+  const rawUrl = String(url || '').trim().replace(/\s+/g, '');
+  const signMarker = '/storage/v1/object/sign/';
+  const publicMarker = '/storage/v1/object/public/';
+
+  if (rawUrl.includes(signMarker)) {
+    return rawUrl.split('?')[0].replace(signMarker, publicMarker);
+  }
+
+  return rawUrl;
+}
+
 function getUserId(user) {
   return user?.sub || user?.id || null;
 }
@@ -182,7 +194,7 @@ function formatItem(item) {
           ativo: produto.ativo,
           imagens: imagens.map((imagem) => ({
             id: imagem.id,
-            url: imagem.url,
+            url: normalizeImageUrl(imagem.url),
           })),
         }
       : null,
@@ -214,6 +226,27 @@ function formatPedido(pedido) {
   };
 }
 
+function buscarItensDoPedido(idPedido, transaction) {
+  return db.PedidoItem.findAll({
+    where: { id_pedido: idPedido },
+    include: [
+      {
+        model: db.Produto,
+        as: 'produto',
+        attributes: ['id', 'nome', 'ativo'],
+        include: [
+          {
+            model: db.ProdutoImagem,
+            as: 'imagens',
+            attributes: ['id', 'url'],
+          },
+        ],
+      },
+    ],
+    transaction,
+  });
+}
+
 async function buscarPedidoCompleto(where, transaction) {
   try {
     console.log('[pedidoService] buscarPedidoCompleto:', { where });
@@ -232,11 +265,7 @@ async function buscarPedidoCompleto(where, transaction) {
     // Carregar itens manualmente
     if (db.PedidoItem) {
       try {
-        const itens = await db.PedidoItem.findAll({
-          where: { id_pedido: pedido.id },
-          transaction,
-          raw: false,
-        });
+        const itens = await buscarItensDoPedido(pedido.id, transaction);
         pedido.dataValues.itens = itens;
       } catch (itenError) {
         console.error('[pedidoService] erro ao carregar itens:', itenError.message);
@@ -426,10 +455,7 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
       console.log('[pedidoService] carregando itens...');
       for (const pedido of rows) {
         try {
-          const itens = await db.PedidoItem.findAll({
-            where: { id_pedido: pedido.id },
-            raw: true,
-          });
+          const itens = await buscarItensDoPedido(pedido.id);
           pedido.dataValues.itens = itens;
         } catch (itemError) {
           console.error(`[pedidoService] erro ao carregar itens para pedido ${pedido.id}:`, itemError.message);
@@ -515,10 +541,7 @@ exports.listarTodosPedidos = async (query = {}) => {
       console.log('[pedidoService] carregando itens para todos os pedidos...');
       for (const pedido of rows) {
         try {
-          const itens = await db.PedidoItem.findAll({
-            where: { id_pedido: pedido.id },
-            raw: true,
-          });
+          const itens = await buscarItensDoPedido(pedido.id);
           pedido.dataValues.itens = itens;
         } catch (itemError) {
           console.error(`[pedidoService] erro ao carregar itens para pedido ${pedido.id}:`, itemError.message);
@@ -724,10 +747,33 @@ exports.obterTaxaRecompraAnual = async (ano = new Date().getFullYear()) => {
 
 exports.obterTicketMedio = async () => {
   try {
+    const hoje = new Date();
+    const partesMesAtual = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: 'numeric',
+    }).formatToParts(hoje);
+    const anoAtual = Number(partesMesAtual.find((parte) => parte.type === 'year')?.value);
+    const mesAtual = Number(partesMesAtual.find((parte) => parte.type === 'month')?.value);
+    const proximoMes = new Date(Date.UTC(anoAtual, mesAtual, 1));
+    const inicioMes = new Date(`${anoAtual}-${String(mesAtual).padStart(2, '0')}-01T00:00:00-03:00`);
+    const inicioProximoMes = new Date(
+      `${proximoMes.getUTCFullYear()}-${String(proximoMes.getUTCMonth() + 1).padStart(2, '0')}-01T00:00:00-03:00`
+    );
+    const mesReferencia = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      month: 'long',
+      year: 'numeric',
+    }).format(inicioMes);
+
     const resultado = await db.Pedido.findOne({
       where: {
         status: {
           [Op.in]: SALE_STATUSES,
+        },
+        criado_em: {
+          [Op.gte]: inicioMes,
+          [Op.lt]: inicioProximoMes,
         },
       },
       attributes: [
@@ -751,6 +797,7 @@ exports.obterTicketMedio = async () => {
       receitaTotalNumerico: receitaTotal,
       total_vendas: totalVendas,
       clientes_unicos: clientesUnicos,
+      mesReferencia,
     };
   } catch (error) {
     console.error('[pedidoService] erro ao calcular ticket medio:', error.message);

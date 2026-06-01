@@ -10,6 +10,10 @@ const DEFAULT_CONFIG = {
   ticketalto: 200,
   recomprabaixa: 20,
   recompraalta: 50,
+  visitantebaixo: 100,
+  visitantealto: 500,
+  conversaobaixa: 2,
+  conversaoalta: 8,
 };
 
 function toNumber(value, fallback) {
@@ -26,6 +30,10 @@ function formatConfig(config) {
     ticketalto: toNumber(config?.ticketalto, DEFAULT_CONFIG.ticketalto),
     recomprabaixa: toNumber(config?.recomprabaixa, DEFAULT_CONFIG.recomprabaixa),
     recompraalta: toNumber(config?.recompraalta, DEFAULT_CONFIG.recompraalta),
+    visitantebaixo: toNumber(config?.visitantebaixo, DEFAULT_CONFIG.visitantebaixo),
+    visitantealto: toNumber(config?.visitantealto, DEFAULT_CONFIG.visitantealto),
+    conversaobaixa: toNumber(config?.conversaobaixa, DEFAULT_CONFIG.conversaobaixa),
+    conversaoalta: toNumber(config?.conversaoalta, DEFAULT_CONFIG.conversaoalta),
   };
 }
 
@@ -67,11 +75,17 @@ exports.atualizarConfig = async (body) => {
     ticketalto: toNumber(body.ticketalto, current.ticketalto),
     recomprabaixa: toNumber(body.recomprabaixa, current.recomprabaixa),
     recompraalta: toNumber(body.recompraalta, current.recompraalta),
+    visitantebaixo: toNumber(body.visitantebaixo, current.visitantebaixo),
+    visitantealto: toNumber(body.visitantealto, current.visitantealto),
+    conversaobaixa: toNumber(body.conversaobaixa, current.conversaobaixa),
+    conversaoalta: toNumber(body.conversaoalta, current.conversaoalta),
   };
 
   validateRange(payload.faturamento_baixo, payload.faturamento_alto, 'faturamento_baixo', 'faturamento_alto');
   validateRange(payload.ticketbaixo, payload.ticketalto, 'ticketbaixo', 'ticketalto');
   validateRange(payload.recomprabaixa, payload.recompraalta, 'recomprabaixa', 'recompraalta');
+  validateRange(payload.visitantebaixo, payload.visitantealto, 'visitantebaixo', 'visitantealto');
+  validateRange(payload.conversaobaixa, payload.conversaoalta, 'conversaobaixa', 'conversaoalta');
 
   let config = await db.KpiConfig.findOne();
 

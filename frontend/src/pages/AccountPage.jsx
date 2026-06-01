@@ -101,7 +101,7 @@ function OrdersPage() {
             <h1>Meus pedidos</h1>
             <p>Acompanhe o histórico completo das suas compras e o andamento de cada pedido.</p>
           </div>
-          <Link to="/" className={styles.backLink}>Continuar comprando</Link>
+          <Link to="/" className={styles.backLink}>Voltar para a pagina inicial</Link>
         </section>
 
         <section className={styles.filters}>

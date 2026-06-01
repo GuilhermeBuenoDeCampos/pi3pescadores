@@ -27,3 +27,17 @@
   border-color: var(--gold-mid);
   color: var(--indigo-dark);
 }
+
+@media (max-width: 720px) {
+  .filterBar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .filterButton {
+    min-height: 42px;
+    padding: 0.62rem 0.7rem;
+    overflow-wrap: anywhere;
+  }
+}

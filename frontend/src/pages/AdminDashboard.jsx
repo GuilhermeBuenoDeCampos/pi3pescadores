@@ -13,8 +13,8 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { FiArrowLeft, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings, FiX } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
@@ -28,6 +28,16 @@ import faturamentoAltoImg from '../assets/admin/faturamentoalto.png';
 import recompraVermelhoImg from '../assets/admin/recompravermelho.png';
 import recompraAmareloImg from '../assets/admin/recompraamarelo.png';
 import recompraVerdeImg from '../assets/admin/recompraverde.png';
+import ticketBaixoImg from '../assets/admin/ticketbaixo.png';
+import ticketMedioImg from '../assets/admin/ticketmedio.png';
+import ticketAltoImg from '../assets/admin/ticketalto.png';
+import palavrasPesquisadasImg from '../assets/admin/palavraspesquisadas.png';
+import visitanteBaixoImg from '../assets/admin/visitantebaixo.png';
+import visitanteMedioImg from '../assets/admin/visitantemedio.png';
+import visitanteAltoImg from '../assets/admin/visitantealto.png';
+import conversaoBaixaImg from '../assets/admin/SBruim.png';
+import conversaoMediaImg from '../assets/admin/SBnormal.png';
+import conversaoAltaImg from '../assets/admin/SBbom.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import KpiConfigModal from '../components/KpiConfigModal';
@@ -323,6 +333,77 @@ function createCableCarPointsPlugin(imageSrc) {
   };
 }
 
+const kpiCalculations = {
+  faturamento: {
+    title: 'Faturamento mensal',
+    description: 'Soma o valor total dos pedidos com status confirmado, preparando, enviado ou concluído criados no mês atual.',
+  },
+  ticket: {
+    title: 'Ticket médio mensal',
+    description: 'Divide a receita total pela quantidade de vendas com status confirmado, preparando, enviado ou concluído criadas no mês exibido no card.',
+  },
+  recompra: {
+    title: 'Taxa de recompra',
+    description: 'Divide a quantidade de clientes com mais de uma compra pela quantidade total de clientes que compraram no ano atual e multiplica por 100.',
+  },
+  pesquisas: {
+    title: 'Palavras mais pesquisadas',
+    description: 'Agrupa as buscas registradas por palavra e ordena da maior para a menor quantidade de pesquisas.',
+  },
+  conversao: {
+    title: 'Taxa de conversão',
+    description: 'Divide a quantidade de pedidos confirmados pela quantidade de visitantes únicos da home no mês e multiplica por 100.',
+  },
+  visitantes: {
+    title: 'Visitantes únicos',
+    description: 'Conta uma vez cada usuário logado ou, para visitantes sem login, cada IP que acessou a home durante o mês.',
+  },
+  acuracidade: {
+    title: 'Acuracidade média',
+    description: 'Para cada auditoria, calcula 100 menos o percentual da diferença absoluta entre o estoque físico e o registrado. O card exibe a média dos produtos auditados.',
+  },
+};
+
+function CalculationHelpButton({ calculation, onOpen, withSettings = false }) {
+  return (
+    <button
+      className={`${styles.calculationHelpButton} ${withSettings ? styles.calculationHelpButtonWithSettings : ''}`}
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        onOpen(calculation);
+      }}
+      title={`Como ${calculation.title.toLowerCase()} é calculado`}
+      aria-label={`Mostrar como ${calculation.title.toLowerCase()} é calculado`}
+    >
+      <FiHelpCircle size={18} />
+    </button>
+  );
+}
+
+function CalculationHelpModal({ calculation, onClose }) {
+  if (!calculation) return null;
+
+  return (
+    <div className={styles.calculationOverlay} onClick={onClose}>
+      <div
+        className={styles.calculationModal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="calculation-help-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className={styles.calculationCloseButton} type="button" onClick={onClose} aria-label="Fechar explicação">
+          <FiX size={18} />
+        </button>
+        <FiHelpCircle className={styles.calculationModalIcon} size={24} />
+        <h2 id="calculation-help-title">{calculation.title}</h2>
+        <p>{calculation.description}</p>
+      </div>
+    </div>
+  );
+}
+
 function AdminDashboard() {
   const navigate = useNavigate();
   const [accuracy, setAccuracy] = useState(null);
@@ -342,6 +423,9 @@ function AdminDashboard() {
   const [showKpiModal, setShowKpiModal] = useState(false);
   const [showRecompraModal, setShowRecompraModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
+  const [showVisitanteModal, setShowVisitanteModal] = useState(false);
+  const [showConversaoModal, setShowConversaoModal] = useState(false);
+  const [calculationHelp, setCalculationHelp] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -443,17 +527,33 @@ function AdminDashboard() {
   const ticketAlto = Number(kpiConfig?.ticketalto || 200);
   const ticketValor = Number(ticketMedio?.ticketMedioNumerico || 0);
 
-  let imagemTicket = '';
+  let imagemTicket = ticketMedioImg;
   if (ticketValor < ticketBaixo) {
-    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-vazio.jpeg`;
-  } else if (ticketValor <= ticketAlto) {
-    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-medio.jpeg`;
-  } else {
-    imagemTicket = `${BACKEND_URL}/uploads/img/cesto-cheio.jpeg`;
+    imagemTicket = ticketBaixoImg;
+  } else if (ticketValor > ticketAlto) {
+    imagemTicket = ticketAltoImg;
   }
   
   // Pegar a taxa de conversão do mês mais recente
   const taxaMesAtual = taxaConversao.length > 0 ? taxaConversao[0] : null;
+  const conversaoValor = Number(taxaMesAtual?.taxa_conversao || 0);
+  const conversaoBaixa = Number(kpiConfig?.conversaobaixa || 2);
+  const conversaoAlta = Number(kpiConfig?.conversaoalta || 8);
+  let imagemConversao = conversaoMediaImg;
+  if (conversaoValor < conversaoBaixa) {
+    imagemConversao = conversaoBaixaImg;
+  } else if (conversaoValor > conversaoAlta) {
+    imagemConversao = conversaoAltaImg;
+  }
+  const visitantesValor = Number(taxaMesAtual?.visitantes_unicos || 0);
+  const visitanteBaixo = Number(kpiConfig?.visitantebaixo || 100);
+  const visitanteAlto = Number(kpiConfig?.visitantealto || 500);
+  let imagemVisitante = visitanteMedioImg;
+  if (visitantesValor < visitanteBaixo) {
+    imagemVisitante = visitanteBaixoImg;
+  } else if (visitantesValor > visitanteAlto) {
+    imagemVisitante = visitanteAltoImg;
+  }
 
   // Determine color and image based on accuracy percentage
   const getAccuracyMetrics = (value) => {
@@ -634,11 +734,17 @@ function AdminDashboard() {
     labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preco', 'Experiencia'],
     datasets: [
       {
-        label: 'Satisfacao',
+        label: 'Satisfação',
         data: [0.75, 0.78, 0.92, 0.68, 0.82],
-        borderColor: '#a7824f',
-        backgroundColor: 'rgba(167, 130, 79, 0.22)',
-        pointBackgroundColor: '#a7824f',
+        borderColor: '#08936f',
+        backgroundColor: 'rgba(8, 147, 111, 0.28)',
+        pointBackgroundColor: '#08936f',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 9,
+        borderWidth: 3,
+        pointStyle: 'circle',
       },
     ],
   }), []);
@@ -658,6 +764,40 @@ function AdminDashboard() {
 
   return (
     <main className={styles.page}>
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}>
+          <img src={logo} alt="Tres Pescadores Store" />
+          <div>
+            <strong>Tres Pescadores</strong>
+            <span>Admin Console</span>
+          </div>
+        </div>
+
+        <nav className={styles.sidebarNav} aria-label="Menu administrativo">
+          <span className={styles.navLabel}>Principal</span>
+          <button className={`${styles.navItem} ${styles.navItemActive}`} type="button"><FiGrid /> Visao geral</button>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/vendas')}><FiBarChart2 /> Vendas</button>
+          <span className={styles.navLabel}>Gestao</span>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/admin/usuarios')}><FiUsers /> Usuarios</button>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/estoque')}><FiPackage /> Estoque</button>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/admin/faturamento-completo')}><FiDollarSign /> Faturamento</button>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/')}><FiHome /> Loja</button>
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <div className={styles.userCard}>
+            <FiUser />
+            <div>
+              <strong>{getAuthUser()?.nome || 'Usuario'}</strong>
+              <span>Administrador</span>
+            </div>
+          </div>
+          <button className={styles.logoutButton} type="button" onClick={() => { clearAuthSession(); navigate('/login'); }}>
+            <FiLogOut /> Sair
+          </button>
+        </div>
+      </aside>
+
       <section className={styles.shell}>
         <header className={styles.hero}>
           <img src={logo} alt="Tres Pescadores Store" />
@@ -665,66 +805,21 @@ function AdminDashboard() {
             <h1>Painel Administrativo</h1>
             <p>Visao geral e gestao rapida</p>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b' }}>
-              <FiUser size={14} />
-              {getAuthUser()?.nome || 'Usuário'}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button
-                onClick={() => navigate('/')}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#5366aa', background: '#f0f2f8', border: 'none', cursor: 'pointer',
-                }}
-              >
-                <FiArrowLeft size={14} />
-                Voltar
-              </button>
-              <Link
-                to="/admin/usuarios"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#fff', background: '#5366aa',
-                  boxShadow: '0 8px 20px rgba(83,102,170,0.25)',
-                  textDecoration: 'none',
-                }}
-              >
-                <FiUsers size={14} />
-                Gerenciar Usuários
-              </Link>
-              <Link
-                to="/estoque"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#08936f', background: '#e6f5f0',
-                  textDecoration: 'none',
-                }}
-              >
-                <FiPackage size={14} />
-                Gerenciar Estoque
-              </Link>
-              <button
-                onClick={() => { clearAuthSession(); navigate('/login'); }}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#b91c1c', background: '#fef2f2', border: 'none', cursor: 'pointer',
-                }}
-              >
-                <FiLogOut size={14} />
-                Sair
-              </button>
-            </div>
-          </div>
         </header>
 
         <section className={styles.kpiGrid} aria-label="Indicadores principais">
           <article 
-            className={styles.kpiCard}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard}`}
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate('/admin/faturamento-completo')}
+            onKeyDown={(event) => {
+              if (event.currentTarget !== event.target) return;
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate('/admin/faturamento-completo');
+              }
+            }}
             style={{
               backgroundImage: `url(${getFaturamentoBackgroundImage()})`,
               backgroundSize: 'cover',
@@ -748,10 +843,13 @@ function AdminDashboard() {
 
             {/* Engrenagem */}
             <button
-              onClick={() => setShowKpiModal(true)}
+              onClick={(event) => {
+                event.stopPropagation();
+                setShowKpiModal(true);
+              }}
               style={{
                 position: 'absolute',
-                top: 12,
+                bottom: 12,
                 right: 12,
                 zIndex: 10,
                 background: 'rgba(255, 255, 255, 0.9)',
@@ -777,8 +875,8 @@ function AdminDashboard() {
             >
               <FiSettings size={18} color="#10182c" />
             </button>
-
             {/* Conteúdo do card */}
+            <CalculationHelpButton calculation={kpiCalculations.faturamento} onOpen={setCalculationHelp} withSettings />
             <div className={styles.revenueKpiContent}>
               <span>Faturamento mensal</span>
               <strong>
@@ -791,34 +889,80 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={styles.kpiCard}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard}`}
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate('/vendas')}
+            onKeyDown={(event) => {
+              if (event.currentTarget !== event.target) return;
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate('/vendas');
+              }
+            }}
             style={{
+              backgroundImage: `url(${imagemTicket})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
               position: 'relative',
-              background: ticketValor > 0
-                ? `linear-gradient(rgba(83, 102, 170, 0.72), rgba(83, 102, 170, 0.72)), url("${imagemTicket}") center / cover`
-                : undefined,
+              overflow: 'hidden',
             }}
           >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
             <button
-              onClick={() => setShowTicketModal(true)}
+              onClick={(event) => {
+                event.stopPropagation();
+                setShowTicketModal(true);
+              }}
               style={{
-                position: 'absolute', top: 8, right: 8,
-                background: 'rgba(255,255,255,0.2)', border: 'none',
-                borderRadius: 6, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: 4, color: '#fff',
+                position: 'absolute',
+                bottom: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
               }}
               title="Configurar limites do ticket médio"
             >
-              <FiSettings size={16} />
+              <FiSettings size={18} color="#10182c" />
             </button>
-            <span>Ticket médio</span>
+            <CalculationHelpButton calculation={kpiCalculations.ticket} onOpen={setCalculationHelp} withSettings />
+            <div className={styles.revenueKpiContent}>
+            <span>Ticket médio - {ticketMedio?.mesReferencia || 'mês atual'}</span>
             <strong>{loadingTicketMedio ? 'Carregando...' : ticketMedioFormatado}</strong>
             {ticketMedio && (
-              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
                 {ticketMedio.total_vendas} vendas confirmadas
               </small>
             )}
+            </div>
           </article>
           <article
             className={styles.kpiCard}
@@ -846,7 +990,7 @@ function AdminDashboard() {
               onClick={() => setShowRecompraModal(true)}
               style={{
                 position: 'absolute',
-                top: 12,
+                bottom: 12,
                 right: 12,
                 zIndex: 10,
                 background: 'rgba(255, 255, 255, 0.9)',
@@ -873,6 +1017,7 @@ function AdminDashboard() {
               <FiSettings size={18} color="#10182c" />
             </button>
 
+            <CalculationHelpButton calculation={kpiCalculations.recompra} onOpen={setCalculationHelp} withSettings />
             <div className={styles.revenueKpiContent}>
               <span>Taxa de recompra</span>
               <strong>
@@ -882,69 +1027,211 @@ function AdminDashboard() {
               </strong>
             </div>
           </article>
-          <article className={`${styles.kpiCard} ${styles.searchKpi}`}>
-            <span>Palavras mais pesquisadas</span>
-            <strong>{loadingSearches ? 'Carregando...' : topSearch?.palavra || 'Sem dados'}</strong>
-            <div className={styles.searchList}>
-              {topSearches.slice(0, 4).map((item) => (
-                <small key={item.palavra}>
-                  <span>{item.palavra}</span>
-                  <b>{item.total}</b>
-                </small>
-              ))}
+          <article
+            className={`${styles.kpiCard} ${styles.searchKpi}`}
+            style={{
+              backgroundImage: `url(${palavrasPesquisadasImg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            <CalculationHelpButton calculation={kpiCalculations.pesquisas} onOpen={setCalculationHelp} />
+            <div className={styles.revenueKpiContent}>
+              <span>Palavras mais pesquisadas</span>
+              <strong>{loadingSearches ? 'Carregando...' : topSearch?.palavra || 'Sem dados'}</strong>
+              <div className={styles.searchList}>
+                {topSearches.slice(0, 4).map((item) => (
+                  <small key={item.palavra}>
+                    <span>{item.palavra}</span>
+                    <b>{item.total}</b>
+                  </small>
+                ))}
+              </div>
             </div>
           </article>
         </section>
 
         <section className={styles.conversionSection} aria-label="Taxa de conversão">
-          <article className={styles.kpiCard}>
+          <article
+            className={styles.kpiCard}
+            style={{
+              backgroundImage: `url(${imagemConversao})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            <button
+              onClick={() => setShowConversaoModal(true)}
+              style={{
+                position: 'absolute',
+                bottom: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="Configurar taxa de conversao"
+            >
+              <FiSettings size={18} color="#10182c" />
+            </button>
+
+            <CalculationHelpButton calculation={kpiCalculations.conversao} onOpen={setCalculationHelp} withSettings />
+            <div className={styles.revenueKpiContent}>
             <span>Taxa de conversão</span>
             <strong>
               {loadingTaxaConversao ? 'Carregando...' : `${taxaMesAtual?.taxa_conversao ?? 0}%`}
             </strong>
             {taxaMesAtual && (
-              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
+              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
                 {taxaMesAtual.visitantes_unicos} visitantes | {taxaMesAtual.pedidos_confirmados} pedidos
               </small>
             )}
+            </div>
           </article>
-          <article className={styles.kpiCard}>
-            <span>Visitantes únicos (mês)</span>
-            <strong>
-              {loadingTaxaConversao ? 'Carregando...' : taxaMesAtual?.visitantes_unicos ?? 0}
-            </strong>
-            {taxaMesAtual && (
-              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '4px' }}>
-                IPs únicos que visitaram home
-              </small>
-            )}
-          </article>
-          <article className={styles.chartBlock}>
-            <h2>Taxa de conversão por mês</h2>
-            <div className={styles.chartCanvas}>
-              {loadingTaxaConversao ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
-                  Carregando dados...
-                </div>
-              ) : (
-                <Line
-                  data={conversionRateData}
-                  options={{
-                    ...commonOptions,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      x: { grid: { display: false } },
-                      y: {
-                        min: 0,
-                        max: 100,
-                        ticks: { callback: (value) => `${value}%` },
-                        grid: { color: chartColors.grid },
-                      },
-                    },
-                  }}
-                />
+          <article
+            className={styles.kpiCard}
+            style={{
+              backgroundImage: `url(${imagemVisitante})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }} />
+
+            <button
+              onClick={() => setShowVisitanteModal(true)}
+              style={{
+                position: 'absolute',
+                bottom: 12,
+                right: 12,
+                zIndex: 10,
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.transform = 'scale(1.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="Configurar visitantes"
+            >
+              <FiSettings size={18} color="#10182c" />
+            </button>
+
+            <CalculationHelpButton calculation={kpiCalculations.visitantes} onOpen={setCalculationHelp} withSettings />
+            <div className={styles.revenueKpiContent}>
+              <span>Visitantes unicos (mes)</span>
+              <strong>
+                {loadingTaxaConversao ? 'Carregando...' : taxaMesAtual?.visitantes_unicos ?? 0}
+              </strong>
+              {taxaMesAtual && (
+                <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
+                  IPs unicos que visitaram home
+                </small>
               )}
             </div>
+          </article>
+          <article className={styles.accuracyCard}>
+            <CalculationHelpButton calculation={kpiCalculations.acuracidade} onOpen={setCalculationHelp} />
+            <div className={styles.accuracyHeader}>
+              <div className={styles.headerContent}>
+                <div>
+                  <h2>Acuracidade</h2>
+                  <span>{accuracy?.total_auditorias || 0} produtos auditados</span>
+                </div>
+                <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.headerNsaImage} />
+              </div>
+              {loadingAccuracy && <FiRefreshCw className={styles.loadingIcon} />}
+            </div>
+            <div className={styles.accuracyChart}>
+              <Doughnut
+                data={accuracyData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: (context) => `${context.label}: ${Number(context.raw).toFixed(2)}%`,
+                      },
+                    },
+                  },
+                }}
+              />
+              <div className={styles.accuracyValue}>
+                <strong>{loadingAccuracy ? '--' : `${accuracyValue.toFixed(2)}%`}</strong>
+                <span>Acuracidade media</span>
+              </div>
+            </div>
+            {accuracyError && <p className={styles.errorText}>{accuracyError}</p>}
           </article>
         </section>
 
@@ -1026,42 +1313,14 @@ function AdminDashboard() {
             </div>
           </article>
 
-          <article className={styles.chartBlock}>
-            <h2>Satisfacao</h2>
+          <article className={`${styles.chartBlock} ${styles.satisfacaoCard}`}>
+            <div className={styles.satisfacaoHeader}>
+              <h2>Satisfação</h2>
+              <span className={styles.satisfacaoBadge}>Rede de Pesca</span>
+            </div>
             <div className={styles.chartCanvas}>
-              <Radar
+                <Radar
                 data={satisfactionData}
-                options={{
-                  ...commonOptions,
-                  plugins: { legend: { display: false } },
-                  scales: {
-                    r: {
-                      min: 0,
-                      max: 1,
-                      ticks: { stepSize: 0.2, backdropColor: 'transparent' },
-                      grid: { color: chartColors.grid },
-                      angleLines: { color: chartColors.grid },
-                    },
-                  },
-                }}
-              />
-            </div>
-          </article>
-
-          <article className={styles.accuracyCard}>
-            <div className={styles.accuracyHeader}>
-              <div className={styles.headerContent}>
-                <div>
-                  <h2>Acuracidade</h2>
-                  <span>{accuracy?.total_auditorias || 0} produtos auditados</span>
-                </div>
-                <img src={accuracyMetrics.image} alt={accuracyMetrics.label} className={styles.headerNsaImage} />
-              </div>
-              {loadingAccuracy && <FiRefreshCw className={styles.loadingIcon} />}
-            </div>
-            <div className={styles.accuracyChart}>
-              <Doughnut
-                data={accuracyData}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
@@ -1069,19 +1328,40 @@ function AdminDashboard() {
                     legend: { display: false },
                     tooltip: {
                       callbacks: {
-                        label: (context) => `${context.label}: ${Number(context.raw).toFixed(2)}%`,
+                        label: (ctx) => `${ctx.parsed.r >= 1 ? 100 : Math.round(ctx.parsed.r * 100)}%`,
+                      },
+                    },
+                  },
+                  scales: {
+                    r: {
+                      min: 0,
+                      max: 1,
+                      ticks: {
+                        stepSize: 0.2,
+                        backdropColor: 'transparent',
+                        color: '#08936f',
+                        font: { size: 8, weight: '600' },
+                        callback: (v) => `${Math.round(v * 100)}%`,
+                      },
+                      grid: {
+                        color: 'rgba(8, 147, 111, 0.55)',
+                        lineWidth: 1.2,
+                      },
+                      angleLines: {
+                        color: 'rgba(8, 147, 111, 0.35)',
+                        lineWidth: 1,
+                      },
+                      pointLabels: {
+                        color: '#0f172a',
+                        font: { size: 11, weight: '700' },
                       },
                     },
                   },
                 }}
               />
-              <div className={styles.accuracyValue}>
-                <strong>{loadingAccuracy ? '--' : `${accuracyValue.toFixed(2)}%`}</strong>
-                <span>Acuracidade media</span>
-              </div>
             </div>
-            {accuracyError && <p className={styles.errorText}>{accuracyError}</p>}
           </article>
+
         </section>
       </section>
 
@@ -1105,6 +1385,21 @@ function AdminDashboard() {
         type="ticket"
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
+      <KpiConfigModal
+        isOpen={showVisitanteModal}
+        onClose={() => setShowVisitanteModal(false)}
+        config={kpiConfig}
+        type="visitante"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showConversaoModal}
+        onClose={() => setShowConversaoModal(false)}
+        config={kpiConfig}
+        type="conversao"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <CalculationHelpModal calculation={calculationHelp} onClose={() => setCalculationHelp(null)} />
     </main>
   );
 }

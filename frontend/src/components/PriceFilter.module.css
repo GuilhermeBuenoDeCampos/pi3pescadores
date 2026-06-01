@@ -51,3 +51,26 @@
   background: var(--white);
   color: var(--text-dark);
 }
+
+@media (max-width: 720px) {
+  .sortButtons,
+  .priceInputs {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .sortButton {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .priceInputs label {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .priceInputs input {
+    box-sizing: border-box;
+    width: 100%;
+  }
+}

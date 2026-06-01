@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiLogOut, FiUser, FiSearch, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiBarChart2, FiCheckCircle, FiClock, FiGrid, FiHome, FiLogOut, FiPackage, FiSearch, FiShoppingBag, FiTruck, FiUser, FiX } from 'react-icons/fi';
 import {
   fetchTodosPedidos,
   fetchPedidoAdmin,
   getAuthUser,
-  getAuthHeaders,
   clearAuthSession,
-  BACKEND_URL,
   atualizarStatusPedido,
 } from '../services/api';
 import logo from '../assets/logo/logo.png';
@@ -111,15 +109,60 @@ const SalesManagement = () => {
     return colors[status] || '#6b7280';
   };
 
+  const pendingOrders = pedidos.filter((pedido) => pedido.status === 'pendente').length;
+  const confirmedOrders = pedidos.filter((pedido) => pedido.status === 'confirmado').length;
+  const preparingOrders = pedidos.filter((pedido) => pedido.status === 'preparando').length;
+  const shippedOrders = pedidos.filter((pedido) => pedido.status === 'enviado').length;
+  const completedOrders = pedidos.filter((pedido) => pedido.status === 'concluido').length;
+  const cancelledOrders = pedidos.filter((pedido) => pedido.status === 'cancelado').length;
+
   return (
     <div className={styles.container}>
-      <div className={styles.contentWrapper}>
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}>
+          <img src={logo} alt="Tres Pescadores Store Logo" className={styles.logo} />
+          <div>
+            <strong>Tres Pescadores</strong>
+            <span>Admin Console</span>
+          </div>
+        </div>
+
+        <nav className={styles.sidebarNav} aria-label="Menu de vendas">
+          <span className={styles.navLabel}>Principal</span>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/estoque')}>
+            <FiGrid /> Estoque
+          </button>
+          <button className={`${styles.navItem} ${styles.navItemActive}`} type="button">
+            <FiBarChart2 /> Vendas
+          </button>
+          {getAuthUser()?.tipo_usuario === 'admin' && (
+            <button className={styles.navItem} type="button" onClick={() => navigate('/admin')}>
+              <FiHome /> Painel admin
+            </button>
+          )}
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <div className={styles.userCard}>
+            <FiUser />
+            <div>
+              <strong>{getAuthUser()?.nome || 'Usuario'}</strong>
+              <span>Equipe de vendas</span>
+            </div>
+          </div>
+          <button className={styles.logoutButton} type="button" onClick={() => { clearAuthSession(); navigate('/login'); }}>
+            <FiLogOut /> Sair
+          </button>
+        </div>
+      </aside>
+
+      <div className={styles.mainArea}>
         {/* Header */}
         <header className={styles.header}>
-          <img src={logo} alt="Tres Pescadores Store Logo" className={styles.logo} />
           <div className={styles.titleContainer}>
-            <h1>Tres Pescadores Store</h1>
-            <div className={styles.subtitle}>Gerenciar Vendas</div>
+            <p className={styles.breadcrumb}>Painel / Vendas</p>
+            <h1>Gerenciamento de Vendas</h1>
+            <div className={styles.subtitle}>Acompanhe pedidos, clientes e andamento das entregas.</div>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b' }}>
@@ -155,6 +198,37 @@ const SalesManagement = () => {
 
         {/* Main Content */}
         <div className={styles.content}>
+          <section className={styles.dashboardCards} aria-label="Indicadores de vendas">
+            <article className={styles.card}>
+              <div className={`${styles.cardIcon} ${styles.iconBlue}`}><FiShoppingBag /></div>
+              <div><h3>Pedidos na pagina</h3><strong>{pedidos.length}</strong><span>Resultados carregados</span></div>
+            </article>
+            <article className={styles.card}>
+              <div className={`${styles.cardIcon} ${styles.iconYellow}`}><FiClock /></div>
+              <div><h3>Pendentes</h3><strong>{pendingOrders}</strong><span>Aguardando confirmacao</span></div>
+            </article>
+            <article className={styles.card}>
+              <div className={`${styles.cardIcon} ${styles.iconBlue}`}><FiCheckCircle /></div>
+              <div><h3>Confirmados</h3><strong>{confirmedOrders}</strong><span>Pagamento confirmado</span></div>
+            </article>
+            <article className={styles.card}>
+              <div className={`${styles.cardIcon} ${styles.iconTeal}`}><FiPackage /></div>
+              <div><h3>Preparando</h3><strong>{preparingOrders}</strong><span>Separacao em andamento</span></div>
+            </article>
+            <article className={styles.card}>
+              <div className={`${styles.cardIcon} ${styles.iconTeal}`}><FiTruck /></div>
+              <div><h3>Enviados</h3><strong>{shippedOrders}</strong><span>A caminho do cliente</span></div>
+            </article>
+            <article className={styles.card}>
+              <div className={`${styles.cardIcon} ${styles.iconGreen}`}><FiCheckCircle /></div>
+              <div><h3>Concluidos</h3><strong>{completedOrders}</strong><span>Pedidos finalizados</span></div>
+            </article>
+            <article className={styles.card}>
+              <div className={`${styles.cardIcon} ${styles.iconRed}`}><FiX /></div>
+              <div><h3>Cancelados</h3><strong>{cancelledOrders}</strong><span>Pedidos interrompidos</span></div>
+            </article>
+          </section>
+
           {/* Search Bar */}
           <div className={styles.searchSection}>
             <div className={styles.searchBox}>

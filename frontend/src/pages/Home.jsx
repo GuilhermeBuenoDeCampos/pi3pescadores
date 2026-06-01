@@ -10,6 +10,7 @@ import Footer from '../components/Footer';
 import { fetchProducts, fetchCategories, registrarPalavraPesquisada } from '../services/api';
 import { registrarEventoVisitante } from '../services/visitanteEvento';
 import { sortProductsByPrice } from '../utils/productUtils';
+import { FiGrid, FiSliders, FiX } from 'react-icons/fi';
 import styles from './Home.module.css';
 
 function Home() {
@@ -23,6 +24,7 @@ function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mobileFilter, setMobileFilter] = useState(null);
   const homeEventRegistered = useRef(false);
 
   // Registrar evento de visitação à home (apenas uma vez)
@@ -131,6 +133,10 @@ function Home() {
     }
   }
 
+  function closeMobileFilter() {
+    setMobileFilter(null);
+  }
+
   return (
     <div>
       <Header />
@@ -202,20 +208,33 @@ function Home() {
               onSubmit={handleSearchSubmit}
             />
 
-            <CategoryFilter
-              categories={categories}
-              activeCategory={activeCategory}
-              onChange={setActiveCategory}
-            />
+            <div className={styles.mobileFilterActions}>
+              <button type="button" onClick={() => setMobileFilter('categories')}>
+                <FiGrid size={17} />
+                Categorias
+              </button>
+              <button type="button" onClick={() => setMobileFilter('price')}>
+                <FiSliders size={17} />
+                Filtrar por preco
+              </button>
+            </div>
 
-            <PriceFilter
-              sortOrder={sortOrder}
-              onSortChange={setSortOrder}
-              minPrice={minPrice}
-              maxPrice={maxPrice}
-              onMinPriceChange={setMinPrice}
-              onMaxPriceChange={setMaxPrice}
-            />
+            <div className={styles.desktopFilters}>
+              <CategoryFilter
+                categories={categories}
+                activeCategory={activeCategory}
+                onChange={setActiveCategory}
+              />
+
+              <PriceFilter
+                sortOrder={sortOrder}
+                onSortChange={setSortOrder}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                onMinPriceChange={setMinPrice}
+                onMaxPriceChange={setMaxPrice}
+              />
+            </div>
           </div>
 
           <SectionTitle
@@ -243,6 +262,55 @@ function Home() {
         </section>
 
       </main>
+
+      {mobileFilter && (
+        <div className={styles.modalOverlay} role="presentation" onClick={closeMobileFilter}>
+          <section
+            className={styles.filterModal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-filter-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className={styles.modalHeader}>
+              <h2 id="mobile-filter-title">
+                {mobileFilter === 'categories' ? 'Categorias' : 'Filtrar por preco'}
+              </h2>
+              <button type="button" onClick={closeMobileFilter} aria-label="Fechar">
+                <FiX size={20} />
+              </button>
+            </header>
+
+            <div className={styles.modalContent}>
+              {mobileFilter === 'categories' ? (
+                <CategoryFilter
+                  categories={categories}
+                  activeCategory={activeCategory}
+                  onChange={(category) => {
+                    setActiveCategory(category);
+                    closeMobileFilter();
+                  }}
+                />
+              ) : (
+                <PriceFilter
+                  sortOrder={sortOrder}
+                  onSortChange={setSortOrder}
+                  minPrice={minPrice}
+                  maxPrice={maxPrice}
+                  onMinPriceChange={setMinPrice}
+                  onMaxPriceChange={setMaxPrice}
+                />
+              )}
+            </div>
+
+            {mobileFilter === 'price' && (
+              <button type="button" className={styles.applyFilterButton} onClick={closeMobileFilter}>
+                Aplicar filtro
+              </button>
+            )}
+          </section>
+        </div>
+      )}
 
       <Footer />
     </div>
