@@ -32,10 +32,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BIGINT,
         allowNull: false,
       },
-      nome_produto: {
-        type: DataTypes.STRING(180),
-        allowNull: false,
-      },
       quantidade: {
         type: DataTypes.INTEGER,
         allowNull: false,

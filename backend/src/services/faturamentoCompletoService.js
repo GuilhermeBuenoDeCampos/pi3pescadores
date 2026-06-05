@@ -23,32 +23,43 @@ exports.obterResumo = async () => {
 
   const pedidos = await db.Pedido.findAll({
     where: { status: { [Op.in]: SALE_STATUSES } },
-    attributes: ['total', 'criado_em', 'id'],
+    attributes: ['total', 'valor_frete', 'criado_em', 'id'],
   });
 
   let hojeTotal = 0, ontemTotal = 0, semanaTotal = 0;
   let mesTotal = 0, mesPassadoTotal = 0;
+  let hojeFrete = 0, ontemFrete = 0, semanaFrete = 0;
+  let mesFrete = 0, mesPassadoFrete = 0, totalFrete = 0;
   let hojeQtd = 0, ontemQtd = 0, mesQtd = 0;
 
   pedidos.forEach(p => {
     const data = new Date(p.criado_em);
     const val = toMoney(p.total);
-    if (data >= hoje) { hojeTotal += val; hojeQtd++; }
-    if (data >= ontem && data < hoje) { ontemTotal += val; ontemQtd++; }
-    if (data >= inicioSemana) semanaTotal += val;
-    if (data >= inicioMes) { mesTotal += val; mesQtd++; }
-    if (data >= mesPassadoInicio && data < mesPassadoFim) mesPassadoTotal += val;
+    const frete = toMoney(p.valor_frete);
+    totalFrete += frete;
+    if (data >= hoje) { hojeTotal += val; hojeFrete += frete; hojeQtd++; }
+    if (data >= ontem && data < hoje) { ontemTotal += val; ontemFrete += frete; ontemQtd++; }
+    if (data >= inicioSemana) { semanaTotal += val; semanaFrete += frete; }
+    if (data >= inicioMes) { mesTotal += val; mesFrete += frete; mesQtd++; }
+    if (data >= mesPassadoInicio && data < mesPassadoFim) { mesPassadoTotal += val; mesPassadoFrete += frete; }
   });
 
   const ticketMedioHoje = hojeQtd > 0 ? hojeTotal / hojeQtd : 0;
   const ticketMedioMes = mesQtd > 0 ? mesTotal / mesQtd : 0;
 
   return {
-    hoje: { faturamento: toMoney(hojeTotal), pedidos: hojeQtd, ticketMedio: toMoney(ticketMedioHoje) },
-    ontem: { faturamento: toMoney(ontemTotal), pedidos: ontemQtd },
-    semana: { faturamento: toMoney(semanaTotal) },
-    mes: { faturamento: toMoney(mesTotal), pedidos: mesQtd, ticketMedio: toMoney(ticketMedioMes) },
-    mesPassado: { faturamento: toMoney(mesPassadoTotal) },
+    hoje: { faturamento: toMoney(hojeTotal), frete: toMoney(hojeFrete), pedidos: hojeQtd, ticketMedio: toMoney(ticketMedioHoje) },
+    ontem: { faturamento: toMoney(ontemTotal), frete: toMoney(ontemFrete), pedidos: ontemQtd },
+    semana: { faturamento: toMoney(semanaTotal), frete: toMoney(semanaFrete) },
+    mes: { faturamento: toMoney(mesTotal), frete: toMoney(mesFrete), pedidos: mesQtd, ticketMedio: toMoney(ticketMedioMes) },
+    mesPassado: { faturamento: toMoney(mesPassadoTotal), frete: toMoney(mesPassadoFrete) },
+    frete: {
+      total: toMoney(totalFrete),
+      mes: toMoney(mesFrete),
+      hoje: toMoney(hojeFrete),
+      semana: toMoney(semanaFrete),
+      mesPassado: toMoney(mesPassadoFrete),
+    },
   };
 };
 
@@ -96,14 +107,15 @@ exports.obterTopProdutos = async (limit = 10) => {
   const results = await db.sequelize.query(`
     SELECT
       pi.id_produto,
-      pi.nome_produto,
+      p.nome AS nome_produto,
       SUM(pi.subtotal) AS total,
       SUM(pi.quantidade) AS quantidade_vendida,
       COUNT(DISTINCT pi.id_pedido) AS pedidos
     FROM pedido_itens pi
+    JOIN produto p ON p.id = pi.id_produto
     JOIN pedidos ped ON ped.id = pi.id_pedido
     WHERE ped.status IN (:statuses)
-    GROUP BY pi.id_produto, pi.nome_produto
+    GROUP BY pi.id_produto, p.nome
     ORDER BY total DESC
     LIMIT :maxLimit
   `, {
@@ -176,8 +188,10 @@ exports.obterMetaRealizado = async () => {
   const diasNoMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).getDate();
   const diaAtual = agora.getDate();
 
-  const config = await db.KpiConfig.findOne();
-  const metaMensal = config ? Number(config.faturamento_alto) || 5000 : 5000;
+  const config = await db.KpiConfig.findOne({
+    where: { chave: 'faturamento_alto' },
+  });
+  const metaMensal = config ? Number(config.valor) || 5000 : 5000;
 
   const pedidos = await db.Pedido.findAll({
     where: {

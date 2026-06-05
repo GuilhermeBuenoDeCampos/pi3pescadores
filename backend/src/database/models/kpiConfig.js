@@ -9,62 +9,31 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
-      faturamento_baixo: {
-        type: DataTypes.DECIMAL(10, 2),
+      chave: {
+        type: DataTypes.STRING(100),
         allowNull: false,
-        defaultValue: 500,
+        unique: true,
       },
-      faturamento_alto: {
-        type: DataTypes.DECIMAL(10, 2),
+      valor: {
+        type: DataTypes.DECIMAL(12, 2),
         allowNull: false,
-        defaultValue: 5000,
       },
-      ticketbaixo: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 75,
+      descricao: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
       },
-      ticketalto: {
-        type: DataTypes.DECIMAL(10, 2),
+      criado_em: {
+        type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: 200,
       },
-      recomprabaixa: {
-        type: DataTypes.DECIMAL(10, 2),
+      atualizado_em: {
+        type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: 20,
-      },
-      recompraalta: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 50,
-      },
-      visitantebaixo: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 100,
-      },
-      visitantealto: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 500,
-      },
-      conversaobaixa: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 2,
-      },
-      conversaoalta: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 8,
       },
     },
     {
-      tableName: 'kpi_config',
-      timestamps: true,
-      createdAt: 'created_at',
-      updatedAt: 'update_at',
+      tableName: 'kpi_configuracao',
+      timestamps: false,
     }
   );
 

@@ -118,16 +118,21 @@ exports.obterTaxaConversao = async () => {
     const data12MesesAtras = new Date();
     data12MesesAtras.setMonth(data12MesesAtras.getMonth() - 12);
 
+    const isMysql = db.sequelize.getDialect() === 'mysql';
+    const visitanteMes = isMysql ? "DATE_FORMAT(ve.created_at, '%Y-%m-01')" : "DATE_TRUNC('month', ve.created_at)";
+    const pedidoMes = isMysql ? "DATE_FORMAT(p.criado_em, '%Y-%m-01')" : "DATE_TRUNC('month', p.criado_em)";
+    const visitanteIdentidade = isMysql ? 'COALESCE(ve.usuario_id, ve.ip)' : 'COALESCE(ve.usuario_id::text, ve.ip)';
+
     // Query para visitantes únicos que visitaram home (por mês)
     // Conta usuários logados como únicos por usuario_id, e não-logados como únicos por IP
     const visitantesQuery = await db.sequelize.query(`
       SELECT 
-        DATE_TRUNC('month', ve.created_at) AS mes,
-        COUNT(DISTINCT COALESCE(ve.usuario_id::text, ve.ip)) AS visitantes_unicos
-      FROM visitante_eventos ve
+        ${visitanteMes} AS mes,
+        COUNT(DISTINCT ${visitanteIdentidade}) AS visitantes_unicos
+      FROM visitante_evento ve
       WHERE ve.evento = 'visitou_home' 
         AND ve.created_at >= :dataLimite
-      GROUP BY DATE_TRUNC('month', ve.created_at)
+      GROUP BY ${visitanteMes}
       ORDER BY mes DESC
     `, {
       replacements: { dataLimite: data12MesesAtras },
@@ -137,12 +142,12 @@ exports.obterTaxaConversao = async () => {
     // Query para pedidos confirmados (por mês)
     const pedidosQuery = await db.sequelize.query(`
       SELECT 
-        DATE_TRUNC('month', p.criado_em) AS mes,
+        ${pedidoMes} AS mes,
         COUNT(DISTINCT p.id) AS pedidos_confirmados
       FROM pedidos p
       WHERE p.status IN ('confirmado', 'preparando', 'enviado', 'concluido')
         AND p.criado_em >= :dataLimite
-      GROUP BY DATE_TRUNC('month', p.criado_em)
+      GROUP BY ${pedidoMes}
       ORDER BY mes DESC
     `, {
       replacements: { dataLimite: data12MesesAtras },

@@ -42,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
           key: 'id',
         },
       },
+      dados_adicionais: {
+        type: DataTypes.JSON,
+        allowNull: true,
+      },
       criado_em: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -52,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: 'VisitanteEvento',
-      tableName: 'visitante_eventos',
+      tableName: 'visitante_evento',
       timestamps: false,
     }
   );

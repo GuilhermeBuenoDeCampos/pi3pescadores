@@ -3,7 +3,11 @@ const loadEnv = require('../../config/loadEnv');
 
 loadEnv(path.resolve(__dirname, '../../../.env'), { override: true });
 
-const isRemotePostgres = (host) => host && host !== '127.0.0.1' && host !== 'localhost';
+const dialect = process.env.DB_DIALECT || 'postgres';
+const defaultPort = dialect === 'mysql' ? 3306 : 5432;
+
+const isRemotePostgres = (config) =>
+  config.dialect === 'postgres' && config.host && config.host !== '127.0.0.1' && config.host !== 'localhost';
 
 const sslOptions = {
   require: true,
@@ -11,7 +15,7 @@ const sslOptions = {
 };
 
 const commonOptions = {
-  dialect: 'postgres',
+  dialect,
   define: {
     underscored: true,
     freezeTableName: true,
@@ -20,7 +24,7 @@ const commonOptions = {
 };
 
 function withSsl(config) {
-  if (!isRemotePostgres(config.host) && !process.env.DATABASE_URL?.includes('supabase.com')) {
+  if (!isRemotePostgres(config) && !process.env.DATABASE_URL?.includes('supabase.com')) {
     return config;
   }
 
@@ -39,7 +43,7 @@ module.exports = {
     password: process.env.DB_PASSWORD || null,
     database: process.env.DB_NAME || 'pescadores_db',
     host: process.env.DB_HOST || '127.0.0.1',
-    port: process.env.DB_PORT || 5432,
+    port: process.env.DB_PORT || defaultPort,
     ...commonOptions,
   }),
   test: withSsl({
@@ -47,7 +51,7 @@ module.exports = {
     password: process.env.DB_PASSWORD || null,
     database: process.env.DB_NAME_TEST || 'pescadores_db_test',
     host: process.env.DB_HOST || '127.0.0.1',
-    port: process.env.DB_PORT || 5432,
+    port: process.env.DB_PORT || defaultPort,
     ...commonOptions,
   }),
   production: withSsl({

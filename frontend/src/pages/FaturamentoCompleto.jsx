@@ -15,7 +15,7 @@ import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import {
   FiArrowLeft, FiBarChart2, FiDownload, FiGrid, FiLogOut,
   FiPackage, FiPieChart, FiSettings, FiTrendingUp, FiUser, FiDollarSign,
-  FiCalendar, FiTarget, FiCreditCard,
+  FiCalendar, FiTarget, FiCreditCard, FiTruck,
 } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
@@ -286,6 +286,7 @@ function FaturamentoCompleto() {
       ['Faturamento Semana', formatCurrency(resumo?.semana?.faturamento), 'Últimos 7 dias'],
       ['Faturamento Mês Atual', formatCurrency(resumo?.mes?.faturamento), `${resumo?.mes?.pedidos || 0} pedidos | Ticket: ${formatCurrency(resumo?.mes?.ticketMedio)}`],
       ['Faturamento Mês Passado', formatCurrency(resumo?.mesPassado?.faturamento), 'Período anterior'],
+      ['Fretes Mês Atual', formatCurrency(resumo?.frete?.mes), `Total geral: ${formatCurrency(resumo?.frete?.total)}`],
       ['Meta do Mês', formatCurrency(metaRealizado?.meta), `Realizado: ${metaRealizado?.percentual || 0}%`],
       ['Projetado', formatCurrency(metaRealizado?.projetado), `Média diária: ${formatCurrency(metaRealizado?.mediaDiaria)}`],
     ];
@@ -472,6 +473,7 @@ function FaturamentoCompleto() {
         { label: 'Semana', value: formatCurrency(resumo.semana?.faturamento), detail: 'Últimos 7 dias' },
         { label: 'Mês Atual', value: formatCurrency(resumo.mes?.faturamento), detail: `${resumo.mes?.pedidos || 0} pedidos | Ticket: ${formatCurrency(resumo.mes?.ticketMedio)}` },
         { label: 'Mês Passado', value: formatCurrency(resumo.mesPassado?.faturamento), detail: 'Período anterior' },
+        { label: 'Fretes', value: formatCurrency(resumo.frete?.mes), detail: `Total geral: ${formatCurrency(resumo.frete?.total)}` },
       ];
 
       const colW = (pageW - 2 * margin) / resumoItems.length;
@@ -749,6 +751,12 @@ function FaturamentoCompleto() {
                       <span>Faturamento mês passado</span>
                       <strong>{formatCurrency(resumo?.mesPassado?.faturamento)}</strong>
                       <small>período anterior</small>
+                    </article>
+                    <article className={`${styles.kpiCard} ${styles.kpiShipping}`}>
+                      <FiTruck className={styles.kpiIcon} />
+                      <span>Fretes mês atual</span>
+                      <strong>{formatCurrency(resumo?.frete?.mes)}</strong>
+                      <small>Total geral: {formatCurrency(resumo?.frete?.total)}</small>
                     </article>
                     <article className={`${styles.kpiCard} ${styles.kpiPayment}`}>
                       <FiCreditCard className={styles.kpiIcon} />

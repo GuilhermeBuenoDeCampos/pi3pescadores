@@ -92,7 +92,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(captureClientInfo);
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  setHeaders(res, filePath) {
+    if (path.extname(filePath).toLowerCase() === '.jfif') {
+      res.setHeader('Content-Type', 'image/jpeg');
+    }
+  },
+}));
 
 app.get('/health', (req, res) => {
   res.json({

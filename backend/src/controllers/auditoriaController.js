@@ -1,78 +1,87 @@
 const asyncHandler = require('../utils/asyncHandler');
-const produtoService = require('../services/produtoService');
 const db = require('../database/models');
 
-// Get 5 random products for audit
+function getDiferencaExpression() {
+  return '(quantidade_fisica - quantidade_sistema)';
+}
+
+function getAcuracidadeExpression() {
+  if (db.sequelize.getDialect() === 'mysql') {
+    return `
+      CASE
+        WHEN quantidade_sistema = 0 THEN IF(quantidade_fisica = 0, 100, 0)
+        ELSE GREATEST(
+          0,
+          LEAST(
+            100,
+            ((quantidade_sistema - ABS(quantidade_fisica - quantidade_sistema)) / quantidade_sistema) * 100
+          )
+        )
+      END
+    `;
+  }
+
+  return `
+    CASE
+      WHEN quantidade_sistema = 0 THEN CASE WHEN quantidade_fisica = 0 THEN 100 ELSE 0 END
+      ELSE GREATEST(
+        0,
+        LEAST(
+          100,
+          ((quantidade_sistema - ABS(quantidade_fisica - quantidade_sistema))::decimal / quantidade_sistema) * 100
+        )
+      )
+    END
+  `;
+}
+
 exports.getProdutosAleatorios = asyncHandler(async (req, res) => {
-  // Get 5 random products
   const produtos = await db.Produto.findAll({
     attributes: ['id', 'nome', 'preco_venda'],
     limit: 5,
     order: db.sequelize.random(),
   });
 
-  // For each product, calculate stock from movements
   const produtosComEstoque = await Promise.all(
-    produtos.map(async (p) => {
+    produtos.map(async (produto) => {
       const movimentacoes = await db.EstoqueMovimentacao.findAll({
-        where: { id_produto: p.id },
+        where: { id_produto: produto.id },
         attributes: ['tipo', 'quantidade'],
       });
 
-      let estoque = 0;
-      movimentacoes.forEach((mov) => {
-        const quantidade = parseInt(mov.quantidade, 10);
-        if (mov.tipo === 'entrada') {
-          estoque += quantidade;
-        } else if (mov.tipo === 'saida') {
-          estoque -= quantidade;
-        }
-      });
+      const estoque = movimentacoes.reduce((total, movimentacao) => {
+        const quantidade = Number(movimentacao.quantidade) || 0;
+        return movimentacao.tipo === 'entrada' ? total + quantidade : total - quantidade;
+      }, 0);
 
       return {
-        id: p.id,
-        nome: p.nome,
-        preco_venda: p.preco_venda,
+        id: produto.id,
+        nome: produto.nome,
+        preco_venda: produto.preco_venda,
         quantidade_sistema: Math.max(0, estoque),
       };
     })
   );
 
-  res.json({
-    data: produtosComEstoque,
-  });
+  res.json({ data: produtosComEstoque });
 });
 
-// Save audit record
 exports.salvarAuditoria = asyncHandler(async (req, res) => {
   const { auditorias } = req.body;
 
-  if (!auditorias || !Array.isArray(auditorias) || auditorias.length === 0) {
+  if (!Array.isArray(auditorias) || auditorias.length === 0) {
     return res.status(400).json({
       error: { message: 'Invalid audit data' },
     });
   }
 
-  const registros = auditorias.map((item) => {
-    const diferenca = item.quantidade_fisica - item.quantidade_sistema;
-    
-    // Calculate accuracy: if sistema=0, check if físico=0 (100%) or físico>0 (0%)
-    let acuracidade;
-    if (item.quantidade_sistema === 0) {
-      acuracidade = item.quantidade_fisica === 0 ? 100 : 0;
-    } else {
-      acuracidade = ((item.quantidade_sistema - Math.abs(diferenca)) / item.quantidade_sistema) * 100;
-    }
-
-    return {
-      product_id: item.product_id,
-      quantidade_sistema: item.quantidade_sistema,
-      quantidade_fisica: item.quantidade_fisica,
-      diferenca,
-      acuracidade: Math.max(0, Math.min(100, acuracidade)),
-      usuario_id: req.user?.id || null,
-    };
-  });
+  const registros = auditorias.map((item) => ({
+    product_id: item.product_id,
+    quantidade_sistema: item.quantidade_sistema,
+    quantidade_fisica: item.quantidade_fisica,
+    observacoes: item.observacoes || null,
+    usuario_id: req.user?.id || null,
+  }));
 
   const resultado = await db.AuditoriaProduto.bulkCreate(registros);
 
@@ -82,12 +91,18 @@ exports.salvarAuditoria = asyncHandler(async (req, res) => {
   });
 });
 
-// Get audit history
 exports.getHistoricoAuditoria = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
   const offset = (page - 1) * limit;
 
   const { count, rows } = await db.AuditoriaProduto.findAndCountAll({
+    attributes: {
+      include: [
+        [db.sequelize.literal(getDiferencaExpression()), 'diferenca'],
+        [db.sequelize.literal(getAcuracidadeExpression()), 'acuracidade'],
+      ],
+    },
     include: [
       {
         model: db.Produto,
@@ -96,7 +111,7 @@ exports.getHistoricoAuditoria = asyncHandler(async (req, res) => {
       },
     ],
     order: [['created_at', 'DESC']],
-    limit: parseInt(limit),
+    limit,
     offset,
   });
 
@@ -104,8 +119,8 @@ exports.getHistoricoAuditoria = asyncHandler(async (req, res) => {
     data: rows,
     pagination: {
       total: count,
-      page: parseInt(page),
-      limit: parseInt(limit),
+      page,
+      limit,
       pages: Math.ceil(count / limit),
     },
   });
@@ -114,7 +129,7 @@ exports.getHistoricoAuditoria = asyncHandler(async (req, res) => {
 exports.getMediaAcuracidade = asyncHandler(async (req, res) => {
   const media = await db.AuditoriaProduto.findOne({
     attributes: [
-      [db.sequelize.fn('AVG', db.sequelize.col('acuracidade')), 'media_acuracidade'],
+      [db.sequelize.fn('AVG', db.sequelize.literal(getAcuracidadeExpression())), 'media_acuracidade'],
       [db.sequelize.fn('COUNT', db.sequelize.col('id')), 'total_auditorias'],
     ],
     raw: true,

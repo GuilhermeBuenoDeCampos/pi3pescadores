@@ -148,8 +148,12 @@ const StockManagement = () => {
   };
 
   const handleFiles = (files) => {
+    const allowedImageExtensions = ['.jpg', '.jpeg', '.jpe', '.jfif', '.pjpeg', '.png', '.webp', '.avif'];
     const newImages = files
-      .filter(file => file.type.startsWith('image/'))
+      .filter(file => {
+        const fileName = file.name.toLowerCase();
+        return file.type.startsWith('image/') || allowedImageExtensions.some((extension) => fileName.endsWith(extension));
+      })
       .map(file => ({
         file,
         preview: URL.createObjectURL(file)
@@ -222,23 +226,30 @@ const StockManagement = () => {
   };
 
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryParentId, setNewCategoryParentId] = useState('');
   
   const handleCreateCategory = async (e) => {
     e.preventDefault();
     if (!newCategoryName.trim()) return;
 
     try {
+      const payload = {
+        nome: newCategoryName.trim(),
+        id_categoria_pai: newCategoryParentId || null,
+      };
+
       // Usa apiFetch para limpar sessão e redirecionar se o token expirar.
       const response = await apiFetch(`${BACKEND_URL}/api/categorias`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ nome: newCategoryName })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) throw new Error('Falha ao criar categoria');
 
       alert('Categoria salva com sucesso!');
       setNewCategoryName('');
+      setNewCategoryParentId('');
       loadData(); // Recarrega listagem de categorias
     } catch (err) {
       console.error(err);
@@ -669,7 +680,7 @@ const StockManagement = () => {
                         type="file" 
                         name="imagens" 
                         multiple 
-                        accept="image/*" 
+                        accept="image/*,.jfif,.jpe,.pjpeg" 
                         className={styles.dropzoneInput} 
                         onChange={handleImageChange}
                         title="Arraste as imagens aqui ou clique para selecionar"
@@ -677,7 +688,7 @@ const StockManagement = () => {
                       <div className={styles.dropzoneText}>
                         <strong>Arraste as imagens aqui</strong> ou clique para selecionar
                       </div>
-                      <span className={styles.hint}>Suporta múltiplas imagens (JPG, PNG, etc).</span>
+                      <span className={styles.hint}>Suporta múltiplas imagens (JPG, JFIF, PNG, WEBP, AVIF).</span>
                     </div>
 
                     {/* Previews das Imagens */}
@@ -909,7 +920,7 @@ const StockManagement = () => {
 
               <div style={{ marginBottom: '20px' }}>
                 <h4 style={{ color: '#0f172a', marginBottom: '10px' }}>NOVA CATEGORIA</h4>
-                <form onSubmit={handleCreateCategory} style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                <form onSubmit={handleCreateCategory} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(220px, 0.6fr) auto', gap: '10px', alignItems: 'flex-end' }}>
                   <div className={styles.formGroup} style={{ marginBottom: 0, flex: 1 }}>
                     <label>Nome da Categoria *</label>
                     <input 
@@ -920,6 +931,21 @@ const StockManagement = () => {
                       onChange={(e) => setNewCategoryName(e.target.value)}
                       required
                     />
+                  </div>
+                  <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                    <label>Categoria pai</label>
+                    <select
+                      className={styles.formControl}
+                      value={newCategoryParentId}
+                      onChange={(e) => setNewCategoryParentId(e.target.value)}
+                    >
+                      <option value="">Nenhuma</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.nome}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <button type="submit" className={`${styles.btn} ${styles.btnBlue}`}><FiPlus /> Adicionar</button>
                 </form>
@@ -933,6 +959,7 @@ const StockManagement = () => {
                       <tr>
                         <th style={{ width: '80px' }}>ID</th>
                         <th>Nome da Categoria</th>
+                        <th>Categoria Pai</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -940,11 +967,12 @@ const StockManagement = () => {
                         <tr key={cat.id} className={styles.tableBodyRow}>
                           <td style={{ color: '#64748b' }}>#{cat.id}</td>
                           <td>{cat.nome}</td>
+                          <td>{cat.categoria_pai?.nome || '-'}</td>
                         </tr>
                       ))}
                       {categories.length === 0 && (
                         <tr>
-                          <td colSpan="2" style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>Nenhuma categoria cadastrada.</td>
+                          <td colSpan="3" style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>Nenhuma categoria cadastrada.</td>
                         </tr>
                       )}
                     </tbody>

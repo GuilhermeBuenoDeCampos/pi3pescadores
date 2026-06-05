@@ -14,6 +14,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'itens',
         foreignKey: 'id_pedido',
       });
+
+      Pedido.belongsTo(models.EnderecoEntrega, {
+        as: 'enderecoEntrega',
+        foreignKey: 'id_endereco_entrega',
+      });
     }
   }
 
@@ -43,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       valor_frete: {
         type: DataTypes.DECIMAL(12, 2),
-        allowNull: false,
+        allowNull: true,
       },
       tipo_frete: {
         type: DataTypes.ENUM('PAC', 'SEDEX'),
@@ -57,9 +62,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: false,
       },
-      endereco_entrega: {
-        type: DataTypes.JSONB,
-        allowNull: false,
+      id_endereco_entrega: {
+        type: DataTypes.BIGINT,
+        allowNull: true,
       },
       metodo_pagamento: {
         type: DataTypes.STRING(60),

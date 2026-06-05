@@ -2,7 +2,7 @@ const { Transaction } = require('sequelize');
 const db = require('../database/models');
 const AppError = require('../middlewares/appError');
 
-const ACTIVE_STATUS = 'active';
+const ACTIVE_STATUS = 'ativo';
 const MERGED_STATUS = 'merged';
 
 function normalizeImageUrl(url) {
@@ -42,6 +42,7 @@ function normalizeCartItem(item) {
     carrinho_id: plain.carrinho_id,
     produto_id: plain.produto_id,
     quantidade: toNumber(plain.quantidade, 0),
+    preco_unitario: plain.preco_unitario,
     produto: productPlain
       ? {
           id: productPlain.id,
@@ -61,7 +62,7 @@ function normalizeCartItem(item) {
 
 function calcularSubtotal(itens) {
   return itens.reduce((total, item) => {
-    const preco = toNumber(item.produto?.preco_venda, 0);
+    const preco = toNumber(item.preco_unitario ?? item.produto?.preco_venda, 0);
     return total + preco * toNumber(item.quantidade, 0);
   }, 0);
 }
@@ -170,7 +171,7 @@ async function buscarCarrinhoAtivo({ userId, guestToken, transaction, createIfMi
 }
 
 async function salvarOuIncrementarItem({ carrinhoId, produtoId, quantidade, transaction }) {
-  await buscarProdutoPorId(produtoId, transaction);
+  const produto = await buscarProdutoPorId(produtoId, transaction);
 
   const itemExistente = await db.CarrinhoItem.findOne({
     where: {
@@ -185,6 +186,7 @@ async function salvarOuIncrementarItem({ carrinhoId, produtoId, quantidade, tran
     await itemExistente.update(
       {
         quantidade: toNumber(itemExistente.quantidade, 0) + quantidade,
+        preco_unitario: produto.preco_venda,
       },
       { transaction }
     );
@@ -196,6 +198,7 @@ async function salvarOuIncrementarItem({ carrinhoId, produtoId, quantidade, tran
       carrinho_id: carrinhoId,
       produto_id: produtoId,
       quantidade,
+      preco_unitario: produto.preco_venda,
     },
     { transaction }
   );

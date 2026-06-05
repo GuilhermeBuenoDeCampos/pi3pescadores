@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      preco_unitario: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: false,
+      },
     },
     {
       sequelize,

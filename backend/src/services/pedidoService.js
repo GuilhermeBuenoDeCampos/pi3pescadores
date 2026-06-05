@@ -38,6 +38,10 @@ function normalizePaymentMethod(value) {
   return PAYMENT_METHODS.has(method) ? method : 'whatsapp';
 }
 
+function getLikeOperator() {
+  return db.sequelize.getDialect() === 'postgres' ? Op.iLike : Op.like;
+}
+
 function normalizeAddress(address) {
   if (!address || typeof address !== 'object' || Array.isArray(address)) {
     throw new AppError(400, 'endereco_entrega is required');
@@ -182,7 +186,7 @@ function formatItem(item) {
     id: plain.id,
     id_pedido: plain.id_pedido,
     id_produto: plain.id_produto,
-    nome_produto: plain.nome_produto,
+    nome_produto: plain.nome_produto || produto?.nome || 'Produto',
     quantidade: plain.quantidade,
     preco_unitario: formatMoney(plain.preco_unitario),
     preco: formatMoney(plain.preco_unitario),
@@ -204,12 +208,13 @@ function formatItem(item) {
 function formatPedido(pedido) {
   const plain = pedido.toJSON ? pedido.toJSON() : pedido;
   const itens = Array.isArray(plain.itens) ? plain.itens : [];
+  const enderecoEntrega = plain.endereco_entrega || plain.enderecoEntrega || null;
 
   return {
     id: plain.id,
     id_usuario: plain.id_usuario,
     numero_pedido: plain.numero_pedido,
-    nome_cliente: plain.nome_cliente || plain.endereco_entrega?.nome_destinatario || 'N/A',
+    nome_cliente: plain.nome_cliente || enderecoEntrega?.nome_destinatario || 'N/A',
     status: plain.status,
     subtotal: formatMoney(plain.subtotal),
     valor_frete: formatMoney(plain.valor_frete),
@@ -217,7 +222,7 @@ function formatPedido(pedido) {
     desconto: formatMoney(plain.desconto),
     total: formatMoney(plain.total),
     valor_total: formatMoney(plain.total),
-    endereco_entrega: plain.endereco_entrega,
+    endereco_entrega: enderecoEntrega,
     metodo_pagamento: plain.metodo_pagamento,
     observacoes: plain.observacoes,
     criado_em: plain.criado_em,
@@ -254,6 +259,12 @@ async function buscarPedidoCompleto(where, transaction) {
     // Buscar o pedido SEM includes primeiro
     const pedido = await db.Pedido.findOne({
       where,
+      include: [
+        {
+          model: db.EnderecoEntrega,
+          as: 'enderecoEntrega',
+        },
+      ],
       transaction,
       raw: false,
     });
@@ -359,7 +370,7 @@ exports.criarPedido = async (usuarioId, payload) => {
         tipo_frete: frete.servico || null,
         desconto: formatMoney(desconto),
         total: formatMoney(total),
-        endereco_entrega: enderecoEntrega,
+        id_endereco_entrega: null,
         metodo_pagamento: metodoPagamento,
         observacoes: observacoes,
         criado_em: now,
@@ -368,11 +379,32 @@ exports.criarPedido = async (usuarioId, payload) => {
       { transaction }
     );
 
+    const createdEndereco = await db.EnderecoEntrega.create(
+      {
+        cep: enderecoEntrega.cep,
+        rua: enderecoEntrega.rua,
+        numero: enderecoEntrega.numero,
+        complemento: enderecoEntrega.complemento || null,
+        bairro: enderecoEntrega.bairro,
+        cidade: enderecoEntrega.cidade,
+        estado: enderecoEntrega.estado,
+        pais: 'Brasil',
+        criado_em: now,
+      },
+      { transaction }
+    );
+
+    await createdPedido.update(
+      {
+        id_endereco_entrega: createdEndereco.id,
+      },
+      { transaction }
+    );
+
     await db.PedidoItem.bulkCreate(
       itensCalculados.map((item) => ({
         id_pedido: createdPedido.id,
         id_produto: item.id_produto,
-        nome_produto: item.nome_produto,
         quantidade: item.quantidade,
         preco_unitario: item.preco_unitario,
         subtotal: item.subtotal,
@@ -415,7 +447,7 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
 
   if (query.search) {
     where.numero_pedido = {
-      [Op.iLike]: `%${String(query.search).trim()}%`,
+      [getLikeOperator()]: `%${String(query.search).trim()}%`,
     };
   }
 
@@ -439,6 +471,12 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
     console.log('[pedidoService] executando query simples (sem includes)...');
     const { count, rows } = await db.Pedido.findAndCountAll({
       where,
+      include: [
+        {
+          model: db.EnderecoEntrega,
+          as: 'enderecoEntrega',
+        },
+      ],
       distinct: true,
       order: [['criado_em', 'DESC']],
       limit,
@@ -506,7 +544,7 @@ exports.listarTodosPedidos = async (query = {}) => {
 
   if (query.search) {
     where.numero_pedido = {
-      [Op.iLike]: `%${String(query.search).trim()}%`,
+      [getLikeOperator()]: `%${String(query.search).trim()}%`,
     };
   }
 
@@ -526,6 +564,12 @@ exports.listarTodosPedidos = async (query = {}) => {
 
     const { count, rows } = await db.Pedido.findAndCountAll({
       where,
+      include: [
+        {
+          model: db.EnderecoEntrega,
+          as: 'enderecoEntrega',
+        },
+      ],
       distinct: true,
       order: [['criado_em', 'DESC']],
       limit,

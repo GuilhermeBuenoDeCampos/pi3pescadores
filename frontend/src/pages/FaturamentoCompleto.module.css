@@ -334,6 +334,7 @@
 .kpiWeek { border-left: 4px solid var(--teal-dark); }
 .kpiMonth { border-left: 4px solid var(--gold-dark); }
 .kpiLastMonth { border-left: 4px solid var(--peach-dark); }
+.kpiShipping { border-left: 4px solid #0ea5e9; }
 .kpiPayment { border-left: 4px solid #8e44ad; }
 
 .chartsRow {
