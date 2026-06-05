@@ -210,9 +210,11 @@ exports.obterLeadtimePorPeriodo = async (mesAtras = 1) => {
 
     const leadtimes = await db.Leadtime.findAll({
       where: {
-        concluido: {
-          [Op.between]: [dataInicio, dataFim],
-        },
+        [Op.or]: [
+          { created_at: { [Op.between]: [dataInicio, dataFim] } },
+          { updated_at: { [Op.between]: [dataInicio, dataFim] } },
+          { concluido: { [Op.between]: [dataInicio, dataFim] } },
+        ],
       },
       include: [
         {

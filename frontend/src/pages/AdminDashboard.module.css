@@ -259,7 +259,7 @@
 }
 
 .leadtimeContent {
-  width: min(100%, 310px);
+  width: min(100%, 282px);
   gap: 10px;
 }
 
@@ -299,6 +299,7 @@
   column-gap: 10px;
   min-height: 32px;
   padding: 6px 8px;
+  padding-right: 10px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.9);

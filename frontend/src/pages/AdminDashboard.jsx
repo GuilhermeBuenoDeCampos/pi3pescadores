@@ -1248,7 +1248,17 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={`${styles.kpiCard} ${styles.leadtimeKpi}`}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.leadtimeKpi}`}
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate('/admin/leadtime')}
+            onKeyDown={(event) => {
+              if (event.currentTarget !== event.target) return;
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate('/admin/leadtime');
+              }
+            }}
             style={{
               backgroundImage: `linear-gradient(90deg, rgba(16, 24, 44, 0.9) 0%, rgba(16, 24, 44, 0.72) 54%, rgba(8, 147, 111, 0.34) 100%), url(${saoPedroImg})`,
               backgroundSize: 'cover',
