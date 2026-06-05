@@ -242,6 +242,93 @@
   font-weight: 700;
 }
 
+.leadtimeKpi {
+  min-height: 240px;
+  justify-content: flex-end;
+  padding: 18px;
+}
+
+.leadtimeKpi[style*="backgroundImage"],
+.leadtimeKpi[style*="background-image"] {
+  padding: 18px;
+  justify-content: flex-end;
+}
+
+.leadtimeKpi strong {
+  white-space: normal;
+}
+
+.leadtimeContent {
+  width: min(100%, 310px);
+  gap: 10px;
+}
+
+.leadtimeSummary {
+  display: grid;
+  gap: 4px;
+}
+
+.leadtimeSummary span {
+  margin: 0;
+}
+
+.leadtimeSummary strong {
+  font-size: clamp(1.45rem, 2vw, 1.9rem);
+  line-height: 1;
+}
+
+.leadtimeSummary small {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.leadtimeList {
+  width: 100%;
+  display: grid;
+  gap: 5px;
+}
+
+.leadtimeList small {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "label value"
+    "count value";
+  align-items: end;
+  column-gap: 10px;
+  min-height: 32px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.leadtimeList span {
+  grid-area: label;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.leadtimeList b {
+  grid-area: value;
+  color: #ffffff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.leadtimeList em {
+  grid-area: count;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.65rem;
+  font-style: normal;
+  white-space: nowrap;
+}
+
 .dashboardGrid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);

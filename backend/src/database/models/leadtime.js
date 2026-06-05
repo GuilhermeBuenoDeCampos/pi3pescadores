@@ -9,11 +9,6 @@ module.exports = (sequelize, DataTypes) => {
         as: 'pedido',
         foreignKey: 'pedido_id',
       });
-
-      Leadtime.belongsTo(models.Usuario, {
-        as: 'usuario',
-        foreignKey: 'usuarios_id',
-      });
     }
   }
 
@@ -27,16 +22,9 @@ module.exports = (sequelize, DataTypes) => {
       pedido_id: {
         type: DataTypes.BIGINT,
         allowNull: false,
+        unique: true,
         references: {
-          model: 'pedido',
-          key: 'id',
-        },
-      },
-      usuarios_id: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        references: {
-          model: 'usuario',
+          model: 'pedidos',
           key: 'id',
         },
       },

@@ -11,17 +11,9 @@ module.exports = {
       pedido_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
+        unique: true,
         references: {
-          model: 'pedido',
-          key: 'id',
-        },
-        onDelete: 'CASCADE',
-      },
-      usuarios_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'usuario',
+          model: 'pedidos',
           key: 'id',
         },
         onDelete: 'CASCADE',
@@ -65,12 +57,6 @@ module.exports = {
         defaultValue: Sequelize.NOW,
       },
     });
-
-    // Criar índice para pedido_id
-    await queryInterface.addIndex('leadtime', ['pedido_id']);
-
-    // Criar índice para usuarios_id
-    await queryInterface.addIndex('leadtime', ['usuarios_id']);
 
     // Criar índice para concluido (para queries que filtram por pedidos concluídos)
     await queryInterface.addIndex('leadtime', ['concluido']);

@@ -5,10 +5,52 @@ const { Op } = require('sequelize');
 
 const leadtimeStages = ['visitante', 'carrinho', 'pendente', 'confirmado', 'preparando', 'enviado', 'concluido'];
 
+function diffHours(start, end) {
+  if (!start || !end) return null;
+
+  const diff = (new Date(end) - new Date(start)) / (1000 * 60 * 60);
+  return Number.isFinite(diff) && diff >= 0 ? diff : null;
+}
+
+function calcularMedia(valores) {
+  if (!valores.length) return 0;
+  return valores.reduce((total, valor) => total + valor, 0) / valores.length;
+}
+
+function formatDuration(hours) {
+  const totalMinutes = Math.max(0, Math.round(Number(hours || 0) * 60));
+
+  if (totalMinutes < 60) {
+    return `${totalMinutes}min`;
+  }
+
+  const days = Math.floor(totalMinutes / 1440);
+  const hoursRemainder = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+
+  if (days > 0) {
+    return `${days}d ${hoursRemainder}h`;
+  }
+
+  return minutes > 0 ? `${hoursRemainder}h ${minutes}min` : `${hoursRemainder}h`;
+}
+
+function resumirEtapa(valores) {
+  const mediaHoras = calcularMedia(valores);
+  const mediaMinutos = mediaHoras * 60;
+
+  return {
+    horas: parseFloat(mediaHoras.toFixed(2)),
+    minutos: parseFloat(mediaMinutos.toFixed(0)),
+    label: formatDuration(mediaHoras),
+    total: valores.length,
+  };
+}
+
 exports.registrarEventoLeadtime = async (pedidoId, usuarioId, stage) => {
   try {
     if (!leadtimeStages.includes(stage)) {
-      throw new Error(`Stage inválido: ${stage}`);
+      throw new Error(`Stage invalido: ${stage}`);
     }
 
     let leadtime = await db.Leadtime.findOne({
@@ -18,7 +60,6 @@ exports.registrarEventoLeadtime = async (pedidoId, usuarioId, stage) => {
     if (!leadtime) {
       leadtime = await db.Leadtime.create({
         pedido_id: pedidoId,
-        usuarios_id: usuarioId,
         [stage]: new Date(),
       });
     } else {
@@ -38,7 +79,6 @@ exports.registrarEventoLeadtime = async (pedidoId, usuarioId, stage) => {
 
 exports.criarLeadtimeComEventos = async (pedidoId, usuarioId, dataPedido) => {
   try {
-    // Buscar eventos do visitante para esse usuário
     const eventos = await db.VisitanteEvento.findAll({
       where: {
         usuario_id: usuarioId,
@@ -49,20 +89,31 @@ exports.criarLeadtimeComEventos = async (pedidoId, usuarioId, dataPedido) => {
       order: [['criado_em', 'ASC']],
     });
 
-    // Encontrar as datas dos eventos
     const visitanteEvento = eventos.find(e => e.evento === 'visitou_home');
     const carrinhoEvento = eventos.find(e => e.evento === 'adicionou_produto_no_carrinho');
 
-    // Criar o leadtime com as datas dos eventos
     const leadtimeData = {
       pedido_id: pedidoId,
-      usuarios_id: usuarioId,
       visitante: visitanteEvento?.criado_em || null,
       carrinho: carrinhoEvento?.criado_em || null,
       pendente: dataPedido,
     };
 
-    const leadtime = await db.Leadtime.create(leadtimeData);
+    const [leadtime, created] = await db.Leadtime.findOrCreate({
+      where: { pedido_id: pedidoId },
+      defaults: leadtimeData,
+    });
+
+    if (!created) {
+      const updates = Object.fromEntries(
+        Object.entries(leadtimeData).filter(([key, value]) => key !== 'pedido_id' && value && !leadtime[key])
+      );
+
+      if (Object.keys(updates).length > 0) {
+        await leadtime.update(updates);
+      }
+    }
+
     return leadtime;
   } catch (error) {
     console.error('Erro ao criar leadtime com eventos:', error);
@@ -73,11 +124,6 @@ exports.criarLeadtimeComEventos = async (pedidoId, usuarioId, dataPedido) => {
 exports.calcularMediaLeadtime = async () => {
   try {
     const leadtimes = await db.Leadtime.findAll({
-      where: {
-        concluido: {
-          [Op.ne]: null,
-        },
-      },
       raw: true,
     });
 
@@ -86,15 +132,16 @@ exports.calcularMediaLeadtime = async () => {
         media_geral_dias: 0,
         media_geral_horas: 0,
         media_geral_minutos: 0,
+        media_geral_label: '0min',
         por_etapa: {},
+        detalhes_por_etapa: {},
         total_pedidos: 0,
       };
     }
 
     const medias = {
       visitante_carrinho: [],
-      carrinho_pendente: [],
-      pendente_confirmado: [],
+      carrinho_confirmado: [],
       confirmado_preparando: [],
       preparando_enviado: [],
       enviado_concluido: [],
@@ -102,46 +149,28 @@ exports.calcularMediaLeadtime = async () => {
     };
 
     leadtimes.forEach((lt) => {
-      if (lt.visitante && lt.carrinho) {
-        medias.visitante_carrinho.push(
-          (new Date(lt.carrinho) - new Date(lt.visitante)) / (1000 * 60 * 60)
-        );
-      }
-      if (lt.carrinho && lt.pendente) {
-        medias.carrinho_pendente.push(
-          (new Date(lt.pendente) - new Date(lt.carrinho)) / (1000 * 60 * 60)
-        );
-      }
-      if (lt.pendente && lt.confirmado) {
-        medias.pendente_confirmado.push(
-          (new Date(lt.confirmado) - new Date(lt.pendente)) / (1000 * 60 * 60)
-        );
-      }
-      if (lt.confirmado && lt.preparando) {
-        medias.confirmado_preparando.push(
-          (new Date(lt.preparando) - new Date(lt.confirmado)) / (1000 * 60 * 60)
-        );
-      }
-      if (lt.preparando && lt.enviado) {
-        medias.preparando_enviado.push(
-          (new Date(lt.enviado) - new Date(lt.preparando)) / (1000 * 60 * 60)
-        );
-      }
-      if (lt.enviado && lt.concluido) {
-        medias.enviado_concluido.push(
-          (new Date(lt.concluido) - new Date(lt.enviado)) / (1000 * 60 * 60)
-        );
-      }
-      if (lt.visitante && lt.concluido) {
-        medias.visitante_concluido.push(
-          (new Date(lt.concluido) - new Date(lt.visitante)) / (1000 * 60 * 60)
-        );
-      }
+      const etapaValores = {
+        visitante_carrinho: diffHours(lt.visitante, lt.carrinho),
+        carrinho_confirmado: diffHours(lt.carrinho, lt.confirmado),
+        confirmado_preparando: diffHours(lt.confirmado, lt.preparando),
+        preparando_enviado: diffHours(lt.preparando, lt.enviado),
+        enviado_concluido: diffHours(lt.enviado, lt.concluido),
+        visitante_concluido: diffHours(lt.visitante, lt.concluido),
+      };
+
+      Object.entries(etapaValores).forEach(([key, value]) => {
+        if (value !== null) {
+          medias[key].push(value);
+        }
+      });
     });
 
-    const calcularMedia = (valores) => {
-      if (valores.length === 0) return 0;
-      return valores.reduce((a, b) => a + b, 0) / valores.length;
+    const detalhesPorEtapa = {
+      visitante_carrinho: resumirEtapa(medias.visitante_carrinho),
+      carrinho_confirmado: resumirEtapa(medias.carrinho_confirmado),
+      confirmado_preparando: resumirEtapa(medias.confirmado_preparando),
+      preparando_enviado: resumirEtapa(medias.preparando_enviado),
+      enviado_concluido: resumirEtapa(medias.enviado_concluido),
     };
 
     const mediaGeralHoras = calcularMedia(medias.visitante_concluido);
@@ -152,14 +181,15 @@ exports.calcularMediaLeadtime = async () => {
       media_geral_dias: parseFloat(mediaGeralDias.toFixed(2)),
       media_geral_horas: parseFloat(mediaGeralHoras.toFixed(2)),
       media_geral_minutos: parseFloat(mediaGeralMinutos.toFixed(0)),
+      media_geral_label: formatDuration(mediaGeralHoras),
       por_etapa: {
-        visitante_carrinho: parseFloat(calcularMedia(medias.visitante_carrinho).toFixed(2)),
-        carrinho_pendente: parseFloat(calcularMedia(medias.carrinho_pendente).toFixed(2)),
-        pendente_confirmado: parseFloat(calcularMedia(medias.pendente_confirmado).toFixed(2)),
-        confirmado_preparando: parseFloat(calcularMedia(medias.confirmado_preparando).toFixed(2)),
-        preparando_enviado: parseFloat(calcularMedia(medias.preparando_enviado).toFixed(2)),
-        enviado_concluido: parseFloat(calcularMedia(medias.enviado_concluido).toFixed(2)),
+        visitante_carrinho: detalhesPorEtapa.visitante_carrinho.horas,
+        carrinho_confirmado: detalhesPorEtapa.carrinho_confirmado.horas,
+        confirmado_preparando: detalhesPorEtapa.confirmado_preparando.horas,
+        preparando_enviado: detalhesPorEtapa.preparando_enviado.horas,
+        enviado_concluido: detalhesPorEtapa.enviado_concluido.horas,
       },
+      detalhes_por_etapa: detalhesPorEtapa,
       total_pedidos: leadtimes.length,
     };
   } catch (error) {
@@ -187,11 +217,13 @@ exports.obterLeadtimePorPeriodo = async (mesAtras = 1) => {
       include: [
         {
           association: 'pedido',
-          attributes: ['id', 'numero_pedido', 'status'],
-        },
-        {
-          association: 'usuario',
-          attributes: ['id', 'nome', 'email'],
+          attributes: ['id', 'numero_pedido', 'status', 'id_usuario'],
+          include: [
+            {
+              association: 'usuario',
+              attributes: ['id', 'nome', 'email'],
+            },
+          ],
         },
       ],
     });

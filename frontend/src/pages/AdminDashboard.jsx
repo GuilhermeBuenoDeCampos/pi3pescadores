@@ -38,8 +38,10 @@ import visitanteAltoImg from '../assets/admin/visitantealto.png';
 import conversaoBaixaImg from '../assets/admin/SBruim.png';
 import conversaoMediaImg from '../assets/admin/SBnormal.png';
 import conversaoAltaImg from '../assets/admin/SBbom.png';
+import saoPedroImg from '../assets/admin/saopedro.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
+import { obterMediaLeadtime } from '../services/leadtime';
 import KpiConfigModal from '../components/KpiConfigModal';
 import styles from './AdminDashboard.module.css';
 
@@ -362,6 +364,10 @@ const kpiCalculations = {
     title: 'Acuracidade média',
     description: 'Para cada auditoria, calcula 100 menos o percentual da diferença absoluta entre o estoque físico e o registrado. O card exibe a média dos produtos auditados.',
   },
+  leadtime: {
+    title: 'Lead time medio',
+    description: 'Calcula a media entre os horarios registrados no funil: entrada no site, primeiro item no carrinho, pagamento confirmado, preparando, enviado e concluido.',
+  },
 };
 
 function CalculationHelpButton({ calculation, onOpen, withSettings = false }) {
@@ -419,6 +425,8 @@ function AdminDashboard() {
   const [loadingTaxaRecompra, setLoadingTaxaRecompra] = useState(true);
   const [ticketMedio, setTicketMedio] = useState(null);
   const [loadingTicketMedio, setLoadingTicketMedio] = useState(true);
+  const [leadtime, setLeadtime] = useState(null);
+  const [loadingLeadtime, setLoadingLeadtime] = useState(true);
   const [kpiConfig, setKpiConfig] = useState(null);
   const [showKpiModal, setShowKpiModal] = useState(false);
   const [showRecompraModal, setShowRecompraModal] = useState(false);
@@ -438,6 +446,7 @@ function AdminDashboard() {
         setLoadingFaturamento(true);
         setLoadingTaxaRecompra(true);
         setLoadingTicketMedio(true);
+        setLoadingLeadtime(true);
         setAccuracyError('');
         
         const authToken = getAuthToken();
@@ -449,7 +458,7 @@ function AdminDashboard() {
           faturamentoHeaders['Authorization'] = `Bearer ${authToken}`;
         }
 
-        const [accuracyData, searchesData, taxaData, faturamentoData, taxaRecompraData, ticketMedioData, configData] = await Promise.all([
+        const [accuracyData, searchesData, taxaData, faturamentoData, taxaRecompraData, ticketMedioData, leadtimeData, configData] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
@@ -480,6 +489,7 @@ function AdminDashboard() {
           }).catch(err => {
             return null;
           }),
+          obterMediaLeadtime().catch(() => null),
           obterKpiConfig(),
         ]);
 
@@ -490,6 +500,7 @@ function AdminDashboard() {
           setFaturamentoMensal(faturamentoData);
           setTaxaRecompra(taxaRecompraData);
           setTicketMedio(ticketMedioData);
+          setLeadtime(leadtimeData);
           setKpiConfig(configData);
         }
       } catch (error) {
@@ -505,6 +516,7 @@ function AdminDashboard() {
           setLoadingFaturamento(false);
           setLoadingTaxaRecompra(false);
           setLoadingTicketMedio(false);
+          setLoadingLeadtime(false);
         }
       }
     }
@@ -554,6 +566,43 @@ function AdminDashboard() {
   } else if (visitantesValor > visitanteAlto) {
     imagemVisitante = visitanteAltoImg;
   }
+
+  const formatLeadtimeDuration = (value) => {
+    const hours = Number(value || 0);
+    const totalMinutes = Math.max(0, Math.round(hours * 60));
+
+    if (totalMinutes < 60) {
+      return `${totalMinutes}min`;
+    }
+
+    const days = Math.floor(totalMinutes / 1440);
+    const hoursRemainder = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    if (days > 0) {
+      return `${days}d ${hoursRemainder}h`;
+    }
+
+    return minutes > 0 ? `${hoursRemainder}h ${minutes}min` : `${hoursRemainder}h`;
+  };
+
+  const leadtimeEtapas = [
+    ['Entrada -> carrinho', 'visitante_carrinho'],
+    ['Carrinho -> confirmado', 'carrinho_confirmado'],
+    ['Confirmado -> preparando', 'confirmado_preparando'],
+    ['Preparando -> enviado', 'preparando_enviado'],
+    ['Enviado -> concluido', 'enviado_concluido'],
+  ].map(([label, key]) => {
+    const detalhe = leadtime?.detalhes_por_etapa?.[key];
+    const horas = leadtime?.por_etapa?.[key];
+
+    return {
+      key,
+      label,
+      value: detalhe?.label || formatLeadtimeDuration(horas),
+      total: detalhe?.total || 0,
+    };
+  });
 
   // Determine color and image based on accuracy percentage
   const getAccuracyMetrics = (value) => {
@@ -1196,6 +1245,42 @@ function AdminDashboard() {
                   IPs unicos que visitaram home
                 </small>
               )}
+            </div>
+          </article>
+          <article
+            className={`${styles.kpiCard} ${styles.leadtimeKpi}`}
+            style={{
+              backgroundImage: `linear-gradient(90deg, rgba(16, 24, 44, 0.9) 0%, rgba(16, 24, 44, 0.72) 54%, rgba(8, 147, 111, 0.34) 100%), url(${saoPedroImg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center right',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <CalculationHelpButton calculation={kpiCalculations.leadtime} onOpen={setCalculationHelp} />
+            <div className={`${styles.revenueKpiContent} ${styles.leadtimeContent}`}>
+              <div className={styles.leadtimeSummary}>
+                <span>Lead time medio</span>
+                <strong>
+                  {loadingLeadtime
+                    ? 'Carregando...'
+                    : leadtime?.media_geral_label || formatLeadtimeDuration(leadtime?.media_geral_horas)}
+                </strong>
+                <small>
+                  {loadingLeadtime
+                    ? 'Calculando etapas'
+                    : `${leadtime?.total_pedidos || 0} pedidos analisados`}
+                </small>
+              </div>
+              <div className={styles.leadtimeList}>
+                {leadtimeEtapas.map((item) => (
+                  <small key={item.key}>
+                    <span>{item.label}</span>
+                    <b>{item.total > 0 ? item.value : '--'}</b>
+                    <em>{item.total > 0 ? `${item.total} registros` : 'Sem dados'}</em>
+                  </small>
+                ))}
+              </div>
             </div>
           </article>
           <article className={styles.accuracyCard}>

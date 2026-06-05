@@ -3,6 +3,7 @@
 const { Op } = require('sequelize');
 const db = require('../database/models');
 const AppError = require('../middlewares/appError');
+const leadtimeService = require('./leadtimeService');
 
 const ORDER_STATUSES = new Set(['pendente', 'confirmado', 'preparando', 'enviado', 'concluido', 'cancelado']);
 const PAYMENT_METHODS = new Set(['whatsapp', 'pix', 'cartao', 'dinheiro', 'boleto', 'outro']);
@@ -427,6 +428,12 @@ exports.criarPedido = async (usuarioId, payload) => {
     return createdPedido;
   });
 
+  try {
+    await leadtimeService.criarLeadtimeComEventos(pedido.id, usuarioId, now);
+  } catch (error) {
+    console.warn(`[pedidoService] erro ao criar leadtime do pedido ${pedido.id}: ${error.message}`);
+  }
+
   const completo = await buscarPedidoCompleto({ id: pedido.id, id_usuario: usuarioId });
   return formatPedido(completo);
 };
@@ -686,6 +693,14 @@ exports.atualizarStatusPedido = async (idPedido, status) => {
 
     return pedido;
   });
+
+  if (['confirmado', 'preparando', 'enviado', 'concluido'].includes(novoStatus)) {
+    try {
+      await leadtimeService.registrarEventoLeadtime(pedidoAtualizado.id, pedidoAtualizado.id_usuario, novoStatus);
+    } catch (error) {
+      console.warn(`[pedidoService] erro ao registrar leadtime do pedido ${pedidoAtualizado.id}: ${error.message}`);
+    }
+  }
 
   const completo = await buscarPedidoCompleto({ id: pedidoAtualizado.id });
   return formatPedido(completo);

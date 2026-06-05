@@ -17,10 +17,10 @@ exports.obterLeadtimePorPeriodo = asyncHandler(async (req, res) => {
 exports.registrarEventoLeadtime = asyncHandler(async (req, res) => {
   const { pedido_id, usuarios_id, stage } = req.body;
 
-  if (!pedido_id || !usuarios_id || !stage) {
+  if (!pedido_id || !stage) {
     return res.status(400).json({
       error: {
-        message: 'pedido_id, usuarios_id e stage são obrigatórios',
+        message: 'pedido_id e stage sao obrigatorios',
       },
     });
   }
