@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { FiArrowLeft, FiDollarSign, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings } from 'react-icons/fi';
+import { FiArrowLeft, FiDollarSign, FiLogOut, FiPackage, FiRefreshCw, FiShoppingCart, FiUser, FiUsers, FiSettings } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
@@ -714,7 +714,6 @@ function AdminDashboard() {
                 <FiArrowLeft size={14} />
                 Voltar
               </button>
-              {/* Dashboard Financeiro link removed as requested */}
               <Link
                 to="/admin/usuarios"
                 style={{
@@ -752,6 +751,18 @@ function AdminDashboard() {
                 <FiDollarSign size={14} />
                 Faturamento
               </Link>
+              <Link
+                to="/admin/carrinho-abandono"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  color: '#92400e', background: '#fef3c7',
+                  textDecoration: 'none',
+                }}
+              >
+                <FiShoppingCart size={14} />
+                Abandono
+              </Link>
               <button
                 onClick={() => { clearAuthSession(); navigate('/login'); }}
                 style={{
@@ -779,7 +790,6 @@ function AdminDashboard() {
               overflow: 'hidden',
             }}
           >
-            {/* Overlay para escurecer a imagem */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -791,7 +801,6 @@ function AdminDashboard() {
               pointerEvents: 'none',
             }} />
 
-            {/* Engrenagem */}
             <button
               onClick={() => setShowKpiModal(true)}
               style={{
@@ -822,7 +831,6 @@ function AdminDashboard() {
             >
               <FiSettings size={18} color="#10182c" />
             </button>
-            {/* Conteúdo do card */}
             <div className={styles.revenueKpiContent}>
               <span>Faturamento mensal</span>
               <strong>

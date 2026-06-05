@@ -14,21 +14,12 @@ exports.criar = asyncHandler(async (req, res) => {
 });
 
 exports.listarMeus = asyncHandler(async (req, res) => {
-  console.log('[pedidoController] listarMeus chamado', {
-    user: req.user ? { id: req.user.id, sub: req.user.sub } : 'undefined',
-    query: req.query,
-  });
-
   const result = await pedidoService.listarPedidosDoUsuario(pedidoService.getUserId(req.user), req.query);
 
   res.json(result);
 });
 
 exports.listarTodos = asyncHandler(async (req, res) => {
-  console.log('[pedidoController] listarTodos chamado', {
-    query: req.query,
-  });
-
   const result = await pedidoService.listarTodosPedidos(req.query);
 
   res.json(result);
@@ -87,4 +78,3 @@ exports.ticketMedio = asyncHandler(async (req, res) => {
     data: ticketMedio,
   });
 });
-

@@ -16,9 +16,7 @@ router.post(
     const { evento } = req.body;
     const ip = req.clientIp;
     const dispositivo = req.clientUserAgent;
-    const usuarioId = req.user?.sub || null; // Capturar ID do usuário autenticado se existir
-
-    console.log('[visitante-evento POST] Recebido:', { evento, ip, dispositivo, usuarioId });
+    const usuarioId = req.user?.sub || null;
 
     if (!evento) {
       console.warn('[visitante-evento POST] Evento vazio ou undefined');
@@ -32,7 +30,6 @@ router.post(
       return res.status(400).json({ error: 'Evento inválido ou erro ao registrar' });
     }
 
-    console.log('[visitante-evento POST] Evento registrado com sucesso:', novoEvento.id);
     res.status(201).json(novoEvento);
   })
 );

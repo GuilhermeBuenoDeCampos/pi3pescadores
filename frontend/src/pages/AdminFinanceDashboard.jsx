@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   AreaChart,
   Area,
@@ -19,11 +18,31 @@ import {
   LineChart,
   Line,
 } from 'recharts';
-import { FiArrowLeft, FiCalendar, FiDownload, FiTrendingUp, FiEdit, FiCheck, FiX } from 'react-icons/fi';
-import { clearAuthSession, getAuthUser, fetchCategorias, fetchFaturamentoMensal, fetchFinanceDashboard, fetchProdutosMaisVendidos, fetchVendasPorPeriodo } from '../services/api';
+import { FiArrowLeft, FiDownload, FiEdit, FiCheck, FiX } from 'react-icons/fi';
+import { clearAuthSession, fetchCategorias, fetchFaturamentoMensal, fetchFinanceDashboard, fetchProdutosMaisVendidos, fetchVendasPorPeriodo } from '../services/api';
 import styles from './AdminFinanceDashboard.module.css';
 
 const defaultFilter = { period: 'month' };
+const metaStorageKey = 'meta_financeira_override';
+const periodOptions = [
+  { key: 'day', label: 'Hoje' },
+  { key: 'week', label: 'Semana' },
+  { key: 'month', label: 'Mês' },
+  { key: 'year', label: 'Ano' },
+  { key: 'custom', label: 'Personalizado' },
+];
+const categoryColors = ['#5366aa', '#08936f', '#f3d870', '#98c7f2', '#e0aaff', '#f093b8'];
+
+function buildDashboardQuery(filter, customRange) {
+  const query = { ...filter };
+
+  if (filter.period === 'custom') {
+    query.start = customRange.start;
+    query.end = customRange.end;
+  }
+
+  return query;
+}
 
 function formatCurrency(value) {
   if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -55,7 +74,11 @@ function downloadCsv(filename, rows) {
 
 function buildProductCsv(products) {
   const header = ['Produto', 'Unidades vendidas', 'Receita'];
-  const rows = products.map((product) => [product.nome, product.unidades_vendidas, product.receita.toFixed(2)]);
+  const rows = products.map((product) => [
+    product.nome,
+    product.unidades_vendidas ?? product.quantidade ?? 0,
+    Number(product.receita ?? product.faturamento ?? 0).toFixed(2),
+  ]);
   return [header, ...rows];
 }
 
@@ -68,69 +91,35 @@ function AdminFinanceDashboard() {
   const monthlyRef = useRef(null);
   const [metaEditMode, setMetaEditMode] = useState(false);
   const [metaDraft, setMetaDraft] = useState('');
+  const [metaOverride, setMetaOverride] = useState(() => localStorage.getItem(metaStorageKey));
 
-  const { data: summaryData, isLoading: loadingSummary } = useQuery({
+  const { data: summaryData } = useQuery({
     queryKey: ['dashboard-financeiro', filter, customRange],
-    queryFn: () => {
-      const query = { ...filter };
-      if (filter.period === 'custom') {
-        query.start = customRange.start;
-        query.end = customRange.end;
-      }
-      return fetchFinanceDashboard(query);
-    },
+    queryFn: () => fetchFinanceDashboard(buildDashboardQuery(filter, customRange)),
     keepPreviousData: true,
   });
 
   const { data: revenueData, isLoading: loadingRevenue } = useQuery({
     queryKey: ['dashboard-faturamento-mensal', filter, customRange],
-    queryFn: () => {
-      const query = { ...filter };
-      if (filter.period === 'custom') {
-        query.start = customRange.start;
-        query.end = customRange.end;
-      }
-      return fetchFaturamentoMensal(query);
-    },
+    queryFn: () => fetchFaturamentoMensal(buildDashboardQuery(filter, customRange)),
     keepPreviousData: true,
   });
 
   const { data: productsData, isLoading: loadingProducts } = useQuery({
     queryKey: ['dashboard-produtos-mais-vendidos', filter, customRange],
-    queryFn: () => {
-      const query = { ...filter };
-      if (filter.period === 'custom') {
-        query.start = customRange.start;
-        query.end = customRange.end;
-      }
-      return fetchProdutosMaisVendidos(query);
-    },
+    queryFn: () => fetchProdutosMaisVendidos(buildDashboardQuery(filter, customRange)),
     keepPreviousData: true,
   });
 
   const { data: categoriesData, isLoading: loadingCategories } = useQuery({
     queryKey: ['dashboard-categorias', filter, customRange],
-    queryFn: () => {
-      const query = { ...filter };
-      if (filter.period === 'custom') {
-        query.start = customRange.start;
-        query.end = customRange.end;
-      }
-      return fetchCategorias(query);
-    },
+    queryFn: () => fetchCategorias(buildDashboardQuery(filter, customRange)),
     keepPreviousData: true,
   });
 
   const { data: salesData, isLoading: loadingSales } = useQuery({
     queryKey: ['dashboard-vendas-por-periodo', filter, customRange],
-    queryFn: () => {
-      const query = { ...filter };
-      if (filter.period === 'custom') {
-        query.start = customRange.start;
-        query.end = customRange.end;
-      }
-      return fetchVendasPorPeriodo(query);
-    },
+    queryFn: () => fetchVendasPorPeriodo(buildDashboardQuery(filter, customRange)),
     keepPreviousData: true,
   });
 
@@ -163,11 +152,9 @@ function AdminFinanceDashboard() {
     },
     {
       label: 'Meta financeira',
-      value: formatCurrency(
-        Number(localStorage.getItem('meta_financeira_override') || summaryData?.meta_financeira || 0)
-      ),
+      value: formatCurrency(Number(metaOverride || summaryData?.meta_financeira || 0)),
     },
-  ], [summaryData]);
+  ], [metaOverride, summaryData]);
 
   function handleOpenMonthly() {
     try {
@@ -217,8 +204,7 @@ function AdminFinanceDashboard() {
   }, [location.search]);
 
   useEffect(() => {
-    // initialize meta draft from override or summary
-    const override = localStorage.getItem('meta_financeira_override');
+    const override = localStorage.getItem(metaStorageKey);
     if (override) {
       setMetaDraft(String(Number(override)));
     } else if (summaryData?.meta_financeira) {
@@ -231,7 +217,7 @@ function AdminFinanceDashboard() {
   }
 
   function handleCancelEditMeta() {
-    const override = localStorage.getItem('meta_financeira_override');
+    const override = localStorage.getItem(metaStorageKey);
     if (override) setMetaDraft(String(Number(override)));
     else if (summaryData?.meta_financeira) setMetaDraft(String(Number(summaryData.meta_financeira)));
     setMetaEditMode(false);
@@ -239,9 +225,9 @@ function AdminFinanceDashboard() {
 
   function handleSaveMeta() {
     const value = Number(metaDraft) || 0;
-    localStorage.setItem('meta_financeira_override', String(value));
+    localStorage.setItem(metaStorageKey, String(value));
+    setMetaOverride(String(value));
     setMetaEditMode(false);
-    // update dashboardCards will reflect via localStorage read
   }
 
   return (
@@ -263,14 +249,14 @@ function AdminFinanceDashboard() {
 
       <section className={styles.filterBar}>
         <div className={styles.periodButtons}>
-          {['day', 'week', 'month', 'year', 'custom'].map((periodKey) => (
+          {periodOptions.map((period) => (
             <button
               type="button"
-              key={periodKey}
-              className={filter.period === periodKey ? styles.activeFilter : ''}
-              onClick={() => handleFilterChange(periodKey)}
+              key={period.key}
+              className={filter.period === period.key ? styles.activeFilter : ''}
+              onClick={() => handleFilterChange(period.key)}
             >
-              {periodKey === 'day' ? 'Hoje' : periodKey === 'week' ? 'Semana' : periodKey === 'month' ? 'Mês' : periodKey === 'year' ? 'Ano' : 'Personalizado'}
+              {period.label}
             </button>
           ))}
         </div>
@@ -345,7 +331,7 @@ function AdminFinanceDashboard() {
             </button>
           </div>
           <div className={styles.chartCanvas}>
-                {loadingRevenue ? (
+            {loadingRevenue ? (
               <div className={styles.skeletonChart}>Carregando gráfico...</div>
             ) : (
               <ResponsiveContainer width="100%" height={320}>
@@ -455,7 +441,7 @@ function AdminFinanceDashboard() {
                 <PieChart>
                   <Pie data={categoriesData || []} dataKey="faturamento" nameKey="categoria" innerRadius={62} outerRadius={104} paddingAngle={3} stroke="transparent">
                     {(categoriesData || []).map((entry, index) => (
-                      <Cell key={`cell-${entry.categoria}`} fill={[ '#5366aa', '#08936f', '#f3d870', '#98c7f2', '#e0aaff', '#f093b8' ][index % 6]} />
+                      <Cell key={`cell-${entry.categoria}`} fill={categoryColors[index % categoryColors.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => formatCurrency(value)} />

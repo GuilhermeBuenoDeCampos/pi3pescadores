@@ -1,0 +1,30 @@
+.state {
+  width: 100%;
+  padding: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  text-align: center;
+  font-weight: 700;
+}
+
+.state span {
+  display: block;
+}
+
+.error {
+  border-color: rgba(220, 38, 38, 0.28);
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.action {
+  display: inline-flex;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #991b1b;
+  color: #ffffff;
+  text-decoration: none;
+}

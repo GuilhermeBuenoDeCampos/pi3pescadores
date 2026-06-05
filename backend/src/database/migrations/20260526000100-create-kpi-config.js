@@ -36,6 +36,12 @@ async function addColumnIfMissing(queryInterface, Sequelize, tableName, columnNa
   }
 }
 
+async function removeColumnIfExists(queryInterface, Sequelize, tableName, columnName) {
+  if (await columnExists(queryInterface, Sequelize, tableName, columnName)) {
+    await queryInterface.removeColumn(tableName, columnName);
+  }
+}
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     const exists = await tableExists(queryInterface, Sequelize, 'kpi_config');
@@ -151,16 +157,28 @@ module.exports = {
       allowNull: false,
       defaultValue: 8,
     });
+    await addColumnIfMissing(queryInterface, Sequelize, 'kpi_config', 'created_at', {
+      allowNull: false,
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+    });
+    await addColumnIfMissing(queryInterface, Sequelize, 'kpi_config', 'update_at', {
+      allowNull: false,
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+    });
   },
 
-  async down(queryInterface) {
-    await queryInterface.removeColumn('kpi_config', 'ticketbaixo');
-    await queryInterface.removeColumn('kpi_config', 'ticketalto');
-    await queryInterface.removeColumn('kpi_config', 'recomprabaixa');
-    await queryInterface.removeColumn('kpi_config', 'recompraalta');
-    await queryInterface.removeColumn('kpi_config', 'visitantebaixo');
-    await queryInterface.removeColumn('kpi_config', 'visitantealto');
-    await queryInterface.removeColumn('kpi_config', 'conversaobaixa');
-    await queryInterface.removeColumn('kpi_config', 'conversaoalta');
+  async down(queryInterface, Sequelize) {
+    await removeColumnIfExists(queryInterface, Sequelize, 'kpi_config', 'ticketbaixo');
+    await removeColumnIfExists(queryInterface, Sequelize, 'kpi_config', 'ticketalto');
+    await removeColumnIfExists(queryInterface, Sequelize, 'kpi_config', 'recomprabaixa');
+    await removeColumnIfExists(queryInterface, Sequelize, 'kpi_config', 'recompraalta');
+    await removeColumnIfExists(queryInterface, Sequelize, 'kpi_config', 'visitantebaixo');
+    await removeColumnIfExists(queryInterface, Sequelize, 'kpi_config', 'visitantealto');
+    await removeColumnIfExists(queryInterface, Sequelize, 'kpi_config', 'conversaobaixa');
+    await removeColumnIfExists(queryInterface, Sequelize, 'kpi_config', 'conversaoalta');
+    await removeColumnIfExists(queryInterface, Sequelize, 'kpi_config', 'created_at');
+    await removeColumnIfExists(queryInterface, Sequelize, 'kpi_config', 'update_at');
   },
 };

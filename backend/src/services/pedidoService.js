@@ -216,9 +216,6 @@ function formatPedido(pedido) {
 
 async function buscarPedidoCompleto(where, transaction) {
   try {
-    console.log('[pedidoService] buscarPedidoCompleto:', { where });
-
-    // Buscar o pedido SEM includes primeiro
     const pedido = await db.Pedido.findOne({
       where,
       transaction,
@@ -229,7 +226,6 @@ async function buscarPedidoCompleto(where, transaction) {
       throw new AppError(404, 'Pedido não encontrado');
     }
 
-    // Carregar itens manualmente
     if (db.PedidoItem) {
       try {
         const itens = await db.PedidoItem.findAll({
@@ -363,6 +359,23 @@ exports.criarPedido = async (usuarioId, payload) => {
       { transaction }
     );
 
+    if (db.Carrinho) {
+      await db.Carrinho.update(
+        {
+          status: 'finalizado',
+          atualizado_em: now,
+          ultima_interacao_em: now,
+        },
+        {
+          where: {
+            usuario_id: usuarioId,
+            status: 'active',
+          },
+          transaction,
+        }
+      );
+    }
+
     return createdPedido;
   });
 
@@ -391,23 +404,12 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
   }
 
   try {
-    console.log('[pedidoService] listarPedidosDoUsuario iniciado', {
-      usuarioId,
-      where,
-      page,
-      limit,
-      offset,
-    });
-
-    // Validar que os modelos existem
     if (!db.Pedido) {
       const errorMsg = 'Database model "Pedido" not found';
       console.error(`[pedidoService] ${errorMsg}`);
       throw new AppError(500, errorMsg);
     }
 
-    // Query SEM includes primeiro
-    console.log('[pedidoService] executando query simples (sem includes)...');
     const { count, rows } = await db.Pedido.findAndCountAll({
       where,
       distinct: true,
@@ -416,14 +418,7 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
       offset,
     });
 
-    console.log('[pedidoService] query simples sucesso', {
-      total: count,
-      rowsReturned: rows.length,
-    });
-
-    // Tentar carregar itens se houver pedidos
     if (rows.length > 0 && db.PedidoItem) {
-      console.log('[pedidoService] carregando itens...');
       for (const pedido of rows) {
         try {
           const itens = await db.PedidoItem.findAll({
@@ -456,7 +451,6 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
       stack: error.stack,
     });
     
-    // Se for erro de banco de dados, adicionar contexto
     if (error.original) {
       console.error('[pedidoService] erro original (banco de dados):', {
         message: error.original.message,
@@ -485,13 +479,6 @@ exports.listarTodosPedidos = async (query = {}) => {
   }
 
   try {
-    console.log('[pedidoService] listarTodosPedidos iniciado', {
-      where,
-      page,
-      limit,
-      offset,
-    });
-
     if (!db.Pedido) {
       const errorMsg = 'Database model "Pedido" not found';
       console.error(`[pedidoService] ${errorMsg}`);
@@ -506,13 +493,7 @@ exports.listarTodosPedidos = async (query = {}) => {
       offset,
     });
 
-    console.log('[pedidoService] listarTodosPedidos sucesso', {
-      total: count,
-      rowsReturned: rows.length,
-    });
-
     if (rows.length > 0 && db.PedidoItem) {
-      console.log('[pedidoService] carregando itens para todos os pedidos...');
       for (const pedido of rows) {
         try {
           const itens = await db.PedidoItem.findAll({

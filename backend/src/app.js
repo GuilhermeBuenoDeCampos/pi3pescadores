@@ -43,6 +43,30 @@ const allowedOrigins = new Set([
   ...parseOrigins(process.env.API_URL),
 ]);
 
+function isAllowedOrigin(origin) {
+  const normalizedOrigin = normalizeOrigin(origin);
+
+  if (allowedOrigins.has(normalizedOrigin)) {
+    return true;
+  }
+
+  try {
+    const { hostname, protocol } = new URL(normalizedOrigin);
+
+    if (protocol === 'http:' && ['localhost', '127.0.0.1', '0.0.0.0'].includes(hostname)) {
+      return true;
+    }
+
+    if (protocol === 'https:' && (hostname === 'pages.dev' || hostname.endsWith('.pages.dev'))) {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
+}
+
 console.info(`[cors] Allowed origins: ${[...allowedOrigins].join(', ')}`);
 
 const corsOptions = {
@@ -54,7 +78,7 @@ const corsOptions = {
 
     const normalizedOrigin = normalizeOrigin(origin);
 
-    if (allowedOrigins.has(normalizedOrigin)) {
+    if (isAllowedOrigin(normalizedOrigin)) {
       return callback(null, true);
     }
 
@@ -74,7 +98,7 @@ app.use(cors(corsOptions));
 // Middleware adicional para garantir headers CORS
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && allowedOrigins.has(normalizeOrigin(origin))) {
+  if (origin && isAllowedOrigin(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Guest-Token,x-guest-token,Accept,Accept-Language');
@@ -102,238 +126,12 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.get('/health/models', (req, res) => {
-  const db = require('./database/models');
-  const models = Object.keys(db)
-    .filter((key) => key !== 'sequelize' && key !== 'Sequelize')
-    .map((key) => ({
-      name: key,
-      type: typeof db[key],
-      hasAssociate: typeof db[key].associate === 'function',
-    }));
-
-  res.json({
-    ok: true,
-    modelsLoaded: models.length,
-    models,
-    sequelizeConnected: !!db.sequelize,
-    timestamp: new Date().toISOString(),
-  });
-});
-
-app.get('/test/visitante-evento', async (req, res) => {
-  try {
-    const db = require('./database/models');
-    
-    console.log('[test/visitante-evento] Models loaded:', Object.keys(db).filter(k => k !== 'sequelize' && k !== 'Sequelize'));
-    
-    if (!db.VisitanteEvento) {
-      return res.status(500).json({
-        error: 'Model VisitanteEvento not found',
-        modelsLoaded: Object.keys(db).filter((k) => k !== 'sequelize' && k !== 'Sequelize'),
-      });
-    }
-
-    const count = await db.VisitanteEvento.count();
-    const sample = await db.VisitanteEvento.findAll({ limit: 1 });
-
-    res.json({
-      success: true,
-      visitanteEventoCount: count,
-      sampleEvento: sample.length > 0 ? sample[0].toJSON() : null,
-      modelInfo: {
-        name: db.VisitanteEvento.name,
-        tableName: db.VisitanteEvento.tableName,
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-      stack: error.stack,
-    });
-  }
-});
-
 if (process.env.NODE_ENV !== 'production') {
   app.use((req, res, next) => {
     console.warn(`[dev] ${req.method} ${req.originalUrl}`);
     return next();
   });
 }
-
-// Endpoint de teste para debug de pedidos
-app.get('/test/pedidos-count', async (req, res) => {
-  try {
-    const db = require('./database/models');
-    if (!db.Pedido) {
-      return res.status(500).json({
-        error: 'Model Pedido not found',
-        modelsLoaded: Object.keys(db).filter((k) => k !== 'sequelize' && k !== 'Sequelize'),
-      });
-    }
-
-    const count = await db.Pedido.count();
-    const sample = await db.Pedido.findAll({ limit: 1 });
-
-    res.json({
-      success: true,
-      pedidoCount: count,
-      samplePedido: sample.length > 0 ? sample[0].toJSON() : null,
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-      stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined,
-    });
-  }
-});
-
-app.get('/test/pedidos-debug/:usuarioId', async (req, res) => {
-  try {
-    const db = require('./database/models');
-    const { usuarioId } = req.params;
-
-    if (!db.Pedido) {
-      return res.status(500).json({ 
-        error: 'Model Pedido not found',
-        modelsLoaded: Object.keys(db).filter((k) => k !== 'sequelize' && k !== 'Sequelize')
-      });
-    }
-
-    // Tentar a mesma query que listarPedidosDoUsuario
-    const { count, rows } = await db.Pedido.findAndCountAll({
-      where: { id_usuario: usuarioId },
-      distinct: true,
-      order: [['criado_em', 'DESC']],
-      limit: 8,
-      offset: 0,
-    });
-
-    res.json({
-      success: true,
-      usuarioId,
-      totalPedidos: count,
-      pedidosRetornados: rows.length,
-      firstPedido: rows.length > 0 ? rows[0].toJSON() : null,
-    });
-  } catch (error) {
-    console.error('[test/pedidos-debug] erro:', {
-      message: error.message,
-      code: error.code,
-      errorName: error.name,
-      original: error.original?.message,
-    });
-
-    res.status(500).json({
-      error: error.message,
-      errorType: error.constructor.name,
-      errorCode: error.code,
-      errorName: error.name,
-      originalError: error.original?.message || null,
-      stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined,
-    });
-  }
-});
-
-app.get('/test/db-tables', async (req, res) => {
-  try {
-    const db = require('./database/models');
-    
-    // Tentar listar as tabelas do banco de dados
-    const tables = await db.sequelize.query(`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public'
-      ORDER BY table_name
-    `, { type: db.sequelize.QueryTypes.SELECT });
-
-    res.json({
-      success: true,
-      tablesCount: tables.length,
-      tables: tables.map(t => t.table_name),
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-      hint: 'Se este endpoint falhar, o banco de dados não está acessível',
-    });
-  }
-});
-
-app.get('/test/sequelize-check', async (req, res) => {
-  try {
-    const db = require('./database/models');
-    
-    // Testar conexão com banco
-    await db.sequelize.authenticate();
-    
-    // Verificar modelos
-    const models = Object.keys(db)
-      .filter((k) => k !== 'sequelize' && k !== 'Sequelize')
-      .map((name) => {
-        const model = db[name];
-        return {
-          name,
-          tableName: model.tableName || 'unknown',
-          hasAssociate: typeof model.associate === 'function',
-        };
-      });
-
-    res.json({
-      success: true,
-      dbConnected: true,
-      modelsLoaded: models.length,
-      models,
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-      dbConnected: false,
-    });
-  }
-});
-
-app.get('/test/check-pedidos-table', async (req, res) => {
-  try {
-    const db = require('./database/models');
-    
-    // Verificar se a tabela exists
-    const result = await db.sequelize.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_name = 'pedidos'
-      ) as exists
-    `, { type: db.sequelize.QueryTypes.SELECT });
-
-    const tableExists = result[0].exists;
-
-    if (!tableExists) {
-      return res.status(400).json({
-        success: false,
-        tableExists: false,
-        message: 'Tabela "pedidos" não existe no banco de dados. A migração pode não ter sido executada.',
-        suggestion: 'Execute: npm run db:migrate',
-      });
-    }
-
-    // Se existe, tentar contar
-    const count = await db.sequelize.query('SELECT COUNT(*) as count FROM pedidos', {
-      type: db.sequelize.QueryTypes.SELECT
-    });
-
-    res.json({
-      success: true,
-      tableExists: true,
-      pedidosCount: parseInt(count[0].count, 10),
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-      errorType: error.constructor.name,
-      suggestion: 'Verifique se o banco de dados está acessível',
-    });
-  }
-});
 
 app.use('/api', routes);
 

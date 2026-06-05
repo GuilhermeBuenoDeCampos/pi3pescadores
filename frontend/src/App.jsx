@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import AccountPage from './pages/AccountPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminFinanceDashboard from './pages/AdminFinanceDashboard';
+import CartAbandonmentDashboard from './pages/CartAbandonmentDashboard';
 import AdminUsers from './pages/AdminUsers';
 import FaturamentoCompleto from './pages/FaturamentoCompleto';
 import OrderDetailsPage from './pages/OrderDetailsPage';
@@ -62,6 +63,14 @@ function App() {
             element={
               <ProtectedRoute roles={['admin']}>
                 <AdminFinanceDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/carrinho-abandono"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <CartAbandonmentDashboard />
               </ProtectedRoute>
             }
           />

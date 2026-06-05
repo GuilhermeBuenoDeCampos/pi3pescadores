@@ -17,36 +17,23 @@ exports.registrarEvento = async (evento, ip, dispositivo, usuarioId = null) => {
       'comprou',
     ];
 
-    console.log('[visitanteEventoService] Validando evento:', evento);
-    console.log('[visitanteEventoService] Eventos válidos:', eventoValido);
-    console.log('[visitanteEventoService] Evento é válido?', eventoValido.includes(evento));
-
     if (!eventoValido.includes(evento)) {
       console.warn(`[visitanteEventoService] Evento inválido: "${evento}"`);
       return null;
     }
 
-    // Se usuário está autenticado, vincular eventos anteriores do mesmo IP
     if (usuarioId && ip) {
-      console.log(`[visitanteEventoService] Vinculando eventos anteriores do IP ${ip} ao usuário ${usuarioId}`);
-      
-      // Atualizar eventos sem usuario_id do mesmo IP para adicionar o usuario_id
-      const [updated] = await db.VisitanteEvento.update(
+      await db.VisitanteEvento.update(
         { usuario_id: usuarioId },
         {
           where: {
             ip: ip,
-            usuario_id: null, // Apenas eventos sem usuario_id
+            usuario_id: null,
           },
         }
       );
-      
-      if (updated > 0) {
-        console.log(`[visitanteEventoService] ${updated} evento(s) anterior(es) vinculado(s) ao usuário`);
-      }
     }
 
-    console.log('[visitanteEventoService] Tentando criar registro no banco...');
     const novoEvento = await db.VisitanteEvento.create({
       evento,
       ip: ip || null,
@@ -54,7 +41,6 @@ exports.registrarEvento = async (evento, ip, dispositivo, usuarioId = null) => {
       usuario_id: usuarioId || null,
     });
 
-    console.log(`[visitanteEventoService] Evento registrado: ${evento} (ID: ${novoEvento.id}, IP: ${ip}, usuarioId: ${usuarioId})`);
     return novoEvento;
   } catch (error) {
     console.error('[visitanteEventoService] Erro ao registrar evento:', error.message);
@@ -167,7 +153,6 @@ exports.obterTaxaConversao = async () => {
       };
     });
 
-    console.log('[visitanteEventoService] Taxa de conversão calculada:', resultado.length, 'meses');
     return resultado;
   } catch (error) {
     console.error('[visitanteEventoService] Erro ao calcular taxa de conversão:', error.message);

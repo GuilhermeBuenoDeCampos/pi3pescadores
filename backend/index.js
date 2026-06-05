@@ -6,6 +6,7 @@ loadEnv(path.resolve(__dirname, '.env'), { override: true });
 
 const app = require('./src/app');
 const db = require('./src/database/models');
+const { startCarrinhoAbandonoJob } = require('./src/jobs/carrinhoAbandonoJob');
 
 const port = Number(process.env.PORT) || 3000;
 
@@ -14,6 +15,7 @@ async function start() {
 
   app.listen(port, () => {
     console.log(`Backend running on port ${port}`);
+    startCarrinhoAbandonoJob();
   });
 }
 
