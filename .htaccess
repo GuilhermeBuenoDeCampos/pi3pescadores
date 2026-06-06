@@ -1,0 +1,21 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Block sensitive directories
+  RewriteRule ^backend/ - [F,L]
+  RewriteRule ^frontend/ - [F,L]
+  RewriteRule ^node_modules/ - [F,L]
+  RewriteRule ^inspira/ - [F,L]
+
+  # SPA fallback
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Block sensitive files
+<FilesMatch "\.(md|sql|json|lock)$">
+  Require all denied
+</FilesMatch>
