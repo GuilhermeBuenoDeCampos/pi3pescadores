@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
 const path = require('path');
 const routes = require('./routes');
 const notFound = require('./middlewares/notFound');
@@ -30,7 +31,6 @@ function parseOrigins(value) {
 }
 
 const allowedOrigins = new Set([
-  'https://pi3pescadores.onrender.com',
   'https://pi3pescadores.pages.dev',
   'http://localhost:5173',
   'http://localhost:5174',
@@ -342,6 +342,31 @@ app.get('/test/check-pedidos-table', async (req, res) => {
 });
 
 app.use('/api', routes);
+
+const frontendDirectory = process.env.FRONTEND_DIST_PATH
+  ? path.resolve(process.env.FRONTEND_DIST_PATH)
+  : path.resolve(__dirname, '../../public_html');
+const frontendIndex = path.join(frontendDirectory, 'index.html');
+
+console.info(`[frontend] Static directory: ${frontendDirectory}`);
+app.use(express.static(frontendDirectory, { index: false }));
+
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api')) {
+    return next();
+  }
+
+  if (req.path.startsWith('/assets/') || path.extname(req.path)) {
+    return next();
+  }
+
+  if (fs.existsSync(frontendIndex)) {
+    return res.sendFile(frontendIndex);
+  }
+
+  console.warn(`[frontend] index.html not found at ${frontendIndex}`);
+  return next();
+});
 
 app.use(notFound);
 app.use(errorHandler);

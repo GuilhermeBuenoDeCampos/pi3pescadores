@@ -2,7 +2,7 @@ const path = require('path');
 const loadEnv = require('./src/config/loadEnv');
 
 // Load project-specific .env (overrides dotenv when necessary)
-loadEnv(path.resolve(__dirname, '.env'), { override: true });
+loadEnv(path.resolve(__dirname, '.env'), { override: false });
 
 const app = require('./src/app');
 const db = require('./src/database/models');

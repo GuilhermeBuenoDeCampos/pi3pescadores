@@ -387,7 +387,7 @@
   min-height: 240px;
   background:
     linear-gradient(rgba(30, 24, 16, 0.38), rgba(30, 24, 16, 0.48)),
-    url('https://pi3pescadores.onrender.com/uploads/img/acuracidade.jpeg') center / cover;
+    url('../assets/admin/room-chart-bg.jpg') center / cover;
   color: #ffffff;
   align-self: start;
   border-radius: 12px;

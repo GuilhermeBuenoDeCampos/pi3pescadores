@@ -177,7 +177,7 @@ export function clearAuthSession(options = {}) {
  * 
  * Exemplo:
  * getImageUrl('/uploads/Banner/imagem.jpg') 
- * → 'https://pi3pescadores.onrender.com/uploads/Banner/imagem.jpg'
+ * → '/uploads/Banner/imagem.jpg'
  * 
  * @param {string} url - URL ou caminho da imagem
  * @returns {string} URL completa da imagem

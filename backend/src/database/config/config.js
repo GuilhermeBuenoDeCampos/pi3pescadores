@@ -1,7 +1,7 @@
 const path = require('path');
 const loadEnv = require('../../config/loadEnv');
 
-loadEnv(path.resolve(__dirname, '../../../.env'), { override: true });
+loadEnv(path.resolve(__dirname, '../../../.env'), { override: false });
 
 const dialect = process.env.DB_DIALECT || 'postgres';
 const defaultPort = dialect === 'mysql' ? 3306 : 5432;
@@ -24,7 +24,7 @@ const commonOptions = {
 };
 
 function withSsl(config) {
-  if (!isRemotePostgres(config) && !process.env.DATABASE_URL?.includes('supabase.com')) {
+  if (!isRemotePostgres(config)) {
     return config;
   }
 

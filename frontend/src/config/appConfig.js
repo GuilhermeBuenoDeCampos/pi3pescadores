@@ -6,9 +6,7 @@ function removeApiSuffix(url) {
   return normalizeUrl(url).replace(/\/api$/, '');
 }
 
-const defaultBackendUrl = import.meta.env.DEV
-  ? 'http://localhost:3000'
-  : 'https://pi3pescadores.onrender.com';
+const defaultBackendUrl = import.meta.env.DEV ? 'http://localhost:3000' : '';
 
 const configuredApiUrl = normalizeUrl(import.meta.env.VITE_API_URL);
 const configuredBackendUrl = normalizeUrl(import.meta.env.VITE_BACKEND_URL);
