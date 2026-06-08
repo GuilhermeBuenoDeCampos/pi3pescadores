@@ -1,18 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   ArcElement,
-  BarElement,
-  CategoryScale,
   Chart as ChartJS,
   Filler,
   Legend,
-  LinearScale,
   LineElement,
   PointElement,
   RadialLinearScale,
   Tooltip,
 } from 'chart.js';
-import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
+import { Doughnut, Radar } from 'react-chartjs-2';
 import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings, FiX } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
@@ -20,8 +17,6 @@ import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
 import { apiFetch, clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
-import clockTowerBar from '../assets/admin/clock-tower-bar.png';
-import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
 import faturamentoMedioImg from '../assets/admin/faturamentomedio.jpg';
 import faturamentoAltoImg from '../assets/admin/faturamentoalto.png';
@@ -37,7 +32,7 @@ import visitanteMedioImg from '../assets/admin/visitantemedio.png';
 import visitanteAltoImg from '../assets/admin/visitantealto.png';
 import conversaoBaixaImg from '../assets/admin/SBruim.png';
 import conversaoMediaImg from '../assets/admin/SBnormal.png';
-import conversaoAltaImg from '../assets/admin/SBbom.png';
+import conversaoAltaImg from '../assets/admin/conversao-alta.png';
 import saoPedroImg from '../assets/admin/saopedro.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
@@ -47,11 +42,8 @@ import styles from './AdminDashboard.module.css';
 
 ChartJS.register(
   ArcElement,
-  BarElement,
-  CategoryScale,
   Filler,
   Legend,
-  LinearScale,
   LineElement,
   PointElement,
   RadialLinearScale,
@@ -557,6 +549,7 @@ function AdminDashboard() {
   } else if (conversaoValor > conversaoAlta) {
     imagemConversao = conversaoAltaImg;
   }
+
   const visitantesValor = Number(taxaMesAtual?.visitantes_unicos || 0);
   const visitanteBaixo = Number(kpiConfig?.visitantebaixo || 100);
   const visitanteAlto = Number(kpiConfig?.visitantealto || 500);
@@ -775,9 +768,6 @@ function AdminDashboard() {
       },
     ],
   }), []);
-
-  const towerBarsPlugin = useMemo(() => createTowerBarsPlugin(clockTowerBar), []);
-  const cableCarPointsPlugin = useMemo(() => createCableCarPointsPlugin(cableCarPoint), []);
 
   const satisfactionData = useMemo(() => ({
     labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preco', 'Experiencia'],
@@ -1114,7 +1104,7 @@ function AdminDashboard() {
           </article>
         </section>
 
-        <section className={styles.conversionSection} aria-label="Taxa de conversão">
+        <section className={styles.conversionSection} aria-label="Indicadores operacionais">
           <article
             className={styles.kpiCard}
             style={{
@@ -1138,7 +1128,10 @@ function AdminDashboard() {
             }} />
 
             <button
-              onClick={() => setShowConversaoModal(true)}
+              onClick={(event) => {
+                event.stopPropagation();
+                setShowConversaoModal(true);
+              }}
               style={{
                 position: 'absolute',
                 bottom: 12,
@@ -1170,15 +1163,13 @@ function AdminDashboard() {
 
             <CalculationHelpButton calculation={kpiCalculations.conversao} onOpen={setCalculationHelp} withSettings />
             <div className={styles.revenueKpiContent}>
-            <span>Taxa de conversão</span>
-            <strong>
-              {loadingTaxaConversao ? 'Carregando...' : `${taxaMesAtual?.taxa_conversao ?? 0}%`}
-            </strong>
-            {taxaMesAtual && (
-              <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
-                {taxaMesAtual.visitantes_unicos} visitantes | {taxaMesAtual.pedidos_confirmados} pedidos
-              </small>
-            )}
+              <span>Taxa de conversao</span>
+              <strong>{loadingTaxaConversao ? 'Carregando...' : `${conversaoValor.toFixed(2).replace('.', ',')}%`}</strong>
+              {taxaMesAtual && (
+                <small style={{ fontSize: '11px', color: '#ffffff', marginTop: '-8px' }}>
+                  {taxaMesAtual.visitantes_unicos} visitantes | {taxaMesAtual.pedidos_confirmados} pedidos
+                </small>
+              )}
             </div>
           </article>
           <article
@@ -1331,82 +1322,9 @@ function AdminDashboard() {
         </section>
 
         <section className={styles.dashboardGrid}>
-          <article className={`${styles.chartBlock} ${styles.wide}`}>
-            <h2>Faturamento ao longo do tempo</h2>
-            <div className={`${styles.chartCanvas} ${styles.revenueChartCanvas}`}>
-              <Line
-                data={revenueData}
-                options={{
-                  ...commonOptions,
-                  plugins: { legend: { display: false } },
-                  scales: {
-                    x: { grid: { display: false } },
-                    y: {
-                      min: 0,
-                      max: 26000,
-                      ticks: { callback: (value) => `R$ ${value}` },
-                      grid: { color: chartColors.grid },
-                    },
-                  },
-                }}
-                plugins={[revenueCandlesPlugin]}
-              />
-            </div>
-          </article>
 
-          <article className={styles.chartBlock}>
-            <h2>Funil de conversao</h2>
-            <div className={styles.chartCanvas}>
-              <Doughnut data={funnelData} options={commonOptions} />
-            </div>
-          </article>
 
-          <article className={`${styles.chartBlock} ${styles.productChart}`}>
-            <h2>Produtos mais vendidos</h2>
-            <div className={styles.chartCanvas}>
-              <Bar
-                data={productData}
-                options={{
-                  ...commonOptions,
-                  plugins: { legend: { display: false } },
-                  scales: {
-                    x: { grid: { display: false }, ticks: { maxRotation: 12, minRotation: 12 } },
-                    y: { beginAtZero: true, grid: { color: chartColors.grid } },
-                  },
-                }}
-                plugins={[towerBarsPlugin]}
-              />
-            </div>
-          </article>
 
-          <article className={`${styles.chartBlock} ${styles.wide}`}>
-            <h2>Taxa de conversão por mês</h2>
-            <div className={styles.chartCanvas}>
-              {loadingTaxaConversao ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
-                  Carregando dados...
-                </div>
-              ) : (
-                <Line
-                  data={conversionRateData}
-                  options={{
-                    ...commonOptions,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      x: { grid: { display: false } },
-                      y: {
-                        min: 0,
-                        max: 100,
-                        ticks: { callback: (value) => `${value}%` },
-                        grid: { color: chartColors.grid },
-                      },
-                    },
-                  }}
-                  plugins={[cableCarPointsPlugin]}
-                />
-              )}
-            </div>
-          </article>
 
           <article className={`${styles.chartBlock} ${styles.satisfacaoCard}`}>
             <div className={styles.satisfacaoHeader}>
