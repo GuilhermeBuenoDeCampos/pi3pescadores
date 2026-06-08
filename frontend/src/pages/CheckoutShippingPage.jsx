@@ -26,7 +26,7 @@ function getAddressLabel(address) {
         || address?.name
         || address?.title
         || address?.address_type
-        || 'Endereco cadastrado'
+        || 'Endereço cadastrado'
     );
 }
 
@@ -76,11 +76,11 @@ function getShippingDescription(option) {
     const name = getShippingName(option).toUpperCase();
 
     if (name.includes('SEDEX')) {
-        return 'Entrega rapida';
+        return 'Entrega rápida';
     }
 
     if (name.includes('PAC')) {
-        return 'Entrega economica';
+        return 'Entrega econômica';
     }
 
     return option?.description || 'Entrega pelos Correios';
@@ -98,10 +98,10 @@ function formatDeliveryTime(days) {
     const parsedDays = Number(days || 0);
 
     if (parsedDays === 1) {
-        return '1 dia util';
+        return '1 dia útil';
     }
 
-    return `${parsedDays} dias uteis`;
+    return `${parsedDays} dias úteis`;
 }
 
 function normalizeShippingOption(option) {
@@ -162,8 +162,8 @@ const CheckoutShippingPage = () => {
                 setAddresses(Array.isArray(userAddresses) ? userAddresses : []);
                 setError('');
             } catch (err) {
-                console.error('Erro ao buscar enderecos do usuario:', err);
-                setError('Falha ao buscar endereco selecionado. Tente novamente mais tarde.');
+                console.error('Erro ao buscar endereços do usuário:', err);
+                setError('Falha ao buscar endereço selecionado. Tente novamente mais tarde.');
                 setAddresses([]);
             } finally {
                 setLoading(false);
@@ -215,7 +215,7 @@ const CheckoutShippingPage = () => {
         if (cep.length !== 8) {
             setShippingOptions([]);
             setSelectedShippingKey('');
-            setShippingError('O endereco selecionado nao possui um CEP valido para calcular o frete.');
+            setShippingError('O endereço selecionado não possui um CEP válido para calcular o frete.');
             localStorage.removeItem('checkout_shipping_option');
             return;
         }
@@ -255,7 +255,7 @@ const CheckoutShippingPage = () => {
                 setShippingOptions(normalizedOptions);
 
                 if (normalizedOptions.length === 0) {
-                    setShippingError('Nenhuma opcao de frete disponivel para este endereco.');
+                    setShippingError('Nenhuma opção de frete disponível para este endereço.');
                     return;
                 }
 
@@ -326,7 +326,7 @@ const CheckoutShippingPage = () => {
                     <div>
                         <span className={checkoutStyles.kicker}>Checkout</span>
                         <h1 className={checkoutStyles.title}>Escolha a entrega do pedido</h1>
-                        <p className={checkoutStyles.subtitle}>Selecione o frete recalculado para o endereco escolhido.</p>
+                        <p className={checkoutStyles.subtitle}>Selecione o frete recalculado para o endereço escolhido.</p>
                     </div>
                 </section>
 
@@ -338,7 +338,7 @@ const CheckoutShippingPage = () => {
                     <span className={checkoutStyles.stepLine} aria-hidden="true" />
                     <div className={checkoutStyles.stepItem}>
                         <span className={checkoutStyles.stepDot}>2</span>
-                        <span>Endereco</span>
+                        <span>Endereço</span>
                     </div>
                     <span className={checkoutStyles.stepLine} aria-hidden="true" />
                     <div className={`${checkoutStyles.stepItem} ${checkoutStyles.stepActive}`}>
@@ -357,10 +357,10 @@ const CheckoutShippingPage = () => {
 
                 {!loading && !error && !selectedAddress && (
                     <div className={checkoutStyles.emptyCard}>
-                        <h2>Nenhum endereco selecionado</h2>
-                        <p>Volte para a etapa anterior e escolha um endereco antes de selecionar o frete.</p>
+                        <h2>Nenhum endereço selecionado</h2>
+                        <p>Volte para a etapa anterior e escolha um endereço antes de selecionar o frete.</p>
                         <button type="button" onClick={handleChangeAddress} className={checkoutStyles.secondaryButton}>
-                            Selecionar endereco
+                            Selecionar endereço
                         </button>
                     </div>
                 )}
@@ -372,7 +372,7 @@ const CheckoutShippingPage = () => {
                                 <div className={styles.sectionHeading}>
                                     <div>
                                         <h2 id="shipping-title">Selecione o frete da compra</h2>
-                                        <p>As opcoes abaixo usam o CEP do endereco selecionado.</p>
+                                        <p>As opções abaixo usam o CEP do endereço selecionado.</p>
                                     </div>
                                 </div>
 
@@ -403,13 +403,13 @@ const CheckoutShippingPage = () => {
 
                                 {!isCartLoading && !loadingShipping && !shippingError && shippingOptions.length === 0 && displayItems.length > 0 && (
                                     <div className={checkoutStyles.emptyCard}>
-                                        <h2>Nenhuma opcao disponivel</h2>
-                                        <p>Nao encontramos modalidades de entrega para este endereco.</p>
+                                        <h2>Nenhuma opção disponível</h2>
+                                        <p>Não encontramos modalidades de entrega para este endereço.</p>
                                     </div>
                                 )}
 
                                 {!isCartLoading && !loadingShipping && shippingOptions.length > 0 && (
-                                    <div className={styles.shippingList} aria-label="Opcoes de entrega">
+                                    <div className={styles.shippingList} aria-label="Opções de entrega">
                                         {shippingOptions.map((option) => {
                                             const optionKey = getShippingKey(option);
                                             const isSelected = selectedShippingKey === optionKey;
@@ -426,7 +426,7 @@ const CheckoutShippingPage = () => {
                                                     <span className={styles.optionMain}>
                                                         <span className={styles.optionName}>
                                                             {getShippingName(option)}
-                                                            {option.code && <small>Codigo {option.code}</small>}
+                                                            {option.code && <small>Código {option.code}</small>}
                                                         </span>
                                                         <span className={styles.optionDescription}>{option.description}</span>
                                                     </span>

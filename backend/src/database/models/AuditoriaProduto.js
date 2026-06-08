@@ -3,12 +3,12 @@ module.exports = (sequelize, DataTypes) => {
     'AuditoriaProduto',
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         primaryKey: true,
         autoIncrement: true,
       },
       product_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         references: {
           model: 'produto',
@@ -23,16 +23,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      diferenca: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      acuracidade: {
-        type: DataTypes.DECIMAL(5, 2),
-        allowNull: false,
-      },
       usuario_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(36),
+        allowNull: true,
+      },
+      observacoes: {
+        type: DataTypes.STRING(255),
         allowNull: true,
       },
       created_at: {

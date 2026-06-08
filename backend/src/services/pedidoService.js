@@ -3,9 +3,11 @@
 const { Op } = require('sequelize');
 const db = require('../database/models');
 const AppError = require('../middlewares/appError');
+const leadtimeService = require('./leadtimeService');
 
 const ORDER_STATUSES = new Set(['pendente', 'confirmado', 'preparando', 'enviado', 'concluido', 'cancelado']);
 const PAYMENT_METHODS = new Set(['whatsapp', 'pix', 'cartao', 'dinheiro', 'boleto', 'outro']);
+const SALE_STATUSES = ['preparando', 'enviado', 'confirmado', 'concluido'];
 
 function toMoney(value) {
   const n = Number(value);
@@ -16,6 +18,18 @@ function formatMoney(value) {
   return toMoney(value).toFixed(2);
 }
 
+function normalizeImageUrl(url) {
+  const rawUrl = String(url || '').trim().replace(/\s+/g, '');
+  const signMarker = '/storage/v1/object/sign/';
+  const publicMarker = '/storage/v1/object/public/';
+
+  if (rawUrl.includes(signMarker)) {
+    return rawUrl.split('?')[0].replace(signMarker, publicMarker);
+  }
+
+  return rawUrl;
+}
+
 function getUserId(user) {
   return user?.sub || user?.id || null;
 }
@@ -23,6 +37,10 @@ function getUserId(user) {
 function normalizePaymentMethod(value) {
   const method = String(value || '').trim().toLowerCase();
   return PAYMENT_METHODS.has(method) ? method : 'whatsapp';
+}
+
+function getLikeOperator() {
+  return db.sequelize.getDialect() === 'postgres' ? Op.iLike : Op.like;
 }
 
 function normalizeAddress(address) {
@@ -169,9 +187,10 @@ function formatItem(item) {
     id: plain.id,
     id_pedido: plain.id_pedido,
     id_produto: plain.id_produto,
-    nome_produto: plain.nome_produto,
+    nome_produto: plain.nome_produto || produto?.nome || 'Produto',
     quantidade: plain.quantidade,
     preco_unitario: formatMoney(plain.preco_unitario),
+    preco: formatMoney(plain.preco_unitario),
     subtotal: formatMoney(plain.subtotal),
     produto: produto
       ? {
@@ -180,7 +199,7 @@ function formatItem(item) {
           ativo: produto.ativo,
           imagens: imagens.map((imagem) => ({
             id: imagem.id,
-            url: imagem.url,
+            url: normalizeImageUrl(imagem.url),
           })),
         }
       : null,
@@ -190,23 +209,48 @@ function formatItem(item) {
 function formatPedido(pedido) {
   const plain = pedido.toJSON ? pedido.toJSON() : pedido;
   const itens = Array.isArray(plain.itens) ? plain.itens : [];
+  const enderecoEntrega = plain.endereco_entrega || plain.enderecoEntrega || null;
 
   return {
     id: plain.id,
     id_usuario: plain.id_usuario,
     numero_pedido: plain.numero_pedido,
+    nome_cliente: plain.nome_cliente || enderecoEntrega?.nome_destinatario || 'N/A',
     status: plain.status,
     subtotal: formatMoney(plain.subtotal),
     valor_frete: formatMoney(plain.valor_frete),
+    tipo_frete: plain.tipo_frete || 'N/A',
     desconto: formatMoney(plain.desconto),
     total: formatMoney(plain.total),
-    endereco_entrega: plain.endereco_entrega,
+    valor_total: formatMoney(plain.total),
+    endereco_entrega: enderecoEntrega,
     metodo_pagamento: plain.metodo_pagamento,
     observacoes: plain.observacoes,
     criado_em: plain.criado_em,
     atualizado_em: plain.atualizado_em,
     itens: itens.map(formatItem),
   };
+}
+
+function buscarItensDoPedido(idPedido, transaction) {
+  return db.PedidoItem.findAll({
+    where: { id_pedido: idPedido },
+    include: [
+      {
+        model: db.Produto,
+        as: 'produto',
+        attributes: ['id', 'nome', 'ativo'],
+        include: [
+          {
+            model: db.ProdutoImagem,
+            as: 'imagens',
+            attributes: ['id', 'url'],
+          },
+        ],
+      },
+    ],
+    transaction,
+  });
 }
 
 async function buscarPedidoCompleto(where, transaction) {
@@ -227,11 +271,7 @@ async function buscarPedidoCompleto(where, transaction) {
     // Carregar itens manualmente
     if (db.PedidoItem) {
       try {
-        const itens = await db.PedidoItem.findAll({
-          where: { id_pedido: pedido.id },
-          transaction,
-          raw: false,
-        });
+        const itens = await buscarItensDoPedido(pedido.id, transaction);
         pedido.dataValues.itens = itens;
       } catch (itenError) {
         console.error('[pedidoService] erro ao carregar itens:', itenError.message);
@@ -322,11 +362,12 @@ exports.criarPedido = async (usuarioId, payload) => {
         status: 'pendente',
         subtotal: formatMoney(subtotal),
         valor_frete: formatMoney(valorFrete),
+        tipo_frete: frete.servico || null,
         desconto: formatMoney(desconto),
         total: formatMoney(total),
         endereco_entrega: enderecoEntrega,
         metodo_pagamento: metodoPagamento,
-        observacoes: frete.servico ? [observacoes, `Frete selecionado: ${frete.servico}`].filter(Boolean).join('\n') : observacoes,
+        observacoes: observacoes,
         criado_em: now,
         atualizado_em: now,
       },
@@ -360,6 +401,12 @@ exports.criarPedido = async (usuarioId, payload) => {
     return createdPedido;
   });
 
+  try {
+    await leadtimeService.criarLeadtimeComEventos(pedido.id, usuarioId, now);
+  } catch (error) {
+    console.warn(`[pedidoService] erro ao criar leadtime do pedido ${pedido.id}: ${error.message}`);
+  }
+
   const completo = await buscarPedidoCompleto({ id: pedido.id, id_usuario: usuarioId });
   return formatPedido(completo);
 };
@@ -380,7 +427,7 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
 
   if (query.search) {
     where.numero_pedido = {
-      [Op.iLike]: `%${String(query.search).trim()}%`,
+      [getLikeOperator()]: `%${String(query.search).trim()}%`,
     };
   }
 
@@ -420,10 +467,7 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
       console.log('[pedidoService] carregando itens...');
       for (const pedido of rows) {
         try {
-          const itens = await db.PedidoItem.findAll({
-            where: { id_pedido: pedido.id },
-            raw: true,
-          });
+          const itens = await buscarItensDoPedido(pedido.id);
           pedido.dataValues.itens = itens;
         } catch (itemError) {
           console.error(`[pedidoService] erro ao carregar itens para pedido ${pedido.id}:`, itemError.message);
@@ -451,6 +495,90 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
     });
     
     // Se for erro de banco de dados, adicionar contexto
+    if (error.original) {
+      console.error('[pedidoService] erro original (banco de dados):', {
+        message: error.original.message,
+        code: error.original.code,
+      });
+    }
+
+    throw error;
+  }
+};
+
+exports.listarTodosPedidos = async (query = {}) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 50);
+  const offset = (page - 1) * limit;
+  const where = {};
+
+  if (query.status && ORDER_STATUSES.has(String(query.status))) {
+    where.status = String(query.status);
+  }
+
+  if (query.search) {
+    where.numero_pedido = {
+      [getLikeOperator()]: `%${String(query.search).trim()}%`,
+    };
+  }
+
+  try {
+    console.log('[pedidoService] listarTodosPedidos iniciado', {
+      where,
+      page,
+      limit,
+      offset,
+    });
+
+    if (!db.Pedido) {
+      const errorMsg = 'Database model "Pedido" not found';
+      console.error(`[pedidoService] ${errorMsg}`);
+      throw new AppError(500, errorMsg);
+    }
+
+    const { count, rows } = await db.Pedido.findAndCountAll({
+      where,
+      distinct: true,
+      order: [['criado_em', 'DESC']],
+      limit,
+      offset,
+    });
+
+    console.log('[pedidoService] listarTodosPedidos sucesso', {
+      total: count,
+      rowsReturned: rows.length,
+    });
+
+    if (rows.length > 0 && db.PedidoItem) {
+      console.log('[pedidoService] carregando itens para todos os pedidos...');
+      for (const pedido of rows) {
+        try {
+          const itens = await buscarItensDoPedido(pedido.id);
+          pedido.dataValues.itens = itens;
+        } catch (itemError) {
+          console.error(`[pedidoService] erro ao carregar itens para pedido ${pedido.id}:`, itemError.message);
+          pedido.dataValues.itens = [];
+        }
+      }
+    }
+
+    return {
+      data: rows.map(formatPedido),
+      pagination: {
+        total: count,
+        page,
+        limit,
+        pages: Math.ceil(count / limit),
+      },
+    };
+  } catch (error) {
+    console.error('[pedidoService] erro crítico em listarTodosPedidos:', {
+      errorType: error.constructor.name,
+      errorMessage: error.message,
+      errorCode: error.code || error.original?.code,
+      stack: error.stack,
+    });
+
     if (error.original) {
       console.error('[pedidoService] erro original (banco de dados):', {
         message: error.original.message,
@@ -527,8 +655,174 @@ exports.atualizarStatusPedido = async (idPedido, status) => {
     return pedido;
   });
 
+  if (['confirmado', 'preparando', 'enviado', 'concluido'].includes(novoStatus)) {
+    try {
+      await leadtimeService.registrarEventoLeadtime(pedidoAtualizado.id, pedidoAtualizado.id_usuario, novoStatus);
+    } catch (error) {
+      console.warn(`[pedidoService] erro ao registrar leadtime do pedido ${pedidoAtualizado.id}: ${error.message}`);
+    }
+  }
+
   const completo = await buscarPedidoCompleto({ id: pedidoAtualizado.id });
   return formatPedido(completo);
+};
+
+exports.obterFaturamentoMensal = async (meses = 12) => {
+  try {
+    // Buscar todos os pedidos com os status especificados
+    const pedidos = await db.Pedido.findAll({
+      where: {
+        status: {
+          [Op.in]: SALE_STATUSES,
+        },
+      },
+      attributes: ['total', 'criado_em'],
+      order: [['criado_em', 'DESC']],
+    });
+
+    // Agrupar por mês
+    const faturamentoPorMes = {};
+    const hoje = new Date();
+    
+    // Inicializar os últimos N meses com 0
+    for (let i = meses - 1; i >= 0; i--) {
+      const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const chave = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+      faturamentoPorMes[chave] = 0;
+    }
+
+    // Somar os totais
+    pedidos.forEach(pedido => {
+      const data = new Date(pedido.criado_em);
+      const chave = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+      
+      // Apenas considerar se estiver dentro do período de meses
+      if (faturamentoPorMes.hasOwnProperty(chave)) {
+        faturamentoPorMes[chave] = toMoney(
+          faturamentoPorMes[chave] + toMoney(pedido.total)
+        );
+      }
+    });
+
+    // Converter para array ordenado
+    const resultado = Object.entries(faturamentoPorMes)
+      .map(([mes, valor]) => ({
+        mes,
+        faturamento: formatMoney(valor),
+        faturamentoNumerico: toMoney(valor),
+      }))
+      .sort((a, b) => {
+        const [mesA, anoA] = a.mes.split('/').map(Number);
+        const [mesB, anoB] = b.mes.split('/').map(Number);
+        return anoA === anoB ? mesA - mesB : anoA - anoB;
+      });
+
+
+
+    return resultado;
+  } catch (error) {
+    console.error('[pedidoService] erro ao calcular faturamento mensal:', error.message);
+    throw error;
+  }
+};
+
+exports.obterTaxaRecompraAnual = async (ano = new Date().getFullYear()) => {
+  const anoNumero = Number(ano) || new Date().getFullYear();
+  const inicioAno = new Date(anoNumero, 0, 1);
+  const inicioProximoAno = new Date(anoNumero + 1, 0, 1);
+
+  const pedidos = await db.Pedido.findAll({
+    where: {
+      status: {
+        [Op.in]: SALE_STATUSES,
+      },
+      criado_em: {
+        [Op.gte]: inicioAno,
+        [Op.lt]: inicioProximoAno,
+      },
+    },
+    attributes: ['id_usuario'],
+  });
+
+  const comprasPorCliente = new Map();
+
+  pedidos.forEach((pedido) => {
+    const clienteId = String(pedido.id_usuario);
+    comprasPorCliente.set(clienteId, (comprasPorCliente.get(clienteId) || 0) + 1);
+  });
+
+  const totalClientes = comprasPorCliente.size;
+  const clientesRecompra = Array.from(comprasPorCliente.values())
+    .filter((totalCompras) => totalCompras > 1).length;
+  const taxa = totalClientes > 0 ? (clientesRecompra / totalClientes) * 100 : 0;
+
+  return {
+    ano: anoNumero,
+    taxa: Number(taxa.toFixed(2)),
+    totalClientes,
+    clientesRecompra,
+    statusConsiderados: SALE_STATUSES,
+  };
+};
+
+exports.obterTicketMedio = async () => {
+  try {
+    const hoje = new Date();
+    const partesMesAtual = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: 'numeric',
+    }).formatToParts(hoje);
+    const anoAtual = Number(partesMesAtual.find((parte) => parte.type === 'year')?.value);
+    const mesAtual = Number(partesMesAtual.find((parte) => parte.type === 'month')?.value);
+    const proximoMes = new Date(Date.UTC(anoAtual, mesAtual, 1));
+    const inicioMes = new Date(`${anoAtual}-${String(mesAtual).padStart(2, '0')}-01T00:00:00-03:00`);
+    const inicioProximoMes = new Date(
+      `${proximoMes.getUTCFullYear()}-${String(proximoMes.getUTCMonth() + 1).padStart(2, '0')}-01T00:00:00-03:00`
+    );
+    const mesReferencia = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      month: 'long',
+      year: 'numeric',
+    }).format(inicioMes);
+
+    const resultado = await db.Pedido.findOne({
+      where: {
+        status: {
+          [Op.in]: SALE_STATUSES,
+        },
+        criado_em: {
+          [Op.gte]: inicioMes,
+          [Op.lt]: inicioProximoMes,
+        },
+      },
+      attributes: [
+        [db.sequelize.fn('AVG', db.sequelize.col('total')), 'ticket_medio'],
+        [db.sequelize.fn('SUM', db.sequelize.col('total')), 'receita_total'],
+        [db.sequelize.fn('COUNT', db.sequelize.col('id')), 'total_vendas'],
+        [db.sequelize.fn('COUNT', db.sequelize.fn('DISTINCT', db.sequelize.col('id_usuario'))), 'clientes_unicos'],
+      ],
+      raw: true,
+    });
+
+    const ticketMedio = toMoney(resultado?.ticket_medio || 0);
+    const receitaTotal = toMoney(resultado?.receita_total || 0);
+    const totalVendas = Number(resultado?.total_vendas || 0);
+    const clientesUnicos = Number(resultado?.clientes_unicos || 0);
+
+    return {
+      ticket_medio: formatMoney(ticketMedio),
+      ticketMedioNumerico: ticketMedio,
+      receita_total: formatMoney(receitaTotal),
+      receitaTotalNumerico: receitaTotal,
+      total_vendas: totalVendas,
+      clientes_unicos: clientesUnicos,
+      mesReferencia,
+    };
+  } catch (error) {
+    console.error('[pedidoService] erro ao calcular ticket medio:', error.message);
+    throw error;
+  }
 };
 
 exports.getUserId = getUserId;

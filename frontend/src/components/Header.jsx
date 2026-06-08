@@ -25,15 +25,21 @@ function Header() {
         setIsUserMenuOpen(false);
       }
     };
+    const handleAuthChange = () => {
+      setUser(getAuthToken() ? getAuthUser() : null);
+      setIsUserMenuOpen(false);
+    };
 
     window.addEventListener('auth-session-changed', handleSessionChange);
     window.addEventListener('storage', handleSessionChange);
     document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('auth-session-changed', handleAuthChange);
 
     return () => {
       window.removeEventListener('auth-session-changed', handleSessionChange);
       window.removeEventListener('storage', handleSessionChange);
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('auth-session-changed', handleAuthChange);
     };
   }, []);
 
@@ -49,16 +55,16 @@ function Header() {
       <div className={styles.brand}>
         <img src={logo} alt="Logo Três Pescadores" className={styles.logoMark} />
         <div>
-          <Link to="/" className={styles.title}>
+          <Link to="/" className={`${styles.title} ${user ? styles.loggedInTitle : ''}`}>
             Três Pescadores Store
           </Link>
           <p className={styles.subtitle}>Artigos religiosos para fé e devoção</p>
         </div>
       </div>
       <nav className={styles.navLinks}>
-        <Link to="/">Início</Link>
-        <a href="#categories">Categorias</a>
-        <a href="#catalog">Catálogo</a>
+        <Link to="/" className={styles.desktopNavLink}>Início</Link>
+        <a href="#categories" className={styles.desktopNavLink}>Categorias</a>
+        <a href="#catalog" className={styles.desktopNavLink}>Catálogo</a>
         {user ? (
           <div className={styles.userMenu} ref={userMenuRef}>
             <button

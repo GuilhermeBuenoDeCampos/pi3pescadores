@@ -29,6 +29,7 @@ export function ensureGuestToken() {
   const token = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
   localStorage.setItem(GUEST_TOKEN_KEY, token);
   return token;
 }
@@ -59,12 +60,31 @@ function buildCartHeaders(extraHeaders = {}) {
 
 export function getAuthHeaders() {
   const token = getAuthToken();
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export async function apiFetch(url, options = {}) {
+  const response = await fetch(url, options);
+
+  if (response.status === 401) {
+    clearAuthSession();
+
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      window.location.assign('/login');
+    }
+  }
+
+  return response;
 }
 
 async function parseApiError(response, fallbackMessage) {
   try {
     const body = await response.clone().json();
+
+    if (typeof body?.error === 'string') {
+      return body.error;
+    }
+
     return body?.error?.message || body?.message || fallbackMessage;
   } catch {
     try {
@@ -76,8 +96,14 @@ async function parseApiError(response, fallbackMessage) {
   }
 }
 
+function clearExpiredAuthSession(response) {
+  if (response.status === 401 && getAuthToken()) {
+    clearAuthSession();
+  }
+}
+
 export async function registerUser(payload) {
-  const response = await fetch(`${API_URL}/auth/cadastro`, {
+  const response = await apiFetch(`${API_URL}/auth/cadastro`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -93,7 +119,8 @@ export async function registerUser(payload) {
 
 export async function loginUser(payload) {
   const guestToken = ensureGuestToken();
-  const response = await fetch(`${API_URL}/auth/login`, {
+
+  const response = await apiFetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -147,41 +174,24 @@ export function clearAuthSession(options = {}) {
   notifyAuthSessionChanged();
 }
 
-/**
- * Constrói URL completa para imagens
- * Lida com três casos:
- * 1. URL vazia/null → retorna vazio
- * 2. URL completa (http/https) → retorna como está
- * 3. Caminho relativo → prepende BACKEND_URL
- * 
- * Exemplo:
- * getImageUrl('/uploads/Banner/imagem.jpg') 
- * → 'https://pi3pescadores.onrender.com/uploads/Banner/imagem.jpg'
- * 
- * @param {string} url - URL ou caminho da imagem
- * @returns {string} URL completa da imagem
- */
 export function getImageUrl(url) {
-  if (!url) return '';
-  if (url.startsWith('http')) return url;
-  return `${BACKEND_URL}${url}`;
+  const normalizedUrl = String(url || '').trim();
+
+  if (!normalizedUrl) return '';
+  if (/^(https?:)?\/\//i.test(normalizedUrl) || normalizedUrl.startsWith('data:') || normalizedUrl.startsWith('blob:')) {
+    return normalizedUrl;
+  }
+
+  return `${BACKEND_URL}/${normalizedUrl.replace(/^\/+/, '')}`;
 }
 
-
-/**
- * Busca produtos com filtros opcionais
- * 
- * @param {Object} filters - Filtros (category, active, etc)
- * @returns {Promise<Array>} Lista de produtos
- * @throws {Error} Se falhar requisição
- */
 export async function fetchProducts(filters = {}) {
   const params = new URLSearchParams();
-  
+
   if (filters.category) {
     params.append('id_categoria', filters.category);
   }
-  
+
   if (filters.active !== undefined) {
     params.append('ativo', filters.active);
   }
@@ -189,8 +199,8 @@ export async function fetchProducts(filters = {}) {
   const queryString = params.toString();
   const url = queryString ? `${API_URL}/produtos?${queryString}` : `${API_URL}/produtos`;
 
-  const response = await fetch(url);
-  
+  const response = await apiFetch(url);
+
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Não foi possível carregar os produtos: ${response.statusText}`));
   }
@@ -199,17 +209,9 @@ export async function fetchProducts(filters = {}) {
   return result.data || [];
 }
 
-
-/**
- * Busca um produto específico por ID
- * 
- * @param {string|number} id - ID do produto
- * @returns {Promise<Object>} Dados do produto
- * @throws {Error} Se falhar requisição
- */
 export async function fetchProductById(id) {
-  const response = await fetch(`${API_URL}/produtos/${id}`);
-  
+  const response = await apiFetch(`${API_URL}/produtos/${id}`);
+
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Não foi possível carregar o produto: ${response.statusText}`));
   }
@@ -218,16 +220,9 @@ export async function fetchProductById(id) {
   return result.data;
 }
 
-/**
- * Busca um produto específico pelo nome (slug)
- * 
- * @param {string} nome - Nome/slug do produto
- * @returns {Promise<Object>} Dados do produto
- * @throws {Error} Se falhar requisição ou produto não encontrado
- */
 export async function fetchProductByName(nome) {
-  const response = await fetch(`${API_URL}/produtos/nome/${encodeURIComponent(nome)}`);
-  
+  const response = await apiFetch(`${API_URL}/produtos/nome/${encodeURIComponent(nome)}`);
+
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Produto não encontrado: ${response.statusText}`));
   }
@@ -236,17 +231,11 @@ export async function fetchProductByName(nome) {
   return result.data;
 }
 
-/**
- * Busca 5 produtos aleatórios para auditoria
- * 
- * @returns {Promise<Array>} Lista de 5 produtos aleatórios
- * @throws {Error} Se falhar requisição
- */
 export async function fetchProdutosAleatorios() {
-  const response = await fetch(`${API_URL}/auditoria/aleatorios`, {
+  const response = await apiFetch(`${API_URL}/auditoria/aleatorios`, {
     headers: { ...getAuthHeaders() },
   });
-  
+
   if (!response.ok) {
     throw new Error(`Não foi possível carregar os produtos aleatórios: ${response.statusText}`);
   }
@@ -255,20 +244,13 @@ export async function fetchProdutosAleatorios() {
   return result.data;
 }
 
-/**
- * Salva registros de auditoria de estoque
- * 
- * @param {Array} auditorias - Array com dados de auditoria
- * @returns {Promise<Object>} Resultado da operação
- * @throws {Error} Se falhar requisição
- */
 export async function salvarAuditoria(auditorias) {
-  const response = await fetch(`${API_URL}/auditoria/salvar`, {
+  const response = await apiFetch(`${API_URL}/auditoria/salvar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-    body: JSON.stringify({ auditorias })
+    body: JSON.stringify({ auditorias }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Não foi possível salvar a auditoria: ${response.statusText}`);
   }
@@ -277,19 +259,11 @@ export async function salvarAuditoria(auditorias) {
   return result.data;
 }
 
-/**
- * Busca histórico de auditorias
- * 
- * @param {number} page - Número da página
- * @param {number} limit - Quantidade por página
- * @returns {Promise<Object>} Histórico com paginação
- * @throws {Error} Se falhar requisição
- */
 export async function fetchHistoricoAuditoria(page = 1, limit = 10) {
-  const response = await fetch(`${API_URL}/auditoria/historico?page=${page}&limit=${limit}`, {
+  const response = await apiFetch(`${API_URL}/auditoria/historico?page=${page}&limit=${limit}`, {
     headers: { ...getAuthHeaders() },
   });
-  
+
   if (!response.ok) {
     throw new Error(`Não foi possível carregar o histórico de auditorias: ${response.statusText}`);
   }
@@ -299,7 +273,7 @@ export async function fetchHistoricoAuditoria(page = 1, limit = 10) {
 }
 
 export async function fetchMediaAcuracidade() {
-  const response = await fetch(`${API_URL}/auditoria/acuracidade-media`, {
+  const response = await apiFetch(`${API_URL}/auditoria/acuracidade-media`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -312,7 +286,7 @@ export async function fetchMediaAcuracidade() {
 }
 
 export async function registrarPalavraPesquisada(palavra) {
-  const response = await fetch(`${API_URL}/pesquisas`, {
+  const response = await apiFetch(`${API_URL}/pesquisas`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ palavra }),
@@ -327,7 +301,7 @@ export async function registrarPalavraPesquisada(palavra) {
 }
 
 export async function fetchPalavrasMaisPesquisadas(limit = 5) {
-  const response = await fetch(`${API_URL}/pesquisas/mais-pesquisadas?limit=${limit}`, {
+  const response = await apiFetch(`${API_URL}/pesquisas/mais-pesquisadas?limit=${limit}`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -339,16 +313,9 @@ export async function fetchPalavrasMaisPesquisadas(limit = 5) {
   return result.data || [];
 }
 
-
-/**
- * Busca todas as categorias de produtos
- * 
- * @returns {Promise<Array>} Lista de categorias
- * @throws {Error} Se falhar requisição
- */
 export async function fetchCategories() {
-  const response = await fetch(`${API_URL}/categorias`);
-  
+  const response = await apiFetch(`${API_URL}/categorias`);
+
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Não foi possível carregar as categorias: ${response.statusText}`));
   }
@@ -357,21 +324,13 @@ export async function fetchCategories() {
   return result.data || [];
 }
 
-/**
- * Atualiza o status ativo de um produto
- * 
- * @param {string|number} id - ID do produto
- * @param {boolean} ativo - Novo valor para ativo
- * @returns {Promise<Object>} Dados do produto atualizado
- * @throws {Error} Se falhar requisição
- */
 export async function updateProductStatus(id, ativo) {
-  const response = await fetch(`${API_URL}/produtos/${id}`, {
+  const response = await apiFetch(`${API_URL}/produtos/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-    body: JSON.stringify({ ativo })
+    body: JSON.stringify({ ativo }),
   });
-  
+
   if (!response.ok) {
     throw new Error(await parseApiError(response, `Não foi possível atualizar o status do produto: ${response.statusText}`));
   }
@@ -381,11 +340,12 @@ export async function updateProductStatus(id, ativo) {
 }
 
 export async function fetchCart() {
-  const response = await fetch(`${API_URL}/cart`, {
+  const response = await apiFetch(`${API_URL}/cart`, {
     headers: buildCartHeaders(),
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Não foi possível carregar o carrinho.'));
   }
 
@@ -394,13 +354,14 @@ export async function fetchCart() {
 }
 
 export async function addCartItem(payload) {
-  const response = await fetch(`${API_URL}/cart/items`, {
+  const response = await apiFetch(`${API_URL}/cart/items`, {
     method: 'POST',
     headers: buildCartHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Não foi possível adicionar o item ao carrinho.'));
   }
 
@@ -409,13 +370,14 @@ export async function addCartItem(payload) {
 }
 
 export async function updateCartItem(itemId, payload) {
-  const response = await fetch(`${API_URL}/cart/items/${itemId}`, {
+  const response = await apiFetch(`${API_URL}/cart/items/${itemId}`, {
     method: 'PATCH',
     headers: buildCartHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Não foi possível atualizar o item do carrinho.'));
   }
 
@@ -424,12 +386,13 @@ export async function updateCartItem(itemId, payload) {
 }
 
 export async function removeCartItem(itemId) {
-  const response = await fetch(`${API_URL}/cart/items/${itemId}`, {
+  const response = await apiFetch(`${API_URL}/cart/items/${itemId}`, {
     method: 'DELETE',
     headers: buildCartHeaders(),
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Não foi possível remover o item do carrinho.'));
   }
 
@@ -438,21 +401,21 @@ export async function removeCartItem(itemId) {
 }
 
 export async function calculateShipping(payload) {
-    const response = await fetch(`${API_URL}/frete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-    });
+  const response = await apiFetch(`${API_URL}/frete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
 
-    if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Erro ao calcular o frete.'));
-    }
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Erro ao calcular o frete.'));
+  }
 
-    return response.json();
+  return response.json();
 }
 
 export async function fetchAddresses() {
-  const response = await fetch(`${API_URL}/enderecos`, {
+  const response = await apiFetch(`${API_URL}/enderecos`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -469,7 +432,7 @@ export async function getUserAddresses() {
 }
 
 export async function createAddress(payload) {
-  const response = await fetch(`${API_URL}/enderecos`, {
+  const response = await apiFetch(`${API_URL}/enderecos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(payload),
@@ -484,7 +447,7 @@ export async function createAddress(payload) {
 }
 
 export async function updateAddress(id, payload) {
-  const response = await fetch(`${API_URL}/enderecos/${id}`, {
+  const response = await apiFetch(`${API_URL}/enderecos/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(payload),
@@ -499,7 +462,7 @@ export async function updateAddress(id, payload) {
 }
 
 export async function deleteAddress(id) {
-  const response = await fetch(`${API_URL}/enderecos/${id}`, {
+  const response = await apiFetch(`${API_URL}/enderecos/${id}`, {
     method: 'DELETE',
     headers: { ...getAuthHeaders() },
   });
@@ -513,7 +476,7 @@ export async function deleteAddress(id) {
 }
 
 export async function setPrimaryAddress(id) {
-  const response = await fetch(`${API_URL}/enderecos/${id}/principal`, {
+  const response = await apiFetch(`${API_URL}/enderecos/${id}/principal`, {
     method: 'PATCH',
     headers: { ...getAuthHeaders() },
   });
@@ -531,7 +494,7 @@ export async function setPrimaryAddress(id) {
  */
 
 export async function fetchUsuarios() {
-  const response = await fetch(`${API_URL}/usuarios`, {
+  const response = await apiFetch(`${API_URL}/usuarios`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -544,7 +507,7 @@ export async function fetchUsuarios() {
 }
 
 export async function fetchUsuarioById(id) {
-  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+  const response = await apiFetch(`${API_URL}/usuarios/${id}`, {
     headers: { ...getAuthHeaders() },
   });
 
@@ -557,7 +520,7 @@ export async function fetchUsuarioById(id) {
 }
 
 export async function criarUsuario(payload) {
-  const response = await fetch(`${API_URL}/usuarios`, {
+  const response = await apiFetch(`${API_URL}/usuarios`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(payload),
@@ -572,7 +535,7 @@ export async function criarUsuario(payload) {
 }
 
 export async function atualizarUsuario(id, payload) {
-  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+  const response = await apiFetch(`${API_URL}/usuarios/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(payload),
@@ -587,7 +550,7 @@ export async function atualizarUsuario(id, payload) {
 }
 
 export async function excluirUsuario(id) {
-  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+  const response = await apiFetch(`${API_URL}/usuarios/${id}`, {
     method: 'DELETE',
     headers: { ...getAuthHeaders() },
   });
@@ -602,13 +565,14 @@ export async function excluirUsuario(id) {
  */
 
 export async function criarPedido(payload) {
-  const response = await fetch(`${API_URL}/pedidos`, {
+  const response = await apiFetch(`${API_URL}/pedidos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Não foi possível criar o pedido.'));
   }
 
@@ -625,11 +589,13 @@ export async function fetchMeusPedidos(params = {}) {
   if (params.search) query.append('search', params.search);
 
   const queryString = query.toString();
-  const response = await fetch(`${API_URL}/pedidos/meus${queryString ? `?${queryString}` : ''}`, {
+
+  const response = await apiFetch(`${API_URL}/pedidos/meus${queryString ? `?${queryString}` : ''}`, {
     headers: { ...getAuthHeaders() },
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Não foi possível carregar seus pedidos.'));
   }
 
@@ -637,11 +603,12 @@ export async function fetchMeusPedidos(params = {}) {
 }
 
 export async function fetchMeuPedido(id) {
-  const response = await fetch(`${API_URL}/pedidos/meus/${id}`, {
+  const response = await apiFetch(`${API_URL}/pedidos/meus/${id}`, {
     headers: { ...getAuthHeaders() },
   });
 
   if (!response.ok) {
+    clearExpiredAuthSession(response);
     throw new Error(await parseApiError(response, 'Pedido não encontrado.'));
   }
 
@@ -650,7 +617,7 @@ export async function fetchMeuPedido(id) {
 }
 
 export async function atualizarStatusPedido(id, status) {
-  const response = await fetch(`${API_URL}/pedidos/${id}/status`, {
+  const response = await apiFetch(`${API_URL}/pedidos/${id}/status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ status }),
@@ -658,6 +625,55 @@ export async function atualizarStatusPedido(id, status) {
 
   if (!response.ok) {
     throw new Error(await parseApiError(response, 'Não foi possível atualizar o pedido.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function fetchTodosPedidos(params = {}) {
+  const query = new URLSearchParams();
+
+  if (params.page) query.append('page', params.page);
+  if (params.limit) query.append('limit', params.limit);
+  if (params.status) query.append('status', params.status);
+  if (params.search) query.append('search', params.search);
+
+  const queryString = query.toString();
+
+  const response = await apiFetch(`${API_URL}/pedidos${queryString ? `?${queryString}` : ''}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Não foi possível carregar os pedidos.'));
+  }
+
+  return response.json();
+}
+
+export async function fetchTaxaRecompraAnual(ano) {
+  const query = ano ? `?ano=${encodeURIComponent(ano)}` : '';
+
+  const response = await apiFetch(`${API_URL}/pedidos/admin/taxa-recompra-anual${query}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Não foi possível carregar a taxa de recompra.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function fetchPedidoAdmin(id) {
+  const response = await apiFetch(`${API_URL}/pedidos/${id}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Pedido não encontrado.'));
   }
 
   const result = await response.json();

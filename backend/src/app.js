@@ -1,9 +1,11 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
 const path = require('path');
 const routes = require('./routes');
 const notFound = require('./middlewares/notFound');
 const errorHandler = require('./middlewares/errorHandler');
+const captureClientInfo = require('./middlewares/captureClientInfo');
 
 const app = express();
 
@@ -29,7 +31,6 @@ function parseOrigins(value) {
 }
 
 const allowedOrigins = new Set([
-  'https://pi3pescadores.onrender.com',
   'https://pi3pescadores.pages.dev',
   'http://localhost:5173',
   'http://localhost:5174',
@@ -89,8 +90,15 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(captureClientInfo);
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  setHeaders(res, filePath) {
+    if (path.extname(filePath).toLowerCase() === '.jfif') {
+      res.setHeader('Content-Type', 'image/jpeg');
+    }
+  },
+}));
 
 app.get('/health', (req, res) => {
   res.json({
@@ -117,6 +125,39 @@ app.get('/health/models', (req, res) => {
     sequelizeConnected: !!db.sequelize,
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get('/test/visitante-evento', async (req, res) => {
+  try {
+    const db = require('./database/models');
+    
+    console.log('[test/visitante-evento] Models loaded:', Object.keys(db).filter(k => k !== 'sequelize' && k !== 'Sequelize'));
+    
+    if (!db.VisitanteEvento) {
+      return res.status(500).json({
+        error: 'Model VisitanteEvento not found',
+        modelsLoaded: Object.keys(db).filter((k) => k !== 'sequelize' && k !== 'Sequelize'),
+      });
+    }
+
+    const count = await db.VisitanteEvento.count();
+    const sample = await db.VisitanteEvento.findAll({ limit: 1 });
+
+    res.json({
+      success: true,
+      visitanteEventoCount: count,
+      sampleEvento: sample.length > 0 ? sample[0].toJSON() : null,
+      modelInfo: {
+        name: db.VisitanteEvento.name,
+        tableName: db.VisitanteEvento.tableName,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      stack: error.stack,
+    });
+  }
 });
 
 if (process.env.NODE_ENV !== 'production') {
@@ -301,6 +342,31 @@ app.get('/test/check-pedidos-table', async (req, res) => {
 });
 
 app.use('/api', routes);
+
+const frontendDirectory = process.env.FRONTEND_DIST_PATH
+  ? path.resolve(process.env.FRONTEND_DIST_PATH)
+  : path.resolve(__dirname, '../../public_html');
+const frontendIndex = path.join(frontendDirectory, 'index.html');
+
+console.info(`[frontend] Static directory: ${frontendDirectory}`);
+app.use(express.static(frontendDirectory, { index: false }));
+
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api')) {
+    return next();
+  }
+
+  if (req.path.startsWith('/assets/') || path.extname(req.path)) {
+    return next();
+  }
+
+  if (fs.existsSync(frontendIndex)) {
+    return res.sendFile(frontendIndex);
+  }
+
+  console.warn(`[frontend] index.html not found at ${frontendIndex}`);
+  return next();
+});
 
 app.use(notFound);
 app.use(errorHandler);

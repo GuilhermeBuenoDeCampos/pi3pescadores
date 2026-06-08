@@ -88,7 +88,7 @@ function buildEnderecoInclude() {
 
 function ensureEnderecoUsuarioModel() {
   if (!db.EnderecoUsuario) {
-    throw new AppError(500, 'Model EnderecoUsuario nao registrado');
+    throw new AppError(500, 'Model EnderecoUsuario não registrado');
   }
 
   if (db.EnderecoUsuario.tableName !== 'enderecos_usuario') {

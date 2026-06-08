@@ -8,7 +8,7 @@ module.exports = {
         id BIGSERIAL PRIMARY KEY,
         usuario_id UUID NULL REFERENCES usuarios(id) ON UPDATE CASCADE ON DELETE SET NULL,
         guest_token UUID NULL,
-        status VARCHAR(30) NOT NULL DEFAULT 'active',
+        status VARCHAR(30) NOT NULL DEFAULT 'ativo',
         criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         ultima_interacao_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -20,7 +20,8 @@ module.exports = {
         id BIGSERIAL PRIMARY KEY,
         carrinho_id BIGINT NOT NULL REFERENCES carrinhos(id) ON UPDATE CASCADE ON DELETE CASCADE,
         produto_id BIGINT NOT NULL REFERENCES produto(id) ON UPDATE CASCADE ON DELETE CASCADE,
-        quantidade INTEGER NOT NULL DEFAULT 1
+        quantidade INTEGER NOT NULL DEFAULT 1,
+        preco_unitario DECIMAL(12, 2) NOT NULL
       );
     `);
 
@@ -32,13 +33,13 @@ module.exports = {
     await queryInterface.sequelize.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS carrinhos_active_usuario_unique
       ON carrinhos (usuario_id)
-      WHERE status = 'active' AND usuario_id IS NOT NULL;
+      WHERE status = 'ativo' AND usuario_id IS NOT NULL;
     `);
 
     await queryInterface.sequelize.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS carrinhos_active_guest_token_unique
       ON carrinhos (guest_token)
-      WHERE status = 'active' AND guest_token IS NOT NULL;
+      WHERE status = 'ativo' AND guest_token IS NOT NULL;
     `);
   },
 

@@ -170,6 +170,10 @@
   z-index: 10;
 }
 
+.mobileLogo {
+  display: none;
+}
+
 .circle1, .circle2, .circle3 {
   position: absolute;
   border-radius: 50%;
@@ -201,5 +205,11 @@
 @media (max-width: 850px) {
   .rightPanel {
     display: none;
+  }
+
+  .mobileLogo {
+    display: block;
+    width: min(180px, 56vw);
+    margin: 0 auto 1.5rem;
   }
 }

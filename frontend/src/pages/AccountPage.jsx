@@ -159,14 +159,14 @@ function OrdersPage() {
   return (
     <div>
       <Header />
-      <main className={styles.page}>
+      <main className={`${styles.page} ${styles.orderPage}`}>
         <section className={styles.headerPanel}>
           <div>
             <span className={styles.label}>{user?.nome || 'Minha conta'}</span>
             <h1>Meus pedidos</h1>
             <p>Acompanhe o histórico completo das suas compras e o andamento de cada pedido.</p>
           </div>
-          <Link to="/" className={styles.backLink}>Continuar comprando</Link>
+          <Link to="/" className={styles.backLink}>Voltar para a página inicial</Link>
         </section>
 
         <section className={styles.filters}>
@@ -279,6 +279,7 @@ function AddressesPage() {
   const [cepMessage, setCepMessage] = useState('');
   const [cepLoading, setCepLoading] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const redirectTarget = new URLSearchParams(location.search).get('redirect');
@@ -455,14 +456,21 @@ function AddressesPage() {
     }
   }
 
-  async function handleDeleteAddress(address) {
-    setDeletingAddress(address.id);
-    const shouldDelete = window.confirm(`Excluir o endereço "${address.apelido}"?`);
+  function requestDeleteAddress(address) {
+    setDeleteConfirmation(address);
+  }
 
-    if (!shouldDelete) {
-      setDeletingAddress(null);
-      return;
+  function closeDeleteConfirmation() {
+    if (!deletingAddress) {
+      setDeleteConfirmation(null);
     }
+  }
+
+  async function confirmDeleteAddress() {
+    if (!deleteConfirmation) return;
+
+    const address = deleteConfirmation;
+    setDeletingAddress(address.id);
 
     setError('');
 
@@ -475,8 +483,10 @@ function AddressesPage() {
       }
     } catch (deleteError) {
       setError(deleteError.message || 'Não foi possível excluir o endereço.');
+    } finally {
+      setDeletingAddress(null);
+      setDeleteConfirmation(null);
     }
-    setDeletingAddress(null);
   }
 
   async function handleSetPrincipal(address) {
@@ -497,7 +507,7 @@ function AddressesPage() {
   return (
     <div>
       <Header />
-      <main className={styles.page}>
+      <main className={`${styles.page} ${styles.addressPage}`}>
         <section className={styles.hero}>
           <div>
             <h1 className={styles.addressHeroTitle}>Meus endereços</h1>
@@ -565,7 +575,7 @@ function AddressesPage() {
                       type="button"
                       className={styles.cardButtonDanger}
                       disabled={deletingAddress === address.id}
-                      onClick={() => handleDeleteAddress(address)}
+                      onClick={() => requestDeleteAddress(address)}
                     >
                       <FaTrash size={13} />
                       {deletingAddress === address.id ? 'Excluindo...' : 'Excluir'}
@@ -721,6 +731,44 @@ function AddressesPage() {
               </div>
             </form>
           </aside>
+        </div>
+      )}
+
+      {deleteConfirmation && (
+        <div className={styles.modalOverlay} onMouseDown={closeDeleteConfirmation} role="presentation">
+          <section
+            className={styles.confirmModal}
+            onMouseDown={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-address-title"
+          >
+            <div className={styles.confirmModalHeader}>
+              <span className={styles.sectionKicker}>Confirmar exclusão</span>
+              <h2 id="delete-address-title">Excluir endereço?</h2>
+            </div>
+            <p>
+              O endereço "{deleteConfirmation.apelido || 'Endereço cadastrado'}" será removido da sua conta.
+            </p>
+            <div className={styles.confirmModalActions}>
+              <button
+                type="button"
+                className={styles.ghostButton}
+                onClick={closeDeleteConfirmation}
+                disabled={Boolean(deletingAddress)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={styles.dangerButton}
+                onClick={confirmDeleteAddress}
+                disabled={Boolean(deletingAddress)}
+              >
+                {deletingAddress ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </div>
+          </section>
         </div>
       )}
       <Footer />

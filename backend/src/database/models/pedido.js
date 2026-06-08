@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         as: 'itens',
         foreignKey: 'id_pedido',
       });
+
     }
   }
 
@@ -43,7 +44,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       valor_frete: {
         type: DataTypes.DECIMAL(12, 2),
-        allowNull: false,
+        allowNull: true,
+      },
+      tipo_frete: {
+        type: DataTypes.ENUM('PAC', 'SEDEX'),
+        allowNull: true,
       },
       desconto: {
         type: DataTypes.DECIMAL(12, 2),

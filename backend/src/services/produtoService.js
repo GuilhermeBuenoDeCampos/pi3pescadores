@@ -97,23 +97,9 @@ function toProdutoPayload(produto) {
         }
       : null,
     imagens: imagens.map((imagem) => {
-      // Normalize image URL: trim and remove any internal whitespace/newlines
       const rawUrl = imagem.url || '';
-      let sanitized = String(rawUrl).trim().replace(/\s+/g, '');
+      const sanitized = String(rawUrl).trim().replace(/\s+/g, '');
 
-      // If it's a Supabase signed URL, convert to the public object URL and remove query params
-      // Example signed: https://<project>.supabase.co/storage/v1/object/sign/<bucket>/<path>?token=...
-      // Public URL:   https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
-      try {
-        const signMarker = '/storage/v1/object/sign/';
-        const publicMarker = '/storage/v1/object/public/';
-        if (sanitized.includes(signMarker)) {
-          const parts = sanitized.split('?')[0]; // drop token
-          sanitized = parts.replace(signMarker, publicMarker);
-        }
-      } catch (e) {
-        // if anything goes wrong, fall back to the sanitized value
-      }
       return {
         id: imagem.id,
         url: sanitized,

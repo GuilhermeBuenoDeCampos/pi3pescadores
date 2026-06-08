@@ -1,68 +1,327 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Header from '../components/Header';
-import './cart.css';
+import Footer from '../components/Footer';
 import semImagem from '../assets/ProdutoSemImagem/semimagem.png';
-import { getAuthToken, getImageUrl, calculateShipping } from '../services/api';
+import { getAuthToken, getAuthUser, getImageUrl, calculateShipping, criarPedido, fetchAddresses } from '../services/api';
 import { formatPrice } from '../utils/productUtils';
+import styles from './CartPage.module.css';
+
+const STEPS = [
+  { number: 1, label: 'Carrinho' },
+  { number: 2, label: 'Entrega' },
+  { number: 3, label: 'Pagamento' },
+  { number: 4, label: 'Revisão' },
+];
+
+const maskCep = (value) => {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+};
+
+const digitsOnly = (value) => String(value || '').replace(/\D/g, '');
+
+const getAddressLabel = (address) => address?.apelido || 'Endereço cadastrado';
+
+const getAddressCity = (address) => address?.cidade?.nome || address?.cidade || '';
+
+const getAddressState = (address) => (
+  address?.estado?.sigla
+  || address?.estado?.uf
+  || address?.estado?.nome
+  || address?.cidade?.estado?.sigla
+  || address?.cidade?.estado?.uf
+  || address?.cidade?.estado?.nome
+  || ''
+);
+
+const toDeliveryAddress = (address, user) => ({
+  nome_destinatario: user?.nome || getAddressLabel(address),
+  cep: maskCep(address?.cep || ''),
+  rua: address?.logradouro || address?.rua || '',
+  numero: address?.numero || '',
+  complemento: address?.complemento || '',
+  bairro: address?.bairro || '',
+  cidade: getAddressCity(address),
+  estado: getAddressState(address),
+  telefone: user?.telefone || '',
+});
+
+const buildAddressSummary = (address) => {
+  const line1 = [address?.logradouro || address?.rua, address?.numero].filter(Boolean).join(', ');
+  const cityState = [getAddressCity(address), getAddressState(address)].filter(Boolean).join('/');
+  return [line1, address?.bairro, cityState].filter(Boolean).join(' • ');
+};
 
 function CartPage() {
-  const { cart, removeFromCart, addToCart, decreaseQuantity, isCartLoading, cartError } = useCart();
+  const { cart, removeFromCart, clearCart, addToCart, decreaseQuantity, isCartLoading, cartError } = useCart();
   const navigate = useNavigate();
-  
+  const [currentStep, setCurrentStep] = useState(1);
   const [cep, setCep] = useState('');
   const [shippingOptions, setShippingOptions] = useState([]);
   const [selectedShipping, setSelectedShipping] = useState(null);
   const [isLoadingShipping, setIsLoadingShipping] = useState(false);
   const [shippingError, setShippingError] = useState('');
   const [shippingSuccess, setShippingSuccess] = useState(false);
+  const [shippingAddressCep, setShippingAddressCep] = useState('');
+  const [isDeliveryCepEdited, setIsDeliveryCepEdited] = useState(false);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('whatsapp');
+  const [observacoes, setObservacoes] = useState('');
+  const [openWhatsAppAfterOrder, setOpenWhatsAppAfterOrder] = useState(true);
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
+  const [addressesError, setAddressesError] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState({
+    nome_destinatario: '',
+    cep: '',
+    rua: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    telefone: '',
+  });
 
+  useEffect(() => {
+    const user = getAuthUser();
+    if (user && user.nome && !deliveryAddress.nome_destinatario) {
+      setDeliveryAddress((current) => ({
+        ...current,
+        nome_destinatario: user.nome,
+        telefone: user.telefone || '',
+      }));
+    }
+  }, []);
+
+  const user = getAuthUser();
   const displayItems = Array.isArray(cart.items) ? cart.items : [];
+  const selectedAddress = savedAddresses.find((address) => String(address.id) === String(selectedAddressId)) || null;
+  const selectedAddressCep = selectedAddress ? digitsOnly(selectedAddress.cep) : '';
 
   const handleIncrease = (product) => {
-    void addToCart(product).catch((error) => {
-      console.error('Erro ao adicionar item ao carrinho:', error);
-    });
+    void addToCart(product).catch(console.error);
   };
 
   const handleDecrease = (productId) => {
-    void decreaseQuantity(productId).catch((error) => {
-      console.error('Erro ao atualizar quantidade do carrinho:', error);
-    });
+    void decreaseQuantity(productId).catch(console.error);
   };
 
   const getProductPrice = (product) => Number(product.preco_venda ?? product.preco ?? 0) || 0;
 
-  const getProductImage = (product) => (
-    product.imagens?.[0]?.url ? getImageUrl(product.imagens[0].url) : semImagem
-  );
+  const getProductImage = (product = {}) => {
+    const firstImage = Array.isArray(product.imagens) ? product.imagens[0] : null;
+    const rawUrl = firstImage?.url || product.imagem_url || product.url_imagem || product.imagem || '';
+
+    return rawUrl ? getImageUrl(rawUrl) : semImagem;
+  };
+
+  const handleProductImageError = (event) => {
+    if (event.currentTarget.src !== semImagem) {
+      event.currentTarget.src = semImagem;
+    }
+  };
 
   const subtotal = displayItems.reduce((total, item) => {
-    const price = getProductPrice(item.product);
-    return total + price * item.quantity;
+    return total + getProductPrice(item.product) * item.quantity;
   }, 0);
 
   const shippingCost = selectedShipping ? parseFloat(selectedShipping.price) : 0;
   const total = subtotal + shippingCost;
-  
   const totalItems = displayItems.reduce((total, item) => total + item.quantity, 0);
 
+  useEffect(() => {
+    if (currentStep !== 2 || !isDeliveryCepEdited) return undefined;
+
+    const cleanCep = deliveryAddress.cep.replace(/\D/g, '');
+    setCep(cleanCep);
+
+    if (cleanCep.length !== 8 || displayItems.length === 0) return undefined;
+
+    let isCancelled = false;
+    const timer = setTimeout(async () => {
+      setIsLoadingShipping(true);
+
+      try {
+        const [addressResponse, options] = await Promise.all([
+          fetch(`https://viacep.com.br/ws/${cleanCep}/json/`).then((response) => response.json()),
+          calculateShipping({
+            to_postal_code: cleanCep,
+            products: displayItems.map(item => ({ ...item.product, quantity: item.quantity })),
+          }),
+        ]);
+
+        if (isCancelled) return;
+
+        if (!addressResponse.erro) {
+          setDeliveryAddress((current) => ({
+            ...current,
+            cep: maskCep(addressResponse.cep),
+            rua: addressResponse.logradouro || '',
+            bairro: addressResponse.bairro || '',
+            cidade: addressResponse.localidade || '',
+            estado: addressResponse.uf || '',
+          }));
+        }
+
+        if (options && options.length > 0) {
+          setShippingOptions(options);
+          setShippingSuccess(true);
+        } else {
+          setShippingError('Nenhuma opção de frete disponível para este CEP.');
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          console.error('Erro ao recalcular frete:', error);
+          setShippingError('Erro ao calcular frete. Verifique o CEP e tente novamente.');
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingShipping(false);
+          setIsDeliveryCepEdited(false);
+        }
+      }
+    }, 500);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
+  }, [deliveryAddress.cep, currentStep, isDeliveryCepEdited]);
+
+  useEffect(() => {
+    if (currentStep !== 2) return undefined;
+
+    if (!getAuthToken()) {
+      navigate('/login', { state: { from: '/carrinho' } });
+      return undefined;
+    }
+
+    let active = true;
+
+    async function loadAddresses() {
+      setIsLoadingAddresses(true);
+      setAddressesError('');
+      setSelectedShipping(null);
+      setShippingOptions([]);
+      setShippingSuccess(false);
+      setShippingError('');
+      setShippingAddressCep('');
+
+      try {
+        const data = await fetchAddresses();
+        if (!active) return;
+
+        const addresses = Array.isArray(data) ? data : [];
+        setSavedAddresses(addresses);
+
+        const currentSelection = addresses.find((address) => String(address.id) === String(selectedAddressId));
+        const defaultAddress = currentSelection || addresses.find((address) => address.principal) || addresses[0] || null;
+
+        if (defaultAddress) {
+          setSelectedAddressId(defaultAddress.id);
+          setDeliveryAddress(toDeliveryAddress(defaultAddress, user));
+        }
+      } catch (error) {
+        if (!active) return;
+        console.error('Erro ao carregar endereços:', error);
+        setAddressesError(error.message || 'Não foi possível carregar seus endereços.');
+        setSavedAddresses([]);
+      } finally {
+        if (active) setIsLoadingAddresses(false);
+      }
+    }
+
+    loadAddresses();
+
+    return () => {
+      active = false;
+    };
+  }, [currentStep]);
+
+  useEffect(() => {
+    if (currentStep !== 2 || !selectedAddress || displayItems.length === 0) return undefined;
+
+    const cleanCep = selectedAddressCep;
+
+    setSelectedShipping(null);
+    setShippingOptions([]);
+    setShippingSuccess(false);
+    setShippingError('');
+    setShippingAddressCep('');
+    setDeliveryAddress(toDeliveryAddress(selectedAddress, user));
+
+    if (cleanCep.length !== 8) {
+      setShippingError('O endereço selecionado não possui um CEP válido.');
+      return undefined;
+    }
+
+    let isCancelled = false;
+
+    async function loadShipping() {
+      setIsLoadingShipping(true);
+
+      try {
+        const options = await calculateShipping({
+          to_postal_code: cleanCep,
+          products: displayItems.map((item) => ({ ...item.product, quantity: item.quantity })),
+        });
+
+        if (isCancelled) return;
+
+        if (options && options.length > 0) {
+          setShippingOptions(options);
+          setShippingSuccess(true);
+          setShippingAddressCep(cleanCep);
+        } else {
+          setShippingError('Nenhuma opção de frete disponível para este endereço.');
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          console.error('Erro ao calcular frete do endereço:', error);
+          setShippingError('Erro ao calcular frete para o endereço selecionado.');
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingShipping(false);
+        }
+      }
+    }
+
+    loadShipping();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentStep, selectedAddressId, selectedAddressCep, displayItems.length]);
+
+  if (isCartLoading) {
+    return (
+      <div>
+        <Header />
+        <main className={styles.page}>
+          <section className={styles.statePanel}>Carregando carrinho...</section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   const validateCEP = (cepValue) => {
-    const cleanCEP = cepValue.replace(/\D/g, '');
-    if (cleanCEP.length === 0) {
-      return { valid: false, message: '❌ Por favor, informe o CEP.' };
-    }
-    if (cleanCEP.length !== 8) {
-      return { valid: false, message: `❌ CEP deve conter 8 dígitos. (${cleanCEP.length}/8)` };
-    }
+    const clean = cepValue.replace(/\D/g, '');
+    if (clean.length === 0) return { valid: false, message: 'Por favor, informe o CEP.' };
+    if (clean.length !== 8) return { valid: false, message: `CEP deve conter 8 dígitos. (${clean.length}/8)` };
     return { valid: true, message: '' };
   };
 
   const handleCalculateShipping = async () => {
     setShippingError('');
     setShippingSuccess(false);
-    
+
     const validation = validateCEP(cep);
     if (!validation.valid) {
       setShippingError(validation.message);
@@ -75,203 +334,506 @@ function CartPage() {
     setShippingOptions([]);
     setSelectedShipping(null);
 
-    const products = displayItems.map(item => ({
-      ...item.product,
-      quantity: item.quantity,
-    }));
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const endereco = await response.json();
+
+      if (!endereco.erro) {
+        setDeliveryAddress((current) => ({
+          ...current,
+          cep: maskCep(endereco.cep),
+          rua: endereco.logradouro || '',
+          bairro: endereco.bairro || '',
+          cidade: endereco.localidade || '',
+          estado: endereco.uf || '',
+        }));
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+    }
 
     try {
       const data = await calculateShipping({
         to_postal_code: cep,
-        products: products,
+        products: displayItems.map(item => ({ ...item.product, quantity: item.quantity })),
       });
-      
+
       if (data && data.length > 0) {
         setShippingOptions(data);
         setShippingSuccess(true);
-        setShippingError('');
       } else {
-        setShippingError('⚠️ Nenhuma opção de frete disponível para este CEP.');
-        setShippingOptions([]);
+        setShippingError('Nenhuma opção de frete disponível para este CEP.');
       }
     } catch (error) {
       console.error('Erro ao calcular frete:', error);
-      setShippingError('❌ Erro ao calcular frete. Verifique o CEP e tente novamente.');
-      setShippingOptions([]);
+      setShippingError('Erro ao calcular frete. Verifique o CEP e tente novamente.');
     } finally {
       setIsLoadingShipping(false);
     }
   };
 
-  const handleCheckout = (event) => {
-    event.preventDefault();
-    if (displayItems.length === 0) {
-      alert("Seu carrinho está vazio. Adicione produtos antes de continuar.");
-      return;
-    }
-
-    if (!getAuthToken()) {
-      navigate('/login', { state: { from: '/checkout/address' } });
-      return;
-    }
-
-    navigate('/checkout/address');
+  const buildWhatsAppMessage = (pedido) => {
+    const lines = displayItems.map(({ product, quantity }) =>
+      `* ${product.nome} (${quantity}x) - R$ ${formatPrice(getProductPrice(product) * quantity)}`
+    );
+    return [
+      pedido ? `Olá! Acabei de criar o pedido ${pedido.numero_pedido}:` : 'Olá! Gostaria de fazer um pedido:',
+      '',
+      ...lines,
+      '',
+      `Subtotal: R$ ${formatPrice(subtotal)}`,
+      selectedShipping ? `Frete (${selectedShipping.name}): R$ ${formatPrice(shippingCost)}` : 'Frete a calcular',
+      `Total: R$ ${formatPrice(total)}`,
+      '',
+      `Meu nome: ${user?.nome || ''}`,
+      `Meu telefone: ${user?.telefone || ''}`,
+    ].join('\n');
   };
 
-  if (isCartLoading) {
-    return (
-      <div>
-        <Header />
-        <main>
-          <div className="cart-container">
-            <div className="cart-loading">Carregando carrinho...</div>
+  const updateDeliveryAddress = (field, value) => {
+    if (field === 'cep') {
+      setIsDeliveryCepEdited(true);
+      setSelectedShipping(null);
+      setShippingOptions([]);
+      setShippingSuccess(false);
+      setShippingError('');
+    }
+
+    setDeliveryAddress((current) => ({
+      ...current,
+      [field]: field === 'cep' ? maskCep(value) : value,
+    }));
+  };
+
+  const handleSelectAddress = (address) => {
+    setSelectedAddressId(address.id);
+  };
+
+  const handleCheckout = async (event) => {
+    event.preventDefault();
+    if (displayItems.length === 0) return;
+    setCheckoutError('');
+
+    if (!getAuthToken()) {
+      navigate('/login', { state: { from: '/carrinho' } });
+      return;
+    }
+
+    try {
+      setIsSubmittingOrder(true);
+      const pedido = await criarPedido({
+        itens: displayItems.map(({ product, quantity }) => ({
+          id_produto: product.id,
+          quantidade: quantity,
+        })),
+        endereco_entrega: deliveryAddress,
+        metodo_pagamento: paymentMethod,
+        observacoes,
+        frete: selectedShipping ? { name: selectedShipping.name } : null,
+      });
+
+      clearCart();
+
+      if (openWhatsAppAfterOrder) {
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(buildWhatsAppMessage(pedido))}`,
+          '_blank',
+          'noopener,noreferrer'
+        );
+      }
+
+      navigate(`/meus-pedidos/${pedido.id}`, { state: { created: true } });
+    } catch (error) {
+      console.error('Erro ao criar pedido:', error);
+      setCheckoutError(error.message || 'Não foi possível finalizar o pedido.');
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  };
+
+  const nextStep = () => {
+    if (currentStep >= 4) return;
+    if (currentStep === 1 && displayItems.length === 0) return;
+    if (currentStep === 1 && !getAuthToken()) {
+      navigate('/login', { state: { from: '/carrinho' } });
+      return;
+    }
+    if (currentStep === 2 && (!selectedAddress || !deliveryAddress.rua || !deliveryAddress.numero || !selectedShipping)) return;
+    if (currentStep === 1) {
+      setSelectedShipping(null);
+      setShippingOptions([]);
+      setShippingSuccess(false);
+      setShippingError('');
+      setShippingAddressCep('');
+    }
+    setCurrentStep((prev) => prev + 1);
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep((prev) => prev - 1);
+  };
+
+  const isAddressValid = selectedAddress && deliveryAddress.nome_destinatario && deliveryAddress.rua && deliveryAddress.numero;
+
+  const renderTimeline = () => (
+    <section className={styles.timeline}>
+      {STEPS.map((step, index) => (
+        <React.Fragment key={step.number}>
+          <div
+            className={`${styles.timelineStep} ${currentStep === step.number ? styles.timelineStepActive : ''} ${currentStep > step.number ? styles.timelineStepDone : ''}`}
+            onClick={() => currentStep > step.number && setCurrentStep(step.number)}
+          >
+            <span>{currentStep > step.number ? '✓' : step.number}</span>
+            <strong>{step.label}</strong>
           </div>
-        </main>
+          {index < STEPS.length - 1 && (
+            <div className={`${styles.timelineConnector} ${currentStep > step.number ? styles.timelineConnectorDone : ''}`} />
+          )}
+        </React.Fragment>
+      ))}
+    </section>
+  );
+
+  const renderSummary = (showShipping = true) => (
+    <>
+      <div className={styles.summaryLine}>
+        <span>Subtotal</span>
+        <strong>R$ {formatPrice(subtotal)}</strong>
       </div>
-    );
-  }
+      {showShipping && selectedShipping && (
+        <div className={styles.summaryLine}>
+          <span>Frete ({selectedShipping.name})</span>
+          <strong>R$ {formatPrice(shippingCost)}</strong>
+        </div>
+      )}
+      <div className={styles.totalLine}>
+        <span>Total</span>
+        <strong>R$ {formatPrice(total)}</strong>
+      </div>
+    </>
+  );
 
   return (
     <div>
       <Header />
-      <main>
-        <div className="cart-container">
-          {cartError && !isCartLoading && (
-            <div className="cart-loading">
-              {cartError}
-            </div>
-          )}
+      <main className={styles.page}>
+        <Link to="/" className={styles.backLink}>Continuar comprando</Link>
 
-          <div className="cart-items">
-            <div className="cart-header">
-              <h2>Seu carrinho</h2>
-            </div>
+        {cartError && !isCartLoading && (
+          <section className={styles.errorPanel}>{cartError}</section>
+        )}
 
-            {displayItems.length === 0 && (
-              <div className="cart-empty">
-                <div className="cart-empty-icon" aria-hidden="true">
-                  <span />
-                </div>
-                <h3>Seu carrinho está vazio</h3>
-                <p>Escolha seus produtos favoritos e volte aqui para finalizar o pedido.</p>
-                <Link to="/" className="cart-empty-link">Ver produtos</Link>
-              </div>
-            )}
+        {renderTimeline()}
 
-            {displayItems.map(({ product, quantity }) => (
-              <div className="cart-item" key={product.id}>
-                <div className="item-img-box">
-                  <img
-                    src={getProductImage(product)}
-                    alt={product.nome}
-                    onError={(event) => {
-                      event.currentTarget.src = semImagem;
-                    }}
-                  />
+        {currentStep === 1 && (
+          <div className={styles.grid}>
+            <section className={styles.panel}>
+              <h2>Seu Carrinho</h2>
+              {displayItems.length === 0 ? (
+                <div className={styles.emptyCart}>
+                  <p>Seu carrinho está vazio.</p>
+                  <Link to="/" className={styles.emptyLink}>Ver produtos</Link>
                 </div>
-                <div className="item-info">
-                  <div>
-                    <Link to={`/produto/${product.id}`} className="item-title">{product.nome}</Link>
-                  </div>
-                  <div className="item-actions">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void removeFromCart(product.id).catch((error) => {
-                          console.error('Erro ao remover item do carrinho:', error);
-                        });
-                      }}
-                    >
-                      Excluir
-                    </button>
-                  </div>
-                </div>
-
-                <div className="item-qty-selector">
-                  <button type="button" onClick={() => handleDecrease(product.id)} disabled={quantity <= 1}>-</button>
-                  <input type="number" value={quantity} readOnly />
-                  <button type="button" onClick={() => handleIncrease(product)}>+</button>
-                </div>
-
-                <div className="item-price-box">
-                  <span className="current-price">R$ {formatPrice(product.preco_venda ?? product.preco)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <form className="cart-summary" onSubmit={handleCheckout}>
-            <h3 className="summary-title">Resumo da compra</h3>
-            <div className="summary-item">
-              <span>Produtos ({totalItems})</span>
-              <span>R$ {formatPrice(subtotal)}</span>
-            </div>
-            
-            <div className="shipping-calculator">
-              <h4>Simular frete</h4>
-              <div className="cep-input-container">
-                <input 
-                  type="text" 
-                  value={cep} 
-                  onChange={(e) => setCep(e.target.value.replace(/\D/g, '').slice(0, 8))} 
-                  placeholder="Ex: 01234567"
-                  maxLength="8"
-                  className={shippingError && cep ? 'input-error' : ''}
-                />
-                <button type="button" onClick={handleCalculateShipping} disabled={isLoadingShipping}>
-                  {isLoadingShipping ? 'Consultando...' : 'Simular'}
-                </button>
-              </div>
-              <p className="shipping-helper">Valor estimado. O frete final sera calculado no checkout.</p>
-              {shippingError && (
-                <div className="shipping-error">
-                  {shippingError}
-                </div>
-              )}
-              {shippingSuccess && shippingOptions.length > 0 && (
-                <div className="shipping-success">
-                  Estimativas de entrega carregadas com sucesso.
-                </div>
-              )}
-              {shippingOptions.length > 0 && (
-                <div className="shipping-options">
-                  {shippingOptions.map(option => (
-                    <div key={option.name} className="shipping-option">
-                      <input 
-                        type="radio" 
-                        id={option.name} 
-                        name="shipping" 
-                        value={option.name}
-                        onChange={() => setSelectedShipping(option)}
+              ) : (
+                <div className={styles.itemsList}>
+                  {displayItems.map(({ product, quantity }) => (
+                    <article key={product.id} className={styles.item}>
+                      <img
+                        src={getProductImage(product)}
+                        alt={product.nome}
+                        onError={handleProductImageError}
                       />
-                      <label htmlFor={option.name}>
-                        {option.name === 'PAC' ? '🚚' : '⚡'} 
-                        {option.name} - <strong>R$ {formatPrice(option.price)}</strong> ({option.delivery_time} dias)
-                      </label>
-                    </div>
+                      <div>
+                        <Link to={`/produto/${product.id}`} className={styles.itemTitle}>{product.nome}</Link>
+                        <span>{quantity} unidade(s) x R$ {formatPrice(getProductPrice(product))}</span>
+                      </div>
+                      <div className={styles.itemActions}>
+                        <div className={styles.qtyControls}>
+                          <button type="button" onClick={() => handleDecrease(product.id)} disabled={quantity <= 1}>−</button>
+                          <span>{quantity}</span>
+                          <button type="button" onClick={() => handleIncrease(product)}>+</button>
+                        </div>
+                        <button className={styles.removeBtn} onClick={() => removeFromCart(product.id).catch(console.error)}>
+                          Remover
+                        </button>
+                      </div>
+                      <b>R$ {formatPrice(getProductPrice(product) * quantity)}</b>
+                    </article>
                   ))}
                 </div>
               )}
-            </div>
+            </section>
 
-            {selectedShipping && (
-              <div className="summary-item">
-                <span>Frete estimado ({selectedShipping.name})</span>
-                <span>R$ {formatPrice(shippingCost)}</span>
+            <aside className={styles.sidebar}>
+              <section className={styles.panel}>
+                <h2>Resumo da compra</h2>
+                {renderSummary(false)}
+
+                <div className={styles.shippingBox}>
+                  <h3>Calcular frete</h3>
+                  <div className={styles.cepRow}>
+                    <input
+                      type="text"
+                      value={cep}
+                      onChange={(e) => setCep(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                      placeholder="CEP"
+                      maxLength="8"
+                    />
+                    <button onClick={handleCalculateShipping} disabled={isLoadingShipping}>
+                      {isLoadingShipping ? '...' : 'OK'}
+                    </button>
+                  </div>
+                  {shippingError && <span className={styles.errorMsg}>{shippingError}</span>}
+                  {shippingSuccess && <span className={styles.successMsg}>Frete calculado</span>}
+
+                  {shippingOptions.length > 0 && (
+                    <div className={styles.shippingOptions}>
+                      {shippingOptions.map((option) => (
+                        <div key={option.name} className={`${styles.shippingOption} ${styles.shippingOptionPreview}`}>
+                          <span>{option.name === 'PAC' ? '🚚' : '⚡'} {option.name}</span>
+                          <strong>R$ {formatPrice(option.price)}</strong>
+                          <small>({option.delivery_time} dias)</small>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.divider} />
+                {renderSummary(false)}
+
+                <button className={styles.primaryBtn} onClick={nextStep} disabled={displayItems.length === 0}>
+                  Avançar para Entrega
+                </button>
+              </section>
+            </aside>
+          </div>
+        )}
+
+        {currentStep === 2 && (
+          <div className={styles.grid}>
+            <section className={styles.panel}>
+              <div className={styles.sectionTop}>
+                <h2>Endereço de Entrega</h2>
+                <Link to="/meus-enderecos?redirect=checkout" className={styles.manageLink}>
+                  Gerenciar endereços
+                </Link>
               </div>
-            )}
 
-            <div className="summary-item total">
-              <span>Total</span>
-              <span>R$ {formatPrice(total)}</span>
-            </div>
+              {isLoadingAddresses ? (
+                <div className={styles.inlineState}>Carregando endereços...</div>
+              ) : addressesError ? (
+                <div className={styles.errorPanel}>{addressesError}</div>
+              ) : savedAddresses.length === 0 ? (
+                <div className={styles.emptyAddressState}>
+                  <strong>Você ainda não possui endereços cadastrados.</strong>
+                  <span>Cadastre um endereço para continuar sua compra.</span>
+                  <Link to="/meus-enderecos?redirect=checkout" className={styles.emptyLink}>
+                    Cadastrar endereço
+                  </Link>
+                </div>
+              ) : (
+                <div className={styles.addressList}>
+                  {savedAddresses.map((address) => {
+                    const isSelected = String(selectedAddressId) === String(address.id);
 
-            <button className="btn-checkout" type="submit" disabled={displayItems.length === 0}>
-              Continuar para o Checkout
-            </button>
+                    return (
+                      <button
+                        key={address.id}
+                        type="button"
+                        className={`${styles.addressCard} ${isSelected ? styles.addressCardSelected : ''}`}
+                        onClick={() => handleSelectAddress(address)}
+                      >
+                        <span className={styles.addressRadio}>{isSelected ? '✓' : ''}</span>
+                        <div>
+                          <div className={styles.addressTitleRow}>
+                            <strong>{getAddressLabel(address)}</strong>
+                            {address.principal && <span>Principal</span>}
+                          </div>
+                          <p>{buildAddressSummary(address)}</p>
+                          <small>CEP {maskCep(address.cep || '')}</small>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className={styles.shippingBox}>
+                <h3>Escolha a opção de entrega</h3>
+                {shippingAddressCep && (
+                  <span className={styles.shippingCep}>Frete calculado para CEP {maskCep(shippingAddressCep)}</span>
+                )}
+                {isLoadingShipping ? (
+                  <span className={styles.successMsg}>Calculando frete para o endereço selecionado...</span>
+                ) : shippingOptions.length > 0 ? (
+                  <div className={styles.shippingOptions}>
+                    {shippingOptions.map((option) => (
+                      <label key={option.name} className={`${styles.shippingOption} ${selectedShipping?.name === option.name ? styles.shippingOptionSelected : ''}`}>
+                        <input
+                          type="radio"
+                          name="shipping"
+                          value={option.name}
+                          checked={selectedShipping?.name === option.name}
+                          onChange={() => setSelectedShipping(option)}
+                        />
+                        <span>{option.name === 'PAC' ? '🚚' : '⚡'} {option.name}</span>
+                        <strong>R$ {formatPrice(option.price)}</strong>
+                        <small>({option.delivery_time} dias)</small>
+                      </label>
+                    ))}
+                  </div>
+                ) : shippingError ? (
+                  <span className={styles.errorMsg}>{shippingError}</span>
+                ) : selectedAddress ? (
+                  <span className={styles.successMsg}>Selecione uma opção de entrega quando o cálculo terminar.</span>
+                ) : (
+                  <span className={styles.errorMsg}>Selecione um endereço para calcular e escolher uma opção de entrega.</span>
+                )}
+              </div>
+
+              <div className={styles.btnRow}>
+                <button className={styles.secondaryBtn} onClick={prevStep}>Voltar</button>
+                <button className={styles.primaryBtn} onClick={nextStep} disabled={!isAddressValid || !selectedShipping}>
+                  Avançar para Pagamento
+                </button>
+              </div>
+            </section>
+
+            <aside className={styles.sidebar}>
+              <section className={styles.panel}>
+                <h2>Resumo</h2>
+                {renderSummary()}
+              </section>
+            </aside>
+          </div>
+        )}
+
+        {currentStep === 3 && (
+          <div className={styles.grid}>
+            <section className={styles.panel}>
+              <h2>💳 Pagamento</h2>
+              <div className={styles.addressForm}>
+                <label className={styles.fieldLabel}>Forma de pagamento</label>
+                <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                  <option value="whatsapp">Combinar pelo WhatsApp</option>
+                  <option value="pix">Pix</option>
+                  <option value="cartao">Cartão</option>
+                  <option value="dinheiro">Dinheiro</option>
+                  <option value="boleto">Boleto</option>
+                </select>
+
+                <label className={styles.fieldLabel}>Observações</label>
+                <textarea
+                  value={observacoes}
+                  onChange={(e) => setObservacoes(e.target.value)}
+                  placeholder="Observações para o pedido"
+                  rows="3"
+                />
+              </div>
+
+              <div className={styles.btnRow}>
+                <button className={styles.secondaryBtn} onClick={prevStep}>Voltar</button>
+                <button className={styles.primaryBtn} onClick={nextStep}>
+                  Avançar para Revisão
+                </button>
+              </div>
+            </section>
+
+            <aside className={styles.sidebar}>
+              <section className={styles.panel}>
+                <h2>Resumo</h2>
+                {renderSummary()}
+              </section>
+            </aside>
+          </div>
+        )}
+
+        {currentStep === 4 && (
+          <form className={styles.grid} onSubmit={handleCheckout}>
+            <section className={styles.panel}>
+              <h2>📋 Revisão do Pedido</h2>
+
+              <div className={styles.reviewBlock}>
+                <h3>Endereço de Entrega</h3>
+                <address>
+                  <strong>{deliveryAddress.nome_destinatario}</strong>
+                  <span>{deliveryAddress.rua}, {deliveryAddress.numero}{deliveryAddress.complemento ? ` - ${deliveryAddress.complemento}` : ''}</span>
+                  <span>{deliveryAddress.bairro} - {deliveryAddress.cidade}/{deliveryAddress.estado}</span>
+                  <span>CEP {deliveryAddress.cep}</span>
+                  {deliveryAddress.telefone && <span>{deliveryAddress.telefone}</span>}
+                </address>
+              </div>
+
+              <div className={styles.reviewBlock}>
+                <h3>Forma de Pagamento</h3>
+                <p>{paymentMethod === 'whatsapp' ? 'Combinar pelo WhatsApp' :
+                     paymentMethod === 'pix' ? 'Pix' :
+                     paymentMethod === 'cartao' ? 'Cartão' :
+                     paymentMethod === 'dinheiro' ? 'Dinheiro' :
+                     paymentMethod === 'boleto' ? 'Boleto' : paymentMethod}</p>
+              </div>
+
+              {observacoes && (
+                <div className={styles.reviewBlock}>
+                  <h3>Observações</h3>
+                  <p>{observacoes}</p>
+                </div>
+              )}
+
+              <div className={styles.divider} />
+              <div className={styles.summaryLine}>
+                <span>Pedido ({totalItems} item(ns))</span>
+                <strong>R$ {formatPrice(subtotal)}</strong>
+              </div>
+              {renderSummary()}
+
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={openWhatsAppAfterOrder}
+                  onChange={(e) => setOpenWhatsAppAfterOrder(e.target.checked)}
+                />
+                Enviar resumo pelo WhatsApp após finalizar
+              </label>
+
+              {checkoutError && <div className={styles.errorPanel}>{checkoutError}</div>}
+
+              <div className={styles.btnRow}>
+                <button className={styles.secondaryBtn} type="button" onClick={prevStep}>Voltar</button>
+                <button className={styles.primaryBtn} type="submit" disabled={isSubmittingOrder}>
+                  {isSubmittingOrder ? 'Criando pedido...' : 'Finalizar pedido'}
+                </button>
+              </div>
+            </section>
+
+            <aside className={styles.sidebar}>
+              <section className={styles.panel}>
+                <h2>Resumo</h2>
+                <div className={styles.itemSummary}>
+                  {displayItems.map(({ product, quantity }) => (
+                    <div key={product.id} className={styles.itemSummaryRow}>
+                      <img
+                        src={getProductImage(product)}
+                        alt={product.nome}
+                        onError={handleProductImageError}
+                      />
+                      <div>
+                        <strong>{product.nome}</strong>
+                        <span>{quantity}x R$ {formatPrice(getProductPrice(product))}</span>
+                      </div>
+                      <b>R$ {formatPrice(getProductPrice(product) * quantity)}</b>
+                    </div>
+                  ))}
+                </div>
+                {renderSummary()}
+
+              </section>
+            </aside>
           </form>
-        </div>
+        )}
       </main>
+      <Footer />
     </div>
   );
 }

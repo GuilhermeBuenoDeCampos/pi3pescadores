@@ -13,22 +13,22 @@ const CheckoutSuccessPage = () => (
                     <span className={checkoutStyles.kicker}>Checkout</span>
                     <h1 className={checkoutStyles.title}>Pedido enviado pelo WhatsApp</h1>
                     <p className={checkoutStyles.subtitle}>
-                        Recebemos sua solicitacao pelo WhatsApp. Nossa equipe entrara em contato para enviar as informacoes do PIX e confirmar os detalhes do pedido.
+                        Recebemos sua solicitação pelo WhatsApp. Nossa equipe entrará em contato para enviar as informações do PIX e confirmar os detalhes do pedido.
                     </p>
                 </div>
             </section>
 
             <section className={styles.sectionCard}>
                 <div className={styles.sectionHeader}>
-                    <span>Proximo passo</span>
+                    <span>Próximo passo</span>
                     <h2>Aguarde nosso contato</h2>
                     <p>
-                        Esta confirmacao ainda nao cria um pedido no sistema. O atendimento sera concluido diretamente com nossa equipe.
+                        Esta confirmação ainda não cria um pedido no sistema. O atendimento será concluído diretamente com nossa equipe.
                     </p>
                 </div>
 
                 <div className={styles.successActions}>
-                    <Link to="/" className={checkoutStyles.primaryButton}>Voltar a pagina inicial</Link>
+                    <Link to="/" className={checkoutStyles.primaryButton}>Voltar à página inicial</Link>
                     <Link to="/" className={checkoutStyles.secondaryButton}>Continuar comprando</Link>
                 </div>
             </section>

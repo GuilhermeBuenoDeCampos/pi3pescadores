@@ -24,6 +24,16 @@ exports.listarMeus = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+exports.listarTodos = asyncHandler(async (req, res) => {
+  console.log('[pedidoController] listarTodos chamado', {
+    query: req.query,
+  });
+
+  const result = await pedidoService.listarTodosPedidos(req.query);
+
+  res.json(result);
+});
+
 exports.detalharMeu = asyncHandler(async (req, res) => {
   const pedido = await pedidoService.buscarPedidoDoUsuario(pedidoService.getUserId(req.user), req.params.id);
 
@@ -49,3 +59,32 @@ exports.atualizarStatus = asyncHandler(async (req, res) => {
     data: pedido,
   });
 });
+
+exports.faturamentoMensal = asyncHandler(async (req, res) => {
+  const meses = Math.min(Math.max(Number(req.query.meses) || 12, 1), 60);
+  const faturamento = await pedidoService.obterFaturamentoMensal(meses);
+
+  res.json({
+    data: faturamento,
+    periodo_meses: meses,
+  });
+});
+
+exports.taxaRecompraAnual = asyncHandler(async (req, res) => {
+  const anoAtual = new Date().getFullYear();
+  const ano = Math.min(Math.max(Number(req.query.ano) || anoAtual, 2000), anoAtual + 1);
+  const taxaRecompra = await pedidoService.obterTaxaRecompraAnual(ano);
+
+  res.json({
+    data: taxaRecompra,
+  });
+});
+
+exports.ticketMedio = asyncHandler(async (req, res) => {
+  const ticketMedio = await pedidoService.obterTicketMedio();
+
+  res.json({
+    data: ticketMedio,
+  });
+});
+

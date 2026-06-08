@@ -138,7 +138,7 @@ exports.atualizar = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: { message: 'Invalid produto id' } });
   }
 
-  // files handled by multer are already saved; upload them to Supabase and collect URLs
+  // Files handled by multer are normalized in local storage and converted to public URLs.
   const files = req.files || [];
   const fileUrls = await uploadService.uploadMultipleFiles(files);
   const payload = { ...req.body, imagens: fileUrls };

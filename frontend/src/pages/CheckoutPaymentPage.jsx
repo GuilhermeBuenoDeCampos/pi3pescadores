@@ -30,7 +30,7 @@ function getAddressLabel(address) {
         || address?.name
         || address?.title
         || address?.address_type
-        || 'Endereco cadastrado'
+        || 'Endereço cadastrado'
     );
 }
 
@@ -95,7 +95,7 @@ function getShippingDays(option) {
 
 function formatDeliveryTime(days) {
     const parsedDays = Number(days || 0);
-    return parsedDays === 1 ? '1 dia util' : `${parsedDays} dias uteis`;
+    return parsedDays === 1 ? '1 dia útil' : `${parsedDays} dias úteis`;
 }
 
 function buildWhatsAppMessage({ user, items, address, shipping, subtotal, total }) {
@@ -106,7 +106,7 @@ function buildWhatsAppMessage({ user, items, address, shipping, subtotal, total 
         const unitPrice = getProductPrice(product);
         const itemTotal = unitPrice * quantity;
 
-        return `- ${quantity}x ${product.nome || product.name || 'Produto'} | Unitario: ${formatCurrency(unitPrice)} | Total: ${formatCurrency(itemTotal)}`;
+        return `- ${quantity}x ${product.nome || product.name || 'Produto'} | Unitário: ${formatCurrency(unitPrice)} | Total: ${formatCurrency(itemTotal)}`;
     });
 
     const addressLines = [
@@ -117,7 +117,7 @@ function buildWhatsAppMessage({ user, items, address, shipping, subtotal, total 
     ].filter(Boolean);
 
     return [
-        'Ola! Gostaria de finalizar minha compra pelo WhatsApp.',
+        'Olá! Gostaria de finalizar minha compra pelo WhatsApp.',
         '',
         customerName ? `Cliente: ${customerName}` : '',
         '',
@@ -129,7 +129,7 @@ function buildWhatsAppMessage({ user, items, address, shipping, subtotal, total 
         `Prazo: ${formatDeliveryTime(getShippingDays(shipping))}`,
         `Total final: ${formatCurrency(total)}`,
         '',
-        'Endereco de entrega:',
+        'Endereço de entrega:',
         ...addressLines,
         '',
         'Forma de pagamento: PIX via WhatsApp',
@@ -157,8 +157,8 @@ const CheckoutPaymentPage = () => {
                 setAddresses(Array.isArray(userAddresses) ? userAddresses : []);
                 setError('');
             } catch (err) {
-                console.error('Erro ao buscar endereco do checkout:', err);
-                setError('Nao foi possivel carregar o endereco selecionado.');
+                console.error('Erro ao buscar endereço do checkout:', err);
+                setError('Não foi possível carregar o endereço selecionado.');
                 setAddresses([]);
             } finally {
                 setLoadingAddresses(false);
@@ -191,15 +191,15 @@ const CheckoutPaymentPage = () => {
 
     const validateCheckout = () => {
         if (displayItems.length === 0) {
-            return 'Seu carrinho esta vazio.';
+            return 'Seu carrinho está vazio.';
         }
 
         if (!selectedAddressId || !selectedAddress) {
-            return 'Selecione um endereco antes de finalizar.';
+            return 'Selecione um endereço antes de finalizar.';
         }
 
         if (!selectedShipping || !getShippingName(selectedShipping)) {
-            return 'Selecione uma opcao de frete antes de finalizar.';
+            return 'Selecione uma opção de frete antes de finalizar.';
         }
 
         if (paymentMethod !== 'pix_whatsapp') {
@@ -250,7 +250,7 @@ const CheckoutPaymentPage = () => {
                     <span className={checkoutStyles.stepLine} aria-hidden="true" />
                     <div className={checkoutStyles.stepItem}>
                         <span className={checkoutStyles.stepDot}>2</span>
-                        <span>Endereco</span>
+                        <span>Endereço</span>
                     </div>
                     <span className={checkoutStyles.stepLine} aria-hidden="true" />
                     <div className={checkoutStyles.stepItem}>
@@ -264,7 +264,7 @@ const CheckoutPaymentPage = () => {
                     </div>
                 </nav>
 
-                {loading && <div className={checkoutStyles.stateCard}>Carregando revisao do pedido...</div>}
+                {loading && <div className={checkoutStyles.stateCard}>Carregando revisão do pedido...</div>}
                 {!loading && error && <div className={checkoutStyles.errorCard}>{error}</div>}
 
                 {!loading && !error && (
@@ -314,7 +314,7 @@ const CheckoutPaymentPage = () => {
 
                                     <div className={styles.detailGrid}>
                                         <div className={styles.detailBlock}>
-                                            <span className={styles.detailLabel}>Endereco selecionado</span>
+                                            <span className={styles.detailLabel}>Endereço selecionado</span>
                                             {selectedAddress ? (
                                                 <>
                                                     <strong className={styles.detailTitle}>{getAddressLabel(selectedAddress)}</strong>
@@ -325,7 +325,7 @@ const CheckoutPaymentPage = () => {
                                                     </div>
                                                 </>
                                             ) : (
-                                                <p className={styles.muted}>Nenhum endereco selecionado.</p>
+                                                <p className={styles.muted}>Nenhum endereço selecionado.</p>
                                             )}
                                         </div>
 
@@ -350,7 +350,7 @@ const CheckoutPaymentPage = () => {
                                         <span>Pagamento</span>
                                         <h2>Forma de pagamento</h2>
                                         <p>
-                                            Neste momento, a confirmacao do pagamento sera feita pelo WhatsApp. Apos finalizar, nossa equipe entrara em contato para enviar as informacoes do PIX e confirmar o pedido.
+                                            Neste momento, a confirmação do pagamento será feita pelo WhatsApp. Após finalizar, nossa equipe entrará em contato para enviar as informações do PIX e confirmar o pedido.
                                         </p>
                                     </div>
 

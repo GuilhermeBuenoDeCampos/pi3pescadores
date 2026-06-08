@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import BannerCarousel from '../components/BannerCarousel';
 import SearchBar from '../components/SearchBar';
@@ -8,7 +8,9 @@ import SectionTitle from '../components/SectionTitle';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
 import { fetchProducts, fetchCategories, registrarPalavraPesquisada } from '../services/api';
+import { registrarEventoVisitante } from '../services/visitanteEvento';
 import { sortProductsByPrice } from '../utils/productUtils';
+import { FiGrid, FiSliders, FiX } from 'react-icons/fi';
 import styles from './Home.module.css';
 
 function Home() {
@@ -22,6 +24,16 @@ function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mobileFilter, setMobileFilter] = useState(null);
+  const homeEventRegistered = useRef(false);
+
+  // Registrar evento de visitação à home (apenas uma vez)
+  useEffect(() => {
+    if (!homeEventRegistered.current) {
+      homeEventRegistered.current = true;
+      registrarEventoVisitante('visitou_home');
+    }
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -121,6 +133,10 @@ function Home() {
     }
   }
 
+  function closeMobileFilter() {
+    setMobileFilter(null);
+  }
+
   return (
     <div>
       <Header />
@@ -128,7 +144,7 @@ function Home() {
       <main>
         <section className={styles.heroSection}>
           <div className={styles.heroLeft}>
-            <span className={styles.heroBadge}>Três Pescadores Store</span>
+            <span className={styles.heroBadge}>Tres Pescadores Store</span>
             <h1>
               Artigos religiosos para <em>fé</em> e devoção
             </h1>
@@ -192,20 +208,33 @@ function Home() {
               onSubmit={handleSearchSubmit}
             />
 
-            <CategoryFilter
-              categories={categories}
-              activeCategory={activeCategory}
-              onChange={setActiveCategory}
-            />
+            <div className={styles.mobileFilterActions}>
+              <button type="button" onClick={() => setMobileFilter('categories')}>
+                <FiGrid size={17} />
+                Categorias
+              </button>
+              <button type="button" onClick={() => setMobileFilter('price')}>
+                <FiSliders size={17} />
+                Filtrar por preco
+              </button>
+            </div>
 
-            <PriceFilter
-              sortOrder={sortOrder}
-              onSortChange={setSortOrder}
-              minPrice={minPrice}
-              maxPrice={maxPrice}
-              onMinPriceChange={setMinPrice}
-              onMaxPriceChange={setMaxPrice}
-            />
+            <div className={styles.desktopFilters}>
+              <CategoryFilter
+                categories={categories}
+                activeCategory={activeCategory}
+                onChange={setActiveCategory}
+              />
+
+              <PriceFilter
+                sortOrder={sortOrder}
+                onSortChange={setSortOrder}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                onMinPriceChange={setMinPrice}
+                onMaxPriceChange={setMaxPrice}
+              />
+            </div>
           </div>
 
           <SectionTitle
@@ -232,51 +261,56 @@ function Home() {
           </div>
         </section>
 
-        <section className={styles.bannerSection}>
-          <div className={styles.bannerGrid}>
-            <div className={styles.bannerMain}>
-              <span>✦ Seleção especial</span>
-              <h2>
-                Itens para o altar, a oração e o presente com significado
-              </h2>
-              <a href="#catalog">Ver produtos →</a>
-            </div>
-            <div className={styles.bannerStack}>
-              <article className={styles.bannerMini}>
-                <h3>Imagens e oratórios</h3>
-                <p>Peças para compor espaços de devoção com beleza e reverência.</p>
-                <a href="#catalog">Explorar →</a>
-              </article>
-              <article className={`${styles.bannerMini} ${styles.bannerMiniWarm}`}>
-                <h3>Bíblias e terços</h3>
-                <p>Clássicos da fé católica para estudo, oração diária e presentes.</p>
-                <a href="#catalog">Conhecer →</a>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.testimonialsSection}>
-          <span className={styles.sectionLabel}>Compromissos da loja</span>
-          <h2>Atendimento com respeito à sua devoção</h2>
-          <div className={styles.testimonialsGrid}>
-            <article className={styles.testimonialCard}>
-              <p>Curadoria focada em artigos religiosos católicos para diferentes momentos de fé.</p>
-              <span>Três Pescadores Store</span>
-            </article>
-            <article className={styles.testimonialCard}>
-              <p>Produtos apresentados com imagens, categorias e preços reais do catálogo.</p>
-              <span>Catálogo atualizado</span>
-            </article>
-            <article className={styles.testimonialCard}>
-              <p>Navegação com busca, filtros por categoria e ordenação por preço preservados.</p>
-              <span>Experiência de compra</span>
-            </article>
-          </div>
-        </section>
-
-        
       </main>
+
+      {mobileFilter && (
+        <div className={styles.modalOverlay} role="presentation" onClick={closeMobileFilter}>
+          <section
+            className={styles.filterModal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-filter-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className={styles.modalHeader}>
+              <h2 id="mobile-filter-title">
+                {mobileFilter === 'categories' ? 'Categorias' : 'Filtrar por preco'}
+              </h2>
+              <button type="button" onClick={closeMobileFilter} aria-label="Fechar">
+                <FiX size={20} />
+              </button>
+            </header>
+
+            <div className={styles.modalContent}>
+              {mobileFilter === 'categories' ? (
+                <CategoryFilter
+                  categories={categories}
+                  activeCategory={activeCategory}
+                  onChange={(category) => {
+                    setActiveCategory(category);
+                    closeMobileFilter();
+                  }}
+                />
+              ) : (
+                <PriceFilter
+                  sortOrder={sortOrder}
+                  onSortChange={setSortOrder}
+                  minPrice={minPrice}
+                  maxPrice={maxPrice}
+                  onMinPriceChange={setMinPrice}
+                  onMaxPriceChange={setMaxPrice}
+                />
+              )}
+            </div>
+
+            {mobileFilter === 'price' && (
+              <button type="button" className={styles.applyFilterButton} onClick={closeMobileFilter}>
+                Aplicar filtro
+              </button>
+            )}
+          </section>
+        </div>
+      )}
 
       <Footer />
     </div>
