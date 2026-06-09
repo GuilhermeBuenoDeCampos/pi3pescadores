@@ -8,6 +8,11 @@ Este pacote foi preparado para o dominio cair no backend Express, sem subdominio
 - `hostinguer/nodejs/uploads`: imagens servidas em `/uploads`.
 - `hostinguer/public_html`: build do frontend Vite.
 
+O `.htaccess` de `public_html` deve manter as diretivas `PassengerAppRoot`,
+`PassengerStartupFile` e `PassengerBaseURI` geradas pela Hostinger. Nao use
+nele a regra de SPA que redireciona toda URL inexistente para `index.html`.
+Essa regra captura `/api`, `/uploads` e `/health` antes do Express.
+
 O backend Express resolve:
 
 - `/api`: rotas da API.
@@ -23,6 +28,10 @@ No Node.js Web App da Hostinger:
 - Entry file: `index.js`
 - Start command: `npm start`
 - Node: 22
+
+Depois do deploy, confirme no Gerenciador de Arquivos que o `.htaccess`
+continua com as diretivas Passenger e sem `RewriteRule . /index.html [L]`.
+O proprio Express entrega `public_html/index.html` nas rotas do React.
 
 Se o painel da Hostinger estiver travado em `server.js`, tambem funciona.
 O arquivo `server.js` existe apenas como wrapper e chama `index.js`.
@@ -60,3 +69,5 @@ Depois de reiniciar o app Node, acesse:
 - `https://www.trespescadoresstore.com.br/uploads/Banner/Aparecida.png`
 
 Se `/health` retornar `503`, o Node esta caindo no runtime. Verifique `stderr.log` no painel da Hostinger.
+Se `/health` retornar HTML, remova do `.htaccess` a regra
+`RewriteRule . /index.html [L]` e reinicie a aplicacao Node.

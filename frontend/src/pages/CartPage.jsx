@@ -658,7 +658,14 @@ function CartPage() {
                 <div className={styles.itemSummary}>
                   {displayItems.map(({ product, quantity }) => (
                     <div key={product.id} className={styles.itemSummaryRow}>
-                      <img src={getProductImage(product)} alt={product.nome} />
+                      <img
+                        src={getProductImage(product)}
+                        alt={product.nome}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = semImagem;
+                        }}
+                      />
                       <div>
                         <strong>{product.nome}</strong>
                         <span>{quantity}x R$ {formatPrice(getProductPrice(product))}</span>

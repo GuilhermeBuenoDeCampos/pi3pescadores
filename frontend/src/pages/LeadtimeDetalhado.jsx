@@ -114,8 +114,21 @@ function LeadtimeDetalhado() {
 
     loadData();
 
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') {
+        loadData();
+      }
+    };
+    const refreshInterval = window.setInterval(refreshWhenVisible, 30000);
+
+    window.addEventListener('focus', refreshWhenVisible);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+
     return () => {
       mounted = false;
+      window.clearInterval(refreshInterval);
+      window.removeEventListener('focus', refreshWhenVisible);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
     };
   }, [periodo]);
 

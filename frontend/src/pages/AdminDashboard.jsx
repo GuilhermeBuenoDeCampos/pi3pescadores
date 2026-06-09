@@ -515,8 +515,21 @@ function AdminDashboard() {
 
     loadDashboardData();
 
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') {
+        loadDashboardData();
+      }
+    };
+    const refreshInterval = window.setInterval(refreshWhenVisible, 30000);
+
+    window.addEventListener('focus', refreshWhenVisible);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+
     return () => {
       isMounted = false;
+      window.clearInterval(refreshInterval);
+      window.removeEventListener('focus', refreshWhenVisible);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
     };
   }, []);
 

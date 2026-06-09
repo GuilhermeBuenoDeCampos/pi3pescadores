@@ -210,12 +210,13 @@ function formatPedido(pedido) {
   const plain = pedido.toJSON ? pedido.toJSON() : pedido;
   const itens = Array.isArray(plain.itens) ? plain.itens : [];
   const enderecoEntrega = plain.endereco_entrega || plain.enderecoEntrega || null;
+  const usuario = plain.usuario || null;
 
   return {
     id: plain.id,
     id_usuario: plain.id_usuario,
     numero_pedido: plain.numero_pedido,
-    nome_cliente: plain.nome_cliente || enderecoEntrega?.nome_destinatario || 'N/A',
+    nome_cliente: usuario?.nome || plain.nome_cliente || enderecoEntrega?.nome_destinatario || 'N/A',
     status: plain.status,
     subtotal: formatMoney(plain.subtotal),
     valor_frete: formatMoney(plain.valor_frete),
@@ -261,6 +262,11 @@ async function buscarPedidoCompleto(where, transaction) {
     const pedido = await db.Pedido.findOne({
       where,
       include: [
+        {
+          model: db.Usuario,
+          as: 'usuario',
+          attributes: ['id', 'nome', 'email'],
+        },
         {
           model: db.EnderecoEntrega,
           as: 'enderecoEntrega',
@@ -480,6 +486,11 @@ exports.listarPedidosDoUsuario = async (usuarioId, query = {}) => {
       where,
       include: [
         {
+          model: db.Usuario,
+          as: 'usuario',
+          attributes: ['id', 'nome', 'email'],
+        },
+        {
           model: db.EnderecoEntrega,
           as: 'enderecoEntrega',
         },
@@ -572,6 +583,11 @@ exports.listarTodosPedidos = async (query = {}) => {
     const { count, rows } = await db.Pedido.findAndCountAll({
       where,
       include: [
+        {
+          model: db.Usuario,
+          as: 'usuario',
+          attributes: ['id', 'nome', 'email'],
+        },
         {
           model: db.EnderecoEntrega,
           as: 'enderecoEntrega',

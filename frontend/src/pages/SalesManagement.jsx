@@ -64,6 +64,22 @@ const SalesManagement = () => {
 
   useEffect(() => {
     loadPedidos(pagination.page, filtroStatus, searchTerm);
+
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') {
+        loadPedidos(pagination.page, filtroStatus, searchTerm);
+      }
+    };
+    const refreshInterval = window.setInterval(refreshWhenVisible, 30000);
+
+    window.addEventListener('focus', refreshWhenVisible);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+
+    return () => {
+      window.clearInterval(refreshInterval);
+      window.removeEventListener('focus', refreshWhenVisible);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+    };
   }, []);
 
   const handleFiltroStatus = (status) => {

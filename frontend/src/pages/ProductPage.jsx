@@ -174,7 +174,14 @@ function ProductPage() {
                         setMainImgSrc(imgUrl);
                       }}
                     >
-                      <img src={imgUrl} alt={`Miniatura de ${product.nome}`} />
+                      <img
+                        src={imgUrl}
+                        alt={`Miniatura de ${product.nome}`}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = semImagem;
+                        }}
+                      />
                     </button>
                   );
                 })}

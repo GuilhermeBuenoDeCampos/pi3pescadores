@@ -2,7 +2,9 @@ import { API_URL, getAuthToken } from './api';
 
 export const obterMediaLeadtime = async () => {
   try {
-    const response = await fetch(`${API_URL}/leadtime`);
+    const response = await fetch(`${API_URL}/leadtime`, {
+      cache: 'no-store',
+    });
     if (!response.ok) {
       throw new Error('Erro ao buscar média de leadtime');
     }
@@ -26,6 +28,7 @@ export const obterLeadtimePorPeriodo = async (mes = 1) => {
     }
 
     const response = await fetch(`${API_URL}/leadtime/periodo?mes=${mes}`, {
+      cache: 'no-store',
       headers,
     });
 

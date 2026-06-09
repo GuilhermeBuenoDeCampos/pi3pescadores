@@ -64,7 +64,10 @@ export function getAuthHeaders() {
 
 export async function apiFetch(url, options = {}) {
   // Centraliza todas as chamadas ao backend para interceptar sessão expirada.
-  const response = await fetch(url, options);
+  const response = await fetch(url, {
+    cache: 'no-store',
+    ...options,
+  });
 
   if (response.status === 401) {
     // Remove token e usuário salvos para impedir novas chamadas autenticadas inválidas.

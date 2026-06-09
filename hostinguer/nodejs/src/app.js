@@ -94,6 +94,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(captureClientInfo);
 
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
+
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
   setHeaders(res, filePath) {
     if (path.extname(filePath).toLowerCase() === '.jfif') {
@@ -101,6 +106,10 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
     }
   },
 }));
+
+app.get(/^\/uploads\/.+/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'assets/semimagem.png'));
+});
 
 app.get('/health', (req, res) => {
   res.json({
@@ -352,7 +361,21 @@ const frontendDirectory = process.env.FRONTEND_DIST_PATH
 const frontendIndex = path.join(frontendDirectory, 'index.html');
 
 console.info(`[frontend] Static directory: ${frontendDirectory}`);
-app.use(express.static(frontendDirectory, { index: false }));
+app.use(express.static(frontendDirectory, {
+  index: false,
+  setHeaders(res, filePath) {
+    if (path.basename(filePath) === 'index.html') {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      return;
+    }
+
+    if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  },
+}));
 
 app.use((req, res, next) => {
   if (req.method !== 'GET' || req.path.startsWith('/api')) {
@@ -364,6 +387,9 @@ app.use((req, res, next) => {
   }
 
   if (fs.existsSync(frontendIndex)) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     return res.sendFile(frontendIndex);
   }
 
