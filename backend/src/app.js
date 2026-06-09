@@ -3,6 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const routes = require('./routes');
+const dashboardRoutes = require('./routes/dashboard');
 const notFound = require('./middlewares/notFound');
 const errorHandler = require('./middlewares/errorHandler');
 const captureClientInfo = require('./middlewares/captureClientInfo');
@@ -342,6 +343,7 @@ app.get('/test/check-pedidos-table', async (req, res) => {
   }
 });
 
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api', routes);
 
 const frontendDirectory = process.env.FRONTEND_DIST_PATH

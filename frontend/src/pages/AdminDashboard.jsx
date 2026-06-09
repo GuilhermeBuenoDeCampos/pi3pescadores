@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Doughnut, Radar } from 'react-chartjs-2';
-import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiUser, FiUsers, FiSettings, FiX } from 'react-icons/fi';
+import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiShoppingCart, FiUser, FiUsers, FiSettings, FiX } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
@@ -820,6 +820,7 @@ function AdminDashboard() {
           <button className={styles.navItem} type="button" onClick={() => navigate('/admin/usuarios')}><FiUsers /> Usuarios</button>
           <button className={styles.navItem} type="button" onClick={() => navigate('/estoque')}><FiPackage /> Estoque</button>
           <button className={styles.navItem} type="button" onClick={() => navigate('/admin/faturamento-completo')}><FiDollarSign /> Faturamento</button>
+          <button className={styles.navItem} type="button" onClick={() => navigate('/admin/carrinho-abandono')}><FiShoppingCart /> Abandono</button>
           <button className={styles.navItem} type="button" onClick={() => navigate('/')}><FiHome /> Loja</button>
         </nav>
 

@@ -16,6 +16,9 @@ async function start() {
       const db = require('./src/database/models');
       await db.sequelize.authenticate();
       console.log('Database connection established');
+
+      const { startCarrinhoAbandonoJob } = require('./src/jobs/carrinhoAbandonoJob');
+      startCarrinhoAbandonoJob();
     } catch (error) {
       console.error('Database connection failed after server start');
       console.error(error);

@@ -12,6 +12,7 @@ const visitanteEventoRoutes = require('./visitanteEvento');
 const kpiConfigRoutes = require('./kpiConfig');
 const faturamentoCompletoRoutes = require('./faturamentoCompleto');
 const leadtimeRoutes = require('./leadtime');
+const dashboardRoutes = require('./dashboard');
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use('/visitante-evento', visitanteEventoRoutes);
 router.use('/kpi-config', kpiConfigRoutes);
 router.use('/faturamento-completo', faturamentoCompletoRoutes);
 router.use('/leadtime', leadtimeRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 module.exports = router;
