@@ -354,6 +354,40 @@
   overflow: hidden;
 }
 
+.satisfactionOverview {
+  grid-column: 1 / -1;
+}
+
+.satisfactionSummary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.satisfactionMetric {
+  background: linear-gradient(180deg, rgba(8, 147, 111, 0.05), rgba(8, 147, 111, 0.02));
+  border: 1px solid rgba(8, 147, 111, 0.12);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.satisfactionMetric span {
+  color: #586271;
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.satisfactionMetric strong {
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
 
 
 .satisfacaoHeader {
@@ -379,6 +413,10 @@
   background: rgba(8, 147, 111, 0.08);
   padding: 2px 8px;
   border-radius: 20px;
+}
+
+.satisfactionRadarCard {
+  min-height: 360px;
 }
 
 .accuracyCard {

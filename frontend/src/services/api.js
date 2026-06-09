@@ -680,6 +680,35 @@ export async function fetchMeuPedido(id) {
   return result.data;
 }
 
+export async function fetchMinhaAvaliacaoPedido(pedidoId) {
+  const response = await apiFetch(`${API_URL}/avaliacoes/meus/${pedidoId}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    clearExpiredAuthSession(response);
+    throw new Error(await parseApiError(response, 'Não foi possível verificar a avaliação do pedido.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function criarAvaliacao(payload) {
+  const response = await apiFetch(`${API_URL}/avaliacoes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Não foi possível enviar a avaliação.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
 export async function atualizarStatusPedido(id, status) {
   const response = await apiFetch(`${API_URL}/pedidos/${id}/status`, {
     method: 'PATCH',
@@ -736,6 +765,19 @@ export async function fetchPedidoAdmin(id) {
 
   if (!response.ok) {
     throw new Error(await parseApiError(response, 'Pedido não encontrado.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function fetchKpiSatisfacao() {
+  const response = await apiFetch(`${API_URL}/admin/kpis/satisfacao`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Não foi possível carregar os KPIs de satisfação.'));
   }
 
   const result = await response.json();
