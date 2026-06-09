@@ -19,7 +19,7 @@ import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { apiFetch, clearAuthSession, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
+import { apiFetch, clearAuthSession, fetchKpiSatisfacao, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
 import clockTowerBar from '../assets/admin/clock-tower-bar.png';
 import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
@@ -428,6 +428,8 @@ function AdminDashboard() {
   const [leadtime, setLeadtime] = useState(null);
   const [loadingLeadtime, setLoadingLeadtime] = useState(true);
   const [kpiConfig, setKpiConfig] = useState(null);
+  const [satisfactionKpis, setSatisfactionKpis] = useState(null);
+  const [loadingSatisfaction, setLoadingSatisfaction] = useState(true);
   const [showKpiModal, setShowKpiModal] = useState(false);
   const [showRecompraModal, setShowRecompraModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
@@ -447,6 +449,7 @@ function AdminDashboard() {
         setLoadingTaxaRecompra(true);
         setLoadingTicketMedio(true);
         setLoadingLeadtime(true);
+        setLoadingSatisfaction(true);
         setAccuracyError('');
         
         const authToken = getAuthToken();
@@ -458,7 +461,7 @@ function AdminDashboard() {
           faturamentoHeaders['Authorization'] = `Bearer ${authToken}`;
         }
 
-        const [accuracyData, searchesData, taxaData, faturamentoData, taxaRecompraData, ticketMedioData, leadtimeData, configData] = await Promise.all([
+        const [accuracyData, searchesData, taxaData, faturamentoData, taxaRecompraData, ticketMedioData, leadtimeData, configData, satisfactionData] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
@@ -491,6 +494,7 @@ function AdminDashboard() {
           }),
           obterMediaLeadtime().catch(() => null),
           obterKpiConfig(),
+          fetchKpiSatisfacao().catch(() => null),
         ]);
 
         if (isMounted) {
@@ -502,6 +506,7 @@ function AdminDashboard() {
           setTicketMedio(ticketMedioData);
           setLeadtime(leadtimeData);
           setKpiConfig(configData);
+          setSatisfactionKpis(satisfactionData);
         }
       } catch (error) {
         if (isMounted) {
@@ -517,6 +522,7 @@ function AdminDashboard() {
           setLoadingTaxaRecompra(false);
           setLoadingTicketMedio(false);
           setLoadingLeadtime(false);
+          setLoadingSatisfaction(false);
         }
       }
     }
@@ -779,12 +785,41 @@ function AdminDashboard() {
   const towerBarsPlugin = useMemo(() => createTowerBarsPlugin(clockTowerBar), []);
   const cableCarPointsPlugin = useMemo(() => createCableCarPointsPlugin(cableCarPoint), []);
 
-  const satisfactionData = useMemo(() => ({
-    labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preco', 'Experiencia'],
+  const satisfactionAverage = Number(satisfactionKpis?.mediaGeral || 0);
+  const satisfactionTotal = Number(satisfactionKpis?.totalAvaliacoes || 0);
+  const satisfactionDistribution = satisfactionKpis?.distribuicao || {};
+  const satisfactionRadar = satisfactionKpis?.radar || {};
+  const satisfactionDistributionData = useMemo(() => ({
+    labels: ['5 estrelas', '4 estrelas', '3 estrelas', '2 estrelas', '1 estrela'],
     datasets: [
       {
-        label: 'Satisfação',
-        data: [0.75, 0.78, 0.92, 0.68, 0.82],
+        label: 'Quantidade de avaliações',
+        data: [
+          Number(satisfactionDistribution[5] || 0),
+          Number(satisfactionDistribution[4] || 0),
+          Number(satisfactionDistribution[3] || 0),
+          Number(satisfactionDistribution[2] || 0),
+          Number(satisfactionDistribution[1] || 0),
+        ],
+        backgroundColor: ['#08936f', '#2fa57f', '#66b99c', '#9ccdb6', '#d8e8df'],
+        borderRadius: 12,
+        borderSkipped: false,
+      },
+    ],
+  }), [satisfactionDistribution]);
+
+  const satisfactionData = useMemo(() => ({
+    labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preço', 'Experiência'],
+    datasets: [
+      {
+        label: 'Satisfação média',
+        data: [
+          Number(satisfactionRadar.atendimento || 0),
+          Number(satisfactionRadar.entrega || 0),
+          Number(satisfactionRadar.qualidade || 0),
+          Number(satisfactionRadar.preco || 0),
+          Number(satisfactionRadar.experiencia || 0),
+        ],
         borderColor: '#08936f',
         backgroundColor: 'rgba(8, 147, 111, 0.28)',
         pointBackgroundColor: '#08936f',
@@ -796,7 +831,7 @@ function AdminDashboard() {
         pointStyle: 'circle',
       },
     ],
-  }), []);
+  }), [satisfactionRadar]);
 
   const accuracyData = useMemo(() => ({
     labels: ['Acuracidade média', 'Diferença'],
@@ -1411,49 +1446,92 @@ function AdminDashboard() {
           <article className={`${styles.chartBlock} ${styles.satisfacaoCard}`}>
             <div className={styles.satisfacaoHeader}>
               <h2>Satisfação</h2>
-              <span className={styles.satisfacaoBadge}>Rede de Pesca</span>
+              <span className={styles.satisfacaoBadge}>Dados reais do banco</span>
             </div>
             <div className={styles.chartCanvas}>
+              {loadingSatisfaction ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
+                  Carregando avaliações...
+                </div>
+              ) : (
                 <Radar
-                data={satisfactionData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                      callbacks: {
-                        label: (ctx) => `${ctx.parsed.r >= 1 ? 100 : Math.round(ctx.parsed.r * 100)}%`,
+                  data={satisfactionData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      tooltip: {
+                        callbacks: {
+                          label: (ctx) => `${Number(ctx.parsed.r).toFixed(1)}/5`,
+                        },
                       },
                     },
-                  },
-                  scales: {
-                    r: {
-                      min: 0,
-                      max: 1,
-                      ticks: {
-                        stepSize: 0.2,
-                        backdropColor: 'transparent',
-                        color: '#08936f',
-                        font: { size: 8, weight: '600' },
-                        callback: (v) => `${Math.round(v * 100)}%`,
-                      },
-                      grid: {
-                        color: 'rgba(8, 147, 111, 0.55)',
-                        lineWidth: 1.2,
-                      },
-                      angleLines: {
-                        color: 'rgba(8, 147, 111, 0.35)',
-                        lineWidth: 1,
-                      },
-                      pointLabels: {
-                        color: '#0f172a',
-                        font: { size: 11, weight: '700' },
+                    scales: {
+                      r: {
+                        min: 0,
+                        max: 5,
+                        ticks: {
+                          stepSize: 1,
+                          backdropColor: 'transparent',
+                          color: '#08936f',
+                          font: { size: 8, weight: '600' },
+                          callback: (v) => `${v}/5`,
+                        },
+                        grid: {
+                          color: 'rgba(8, 147, 111, 0.55)',
+                          lineWidth: 1.2,
+                        },
+                        angleLines: {
+                          color: 'rgba(8, 147, 111, 0.35)',
+                          lineWidth: 1,
+                        },
+                        pointLabels: {
+                          color: '#0f172a',
+                          font: { size: 11, weight: '700' },
+                        },
                       },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              )}
+            </div>
+          </article>
+
+          <article className={`${styles.chartBlock} ${styles.satisfactionOverview}`}>
+            <div className={styles.satisfactionHeader}>
+              <h2>Média geral e distribuição</h2>
+              <span className={styles.satisfacaoBadge}>{satisfactionTotal} avaliações</span>
+            </div>
+            <div className={styles.satisfactionSummary}>
+              <div className={styles.satisfactionMetric}>
+                <span>Média geral</span>
+                <strong>{loadingSatisfaction ? '--' : `${satisfactionAverage.toFixed(1)} / 5`}</strong>
+              </div>
+              <div className={styles.satisfactionMetric}>
+                <span>Total de avaliações</span>
+                <strong>{loadingSatisfaction ? '--' : satisfactionTotal}</strong>
+              </div>
+            </div>
+            <div className={styles.chartCanvas}>
+              {loadingSatisfaction ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
+                  Carregando distribuição...
+                </div>
+              ) : (
+                <Bar
+                  data={satisfactionDistributionData}
+                  options={{
+                    ...commonOptions,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: {
+                      x: { beginAtZero: true, grid: { color: chartColors.grid } },
+                      y: { grid: { display: false } },
+                    },
+                  }}
+                />
+              )}
             </div>
           </article>
 

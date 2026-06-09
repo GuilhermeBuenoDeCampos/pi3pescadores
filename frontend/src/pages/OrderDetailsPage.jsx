@@ -3,7 +3,8 @@ import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import OrderStatusBadge from '../components/OrderStatusBadge';
-import { fetchMeuPedido, getAuthToken, getImageUrl } from '../services/api';
+import CustomerSatisfactionModal from '../components/CustomerSatisfactionModal';
+import { criarAvaliacao, fetchMinhaAvaliacaoPedido, fetchMeuPedido, getAuthToken, getImageUrl } from '../services/api';
 import { formatPrice } from '../utils/productUtils';
 import semImagem from '../assets/ProdutoSemImagem/semimagem.png';
 import styles from './OrderDetailsPage.module.css';
@@ -35,6 +36,11 @@ function OrderDetailsPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [existingReview, setExistingReview] = useState(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -59,10 +65,78 @@ function OrderDetailsPage() {
     };
   }, [id]);
 
+  useEffect(() => {
+    let active = true;
+
+    async function loadReview() {
+      if (!id || !getAuthToken()) {
+        return;
+      }
+
+      try {
+        const avaliacao = await fetchMinhaAvaliacaoPedido(id);
+        if (!active) return;
+
+        setExistingReview(avaliacao);
+      } catch (err) {
+        if (!active) return;
+        if (err?.message) {
+          setReviewError('');
+        }
+      }
+    }
+
+    loadReview();
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!order || existingReview) {
+      return;
+    }
+
+    const shouldPromptReview = location.state?.created || order.status === 'concluido';
+    if (shouldPromptReview) {
+      setIsReviewModalOpen(true);
+    }
+  }, [existingReview, location.state?.created, order]);
+
+  useEffect(() => {
+    if (existingReview) {
+      setIsReviewModalOpen(false);
+    }
+  }, [existingReview]);
+
   const activeStepIndex = useMemo(() => {
     if (!order || order.status === 'cancelado') return -1;
     return STEPS.indexOf(order.status);
   }, [order]);
+
+  const canReviewOrder = Boolean(order && !existingReview && order.status !== 'cancelado' && (location.state?.created || order.status === 'concluido'));
+
+  const handleReviewSubmit = async (payload) => {
+    try {
+      setReviewSubmitting(true);
+      setReviewError('');
+      setReviewSuccess('');
+
+      const avaliacao = await criarAvaliacao({
+        pedido_id: Number(id),
+        ...payload,
+      });
+
+      setExistingReview(avaliacao);
+      setReviewSuccess('Avaliação enviada com sucesso. Obrigado pela sua avaliação.');
+      setIsReviewModalOpen(false);
+    } catch (err) {
+      setReviewError(err.message || 'Não foi possível enviar sua avaliação.');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   if (!getAuthToken()) {
     return <Navigate to="/login" replace />;
@@ -76,6 +150,36 @@ function OrderDetailsPage() {
 
         {location.state?.created && (
           <div className={styles.successNotice}>Pedido criado com sucesso. Ele já está salvo no seu histórico.</div>
+        )}
+
+        {reviewSuccess && <div className={styles.reviewSuccess}>{reviewSuccess}</div>}
+
+        {canReviewOrder && (
+          <section className={styles.reviewPromptCard}>
+            <div>
+              <span className={styles.reviewKicker}>Satisfação do cliente</span>
+              <h2>Conte como foi sua experiência</h2>
+              <p>Uma avaliação rápida ajuda a equipe a melhorar atendimento, entrega, qualidade, preço e experiência.</p>
+            </div>
+            <button type="button" className={styles.reviewPromptButton} onClick={() => setIsReviewModalOpen(true)}>
+              Avaliar pedido
+            </button>
+          </section>
+        )}
+
+        {existingReview && (
+          <section className={styles.reviewPromptCard}>
+            <div>
+              <span className={styles.reviewKicker}>Avaliação registrada</span>
+              <h2>Avaliação registrada com sucesso</h2>
+              <p>Sua nota ficou em {existingReview.nota} estrela(s).</p>
+            </div>
+            <div className={styles.reviewStarsCompact} aria-label={`Avaliação de ${existingReview.nota} estrelas`}>
+              {[1, 2, 3, 4, 5].map((score) => (
+                <FiStar key={score} className={score <= existingReview.nota ? styles.starFilled : styles.starEmpty} />
+              ))}
+            </div>
+          </section>
         )}
 
         {loading ? (
@@ -178,6 +282,15 @@ function OrderDetailsPage() {
           </>
         ) : null}
       </main>
+
+      <CustomerSatisfactionModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        onSubmit={handleReviewSubmit}
+        loading={reviewSubmitting}
+        error={reviewError}
+      />
+
       <Footer />
     </div>
   );
