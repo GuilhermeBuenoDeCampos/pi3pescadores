@@ -34,10 +34,12 @@ import conversaoBaixaImg from '../assets/admin/SBruim.png';
 import conversaoMediaImg from '../assets/admin/SBnormal.png';
 import conversaoAltaImg from '../assets/admin/conversao-alta.png';
 import saoPedroImg from '../assets/admin/saopedro.png';
+import basilicaImg from '../assets/admin/basilica-aparecida.jpg';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import { obterMediaLeadtime } from '../services/leadtime';
 import KpiConfigModal from '../components/KpiConfigModal';
+import { obterTempoPorPagina, obterPaginasEngajamento, obterEstatisticasComportamento } from '../services/analytics';
 import styles from './AdminDashboard.module.css';
 
 ChartJS.register(
@@ -360,6 +362,10 @@ const kpiCalculations = {
     title: 'Lead time medio',
     description: 'Calcula a media entre os horarios registrados no funil: entrada no site, primeiro item no carrinho, pagamento confirmado, preparando, enviado e concluido.',
   },
+  comportamento: {
+    title: 'Comportamento do Usuário',
+    description: 'Monitora o tempo medio de permanencia por pagina, total de cliques e hover, para identificar dificuldades na navegacao e pontos de maior engajamento.',
+  },
 };
 
 function CalculationHelpButton({ calculation, onOpen, withSettings = false }) {
@@ -402,6 +408,86 @@ function CalculationHelpModal({ calculation, onClose }) {
   );
 }
 
+function BehaviorModal({ isOpen, onClose, stats, pages }) {
+  if (!isOpen) return null;
+
+  const maxTime = pages.length > 0 ? Math.max(...pages.map(p => p.tempo_medio_segundos)) : 1;
+
+  return (
+    <div className={styles.calculationOverlay} onClick={onClose}>
+      <div
+        className={`${styles.calculationModal} ${styles.behaviorModal}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="behavior-modal-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button className={styles.calculationCloseButton} type="button" onClick={onClose} aria-label="Fechar">
+          <FiX size={18} />
+        </button>
+        <h2 id="behavior-modal-title">Comportamento do Usuário</h2>
+        <p>Mapeamento de navegação para identificar dificuldades e melhorar a experiência.</p>
+
+        <div className={styles.behaviorModalStats}>
+          <div>
+            <strong>{stats?.sessoes_unicas || 0}</strong>
+            <span>Sessões únicas</span>
+          </div>
+          <div>
+            <strong>{stats?.total_page_views || 0}</strong>
+            <span>Páginas visitadas</span>
+          </div>
+          <div>
+            <strong>{stats?.total_clicks || 0}</strong>
+            <span>Cliques</span>
+          </div>
+          <div>
+            <strong>{stats?.total_hovers || 0}</strong>
+            <span>Hovers</span>
+          </div>
+          <div>
+            <strong>
+              {stats?.tempo_medio_por_pagina_segundos
+                ? `${stats.tempo_medio_por_pagina_segundos}s`
+                : '0s'}
+            </strong>
+            <span>Tempo médio/página</span>
+          </div>
+        </div>
+
+        <h3 className={styles.behaviorModalSubtitle}>Tempo médio por página</h3>
+        <div className={styles.behaviorModalChart}>
+          {pages.length === 0 && <p className={styles.behaviorEmpty}>Nenhum dado disponível ainda. Os dados serão coletados à medida que os usuários navegarem no site.</p>}
+          {pages.map((p, i) => (
+            <div key={i} className={styles.behaviorModalBarRow}>
+              <span className={styles.behaviorModalBarLabel}>{p.pagina}</span>
+              <span className={styles.behaviorModalBarTrack}>
+                <span
+                  className={styles.behaviorModalBarFill}
+                  style={{ width: `${(p.tempo_medio_segundos / maxTime) * 100}%` }}
+                />
+              </span>
+              <span className={styles.behaviorModalBarValue}>{p.tempo_medio_segundos}s</span>
+              <span className={styles.behaviorModalBarCount}>{p.total_visualizacoes} visitas</span>
+            </div>
+          ))}
+        </div>
+
+        <h3 className={styles.behaviorModalSubtitle}>Mapa de calor de interações</h3>
+        <p className={styles.behaviorHeatmapHint}>
+          Os cliques e hovers são registrados com coordenadas para identificar as regiões de maior interesse em cada página.
+          Acesse a página específica para visualizar o heatmap detalhado.
+        </p>
+        <div className={styles.behaviorHeatmapLegend}>
+          <span className={styles.heatmapDot} style={{ background: '#ef4444' }} /> Alta intensidade
+          <span className={styles.heatmapDot} style={{ background: '#f97316' }} /> Média
+          <span className={styles.heatmapDot} style={{ background: '#eab308' }} /> Baixa
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AdminDashboard() {
   const navigate = useNavigate();
   const [accuracy, setAccuracy] = useState(null);
@@ -426,6 +512,10 @@ function AdminDashboard() {
   const [showVisitanteModal, setShowVisitanteModal] = useState(false);
   const [showConversaoModal, setShowConversaoModal] = useState(false);
   const [calculationHelp, setCalculationHelp] = useState(null);
+  const [behaviorStats, setBehaviorStats] = useState(null);
+  const [loadingBehavior, setLoadingBehavior] = useState(true);
+  const [behaviorPages, setBehaviorPages] = useState([]);
+  const [showBehaviorModal, setShowBehaviorModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -439,6 +529,7 @@ function AdminDashboard() {
         setLoadingTaxaRecompra(true);
         setLoadingTicketMedio(true);
         setLoadingLeadtime(true);
+        setLoadingBehavior(true);
         setAccuracyError('');
         
         const authToken = getAuthToken();
@@ -450,7 +541,7 @@ function AdminDashboard() {
           faturamentoHeaders['Authorization'] = `Bearer ${authToken}`;
         }
 
-        const [accuracyData, searchesData, taxaData, faturamentoData, taxaRecompraData, ticketMedioData, leadtimeData, configData] = await Promise.all([
+        const [accuracyData, searchesData, taxaData, faturamentoData, taxaRecompraData, ticketMedioData, leadtimeData, configData, behaviorStatsData, behaviorPagesData] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
@@ -483,6 +574,8 @@ function AdminDashboard() {
           }),
           obterMediaLeadtime().catch(() => null),
           obterKpiConfig(),
+          obterEstatisticasComportamento().catch(() => null),
+          obterTempoPorPagina().catch(() => []),
         ]);
 
         if (isMounted) {
@@ -494,6 +587,8 @@ function AdminDashboard() {
           setTicketMedio(ticketMedioData);
           setLeadtime(leadtimeData);
           setKpiConfig(configData);
+          setBehaviorStats(behaviorStatsData);
+          setBehaviorPages(behaviorPagesData?.paginas || behaviorPagesData || []);
         }
       } catch (error) {
         if (isMounted) {
@@ -509,6 +604,7 @@ function AdminDashboard() {
           setLoadingTaxaRecompra(false);
           setLoadingTicketMedio(false);
           setLoadingLeadtime(false);
+          setLoadingBehavior(false);
         }
       }
     }
@@ -1336,9 +1432,70 @@ function AdminDashboard() {
         </section>
 
         <section className={styles.dashboardGrid}>
-
-
-
+          <article className={styles.behaviorCard}
+            style={{
+              backgroundColor: 'transparent',
+              color: '#ffffff',
+              '--bg-url': `url(${basilicaImg})`,
+            }}
+          >
+            <div className={styles.behaviorHeader}>
+              <span>Comportamento do Usuário</span>
+              <button
+                type="button"
+                className={styles.behaviorDetailsButton}
+                onClick={() => setShowBehaviorModal(true)}
+                title="Ver detalhes de comportamento"
+              >
+                Ver detalhes
+              </button>
+            </div>
+            <div className={styles.behaviorMetrics}>
+              <div className={styles.behaviorMetric}>
+                <strong>
+                  {loadingBehavior
+                    ? '...'
+                    : behaviorStats?.tempo_medio_por_pagina_segundos
+                      ? `${behaviorStats.tempo_medio_por_pagina_segundos}s`
+                      : '0s'}
+                </strong>
+                <span>Tempo médio/página</span>
+              </div>
+              <div className={styles.behaviorMetric}>
+                <strong>
+                  {loadingBehavior ? '...' : behaviorStats?.sessoes_unicas || 0}
+                </strong>
+                <span>Sessões</span>
+              </div>
+              <div className={styles.behaviorMetric}>
+                <strong>
+                  {loadingBehavior ? '...' : behaviorStats?.total_clicks || 0}
+                </strong>
+                <span>Cliques</span>
+              </div>
+              <div className={styles.behaviorMetric}>
+                <strong>
+                  {loadingBehavior ? '...' : behaviorStats?.total_page_views || 0}
+                </strong>
+                <span>Páginas vistas</span>
+              </div>
+            </div>
+            {!loadingBehavior && behaviorPages.length > 0 && (
+              <div className={styles.behaviorPagesList}>
+                <span className={styles.behaviorPagesLabel}>Páginas com maior tempo:</span>
+                {behaviorPages.slice(0, 4).map((p, i) => (
+                  <div key={i} className={styles.behaviorPageItem}>
+                    <span className={styles.behaviorPageName}>{p.pagina}</span>
+                    <span className={styles.behaviorPageTime}>{p.tempo_medio_segundos}s</span>
+                    <span className={styles.behaviorPageBar}>
+                      <span style={{ width: `${Math.min(100, (p.tempo_medio_segundos / Math.max(...behaviorPages.slice(0, 4).map(x => x.tempo_medio_segundos))) * 100)}%` }} />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <CalculationHelpButton calculation={kpiCalculations.comportamento} onOpen={setCalculationHelp} />
+          </article>
 
           <article className={`${styles.chartBlock} ${styles.satisfacaoCard}`}>
             <div className={styles.satisfacaoHeader}>
@@ -1427,6 +1584,12 @@ function AdminDashboard() {
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
       <CalculationHelpModal calculation={calculationHelp} onClose={() => setCalculationHelp(null)} />
+      <BehaviorModal
+        isOpen={showBehaviorModal}
+        onClose={() => setShowBehaviorModal(false)}
+        stats={behaviorStats}
+        pages={behaviorPages}
+      />
     </main>
   );
 }

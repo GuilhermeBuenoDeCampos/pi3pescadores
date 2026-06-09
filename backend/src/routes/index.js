@@ -14,6 +14,7 @@ const faturamentoCompletoRoutes = require('./faturamentoCompleto');
 const leadtimeRoutes = require('./leadtime');
 const dashboardRoutes = require('./dashboard');
 const enderecosRoutes = require('./enderecos');
+const analyticsRoutes = require('./analytics');
 
 const router = Router();
 
@@ -32,5 +33,6 @@ router.use('/faturamento-completo', faturamentoCompletoRoutes);
 router.use('/leadtime', leadtimeRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/enderecos', enderecosRoutes);
+router.use('/analytics', analyticsRoutes);
 
 module.exports = router;

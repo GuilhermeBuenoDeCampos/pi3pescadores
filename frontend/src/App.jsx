@@ -15,11 +15,18 @@ import FaturamentoCompleto from './pages/FaturamentoCompleto';
 import LeadtimeDetalhado from './pages/LeadtimeDetalhado';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import useUserTracking from './hooks/useUserTracking';
 import styles from './App.module.css';
+
+function TrackingLayer() {
+  useUserTracking({ enabled: true });
+  return null;
+}
 
 function App() {
   return (
     <div className={styles.appWrapper}>
+      <TrackingLayer />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
