@@ -4,7 +4,15 @@ import { useCart } from '../context/CartContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import semImagem from '../assets/ProdutoSemImagem/semimagem.png';
-import { getAuthToken, getAuthUser, getImageUrl, calculateShipping, criarPedido } from '../services/api';
+import {
+  calculateShipping,
+  createAddress,
+  criarPedido,
+  fetchAddresses,
+  getAuthToken,
+  getAuthUser,
+  getImageUrl,
+} from '../services/api';
 import { formatPrice } from '../utils/productUtils';
 import styles from './CartPage.module.css';
 
@@ -19,6 +27,17 @@ const maskCep = (value) => {
   const digits = value.replace(/\D/g, '').slice(0, 8);
   return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
 };
+
+const getSavedAddressCity = (address) => address?.cidade?.nome || address?.cidade || '';
+
+const getSavedAddressState = (address) => (
+  address?.estado?.uf
+  || address?.estado?.sigla
+  || address?.estado?.nome
+  || address?.cidade?.estado?.uf
+  || address?.cidade?.estado?.sigla
+  || ''
+);
 
 function CartPage() {
   const { cart, removeFromCart, clearCart, addToCart, decreaseQuantity, isCartLoading, cartError } = useCart();
@@ -36,6 +55,13 @@ function CartPage() {
   const [paymentMethod, setPaymentMethod] = useState('whatsapp');
   const [observacoes, setObservacoes] = useState('');
   const [openWhatsAppAfterOrder, setOpenWhatsAppAfterOrder] = useState(true);
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [loadingAddresses, setLoadingAddresses] = useState(false);
+  const [addressBookError, setAddressBookError] = useState('');
+  const [addressLabel, setAddressLabel] = useState('Casa');
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [saveAddressMessage, setSaveAddressMessage] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState({
     nome_destinatario: '',
     cep: '',
@@ -60,7 +86,39 @@ function CartPage() {
   }, []);
 
   const user = getAuthUser();
+  const authToken = getAuthToken();
   const displayItems = Array.isArray(cart.items) ? cart.items : [];
+
+  useEffect(() => {
+    if (!authToken || currentStep !== 2) return undefined;
+
+    let active = true;
+
+    async function loadSavedAddresses() {
+      try {
+        setLoadingAddresses(true);
+        setAddressBookError('');
+        const addresses = await fetchAddresses();
+        if (active) {
+          setSavedAddresses(Array.isArray(addresses) ? addresses : []);
+        }
+      } catch (error) {
+        if (active) {
+          setAddressBookError(error.message || 'Nao foi possivel carregar seus enderecos.');
+        }
+      } finally {
+        if (active) {
+          setLoadingAddresses(false);
+        }
+      }
+    }
+
+    loadSavedAddresses();
+
+    return () => {
+      active = false;
+    };
+  }, [authToken, currentStep]);
 
   const handleIncrease = (product) => {
     void addToCart(product).catch(console.error);
@@ -235,6 +293,11 @@ function CartPage() {
   };
 
   const updateDeliveryAddress = (field, value) => {
+    if (!['nome_destinatario', 'telefone'].includes(field)) {
+      setSelectedAddressId('');
+    }
+    setSaveAddressMessage('');
+
     if (field === 'cep') {
       setIsDeliveryCepEdited(true);
       setSelectedShipping(null);
@@ -247,6 +310,32 @@ function CartPage() {
       ...current,
       [field]: field === 'cep' ? maskCep(value) : value,
     }));
+  };
+
+  const handleSavedAddressChange = (event) => {
+    const addressId = event.target.value;
+    setSelectedAddressId(addressId);
+    setSaveAddressMessage('');
+
+    const address = savedAddresses.find((item) => String(item.id) === String(addressId));
+    if (!address) return;
+
+    setDeliveryAddress((current) => ({
+      ...current,
+      cep: maskCep(address.cep || ''),
+      rua: address.logradouro || '',
+      numero: address.numero || '',
+      complemento: address.complemento || '',
+      bairro: address.bairro || '',
+      cidade: getSavedAddressCity(address),
+      estado: getSavedAddressState(address),
+    }));
+    setAddressLabel(address.apelido || 'Casa');
+    setSelectedShipping(null);
+    setShippingOptions([]);
+    setShippingSuccess(false);
+    setShippingError('');
+    setIsDeliveryCepEdited(true);
   };
 
   const handleCheckout = async (event) => {
@@ -303,6 +392,42 @@ function CartPage() {
   };
 
   const isAddressValid = deliveryAddress.nome_destinatario && deliveryAddress.rua && deliveryAddress.numero;
+
+  const handleSaveAddress = async () => {
+    if (!authToken) {
+      setSaveAddressMessage('Entre na sua conta para salvar este endereco.');
+      return;
+    }
+
+    if (!isAddressValid || deliveryAddress.cep.replace(/\D/g, '').length !== 8) {
+      setSaveAddressMessage('Preencha o endereco completo antes de salvar.');
+      return;
+    }
+
+    try {
+      setSavingAddress(true);
+      setSaveAddressMessage('');
+      const savedAddress = await createAddress({
+        apelido: addressLabel.trim() || 'Casa',
+        cep: deliveryAddress.cep.replace(/\D/g, ''),
+        logradouro: deliveryAddress.rua,
+        numero: deliveryAddress.numero,
+        complemento: deliveryAddress.complemento,
+        bairro: deliveryAddress.bairro,
+        cidade: deliveryAddress.cidade,
+        estado: deliveryAddress.estado,
+      });
+
+      const addresses = await fetchAddresses();
+      setSavedAddresses(Array.isArray(addresses) ? addresses : []);
+      setSelectedAddressId(savedAddress?.id ? String(savedAddress.id) : '');
+      setSaveAddressMessage('Endereco salvo para compras futuras.');
+    } catch (error) {
+      setSaveAddressMessage(error.message || 'Nao foi possivel salvar o endereco.');
+    } finally {
+      setSavingAddress(false);
+    }
+  };
 
   const renderTimeline = () => (
     <section className={styles.timeline}>
@@ -443,6 +568,29 @@ function CartPage() {
           <div className={styles.grid}>
             <section className={styles.panel}>
               <h2>📦 Endereço de Entrega</h2>
+              {authToken && (
+                <div className={styles.savedAddressSection}>
+                  <label className={styles.fieldLabel} htmlFor="saved-address">Enderecos cadastrados</label>
+                  <select
+                    id="saved-address"
+                    value={selectedAddressId}
+                    onChange={handleSavedAddressChange}
+                    disabled={loadingAddresses}
+                  >
+                    <option value="">
+                      {loadingAddresses ? 'Carregando enderecos...' : 'Digitar um novo endereco'}
+                    </option>
+                    {savedAddresses.map((address) => (
+                      <option key={address.id} value={address.id}>
+                        {address.apelido || 'Endereco'} - {address.logradouro}, {address.numero}
+                        {address.principal ? ' (principal)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {addressBookError && <span className={styles.errorMsg}>{addressBookError}</span>}
+                </div>
+              )}
+
               <div className={styles.addressForm}>
                 <input
                   type="text"
@@ -508,6 +656,35 @@ function CartPage() {
                   />
                 </div>
               </div>
+
+              {!selectedAddressId && (
+                <div className={styles.saveAddressBox}>
+                  <div>
+                    <label className={styles.fieldLabel} htmlFor="address-label">Salvar para compras futuras</label>
+                    <input
+                      id="address-label"
+                      type="text"
+                      value={addressLabel}
+                      onChange={(event) => setAddressLabel(event.target.value)}
+                      placeholder="Ex.: Casa ou Trabalho"
+                      maxLength={80}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.saveAddressButton}
+                    onClick={handleSaveAddress}
+                    disabled={savingAddress || !isAddressValid}
+                  >
+                    {savingAddress ? 'Salvando...' : 'Salvar endereco'}
+                  </button>
+                  {saveAddressMessage && (
+                    <span className={saveAddressMessage.includes('salvo') ? styles.successMsg : styles.errorMsg}>
+                      {saveAddressMessage}
+                    </span>
+                  )}
+                </div>
+              )}
 
               <div className={styles.shippingBox}>
                 <h3>Escolha a opção de entrega</h3>

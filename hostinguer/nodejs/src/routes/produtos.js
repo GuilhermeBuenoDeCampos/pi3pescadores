@@ -19,6 +19,8 @@ const storage = multer.diskStorage({
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/pjpeg', 'image/jfif', 'image/png', 'image/webp', 'image/avif'];
 const ALLOWED_IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.jpe', '.jfif', '.pjpeg', '.png', '.webp', '.avif']);
+const MAX_IMAGE_SIZE = 15 * 1024 * 1024;
+const MAX_IMAGE_COUNT = 10;
 
 function imageFileFilter(req, file, cb) {
   const extension = path.extname(file.originalname || '').toLowerCase();
@@ -33,7 +35,8 @@ function imageFileFilter(req, file, cb) {
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024,
+    fileSize: MAX_IMAGE_SIZE,
+    files: MAX_IMAGE_COUNT,
   },
   fileFilter: imageFileFilter,
 });
@@ -42,11 +45,11 @@ router.get('/', produtoController.listar);
 router.get('/nome/:nome', produtoController.detalharPorNome);
 router.get('/:id', produtoController.detalhar);
 
-router.post('/', authenticate, authorize('admin', 'funcionario'), upload.array('imagens', 10), produtoController.criar);
+router.post('/', authenticate, authorize('admin', 'funcionario'), upload.array('imagens', MAX_IMAGE_COUNT), produtoController.criar);
 router.post('/:id/imagens', authenticate, authorize('admin', 'funcionario'), produtoController.adicionarImagem);
 router.post('/:id/movimentacoes', authenticate, authorize('admin', 'funcionario'), produtoController.registrarMovimentacao);
-router.put('/:id', authenticate, authorize('admin', 'funcionario'), upload.array('imagens', 10), produtoController.atualizar);
-router.post('/:id', authenticate, authorize('admin', 'funcionario'), upload.array('imagens', 10), produtoController.atualizar);
+router.put('/:id', authenticate, authorize('admin', 'funcionario'), upload.array('imagens', MAX_IMAGE_COUNT), produtoController.atualizar);
+router.post('/:id', authenticate, authorize('admin', 'funcionario'), upload.array('imagens', MAX_IMAGE_COUNT), produtoController.atualizar);
 router.post('/movimentacoes/massa', authenticate, authorize('admin', 'funcionario'), produtoController.registrarMovimentacoesEmMassa);
 
 module.exports = router;

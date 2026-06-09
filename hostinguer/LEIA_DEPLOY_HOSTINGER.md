@@ -60,6 +60,16 @@ Confirme no `nodejs/.env` ou nas variaveis do painel:
 - `FRONTEND_URL=https://www.trespescadoresstore.com.br,https://trespescadoresstore.com.br`
 - `CORS_ORIGINS=https://www.trespescadoresstore.com.br,https://trespescadoresstore.com.br`
 
+## Modulo de enderecos
+
+Antes de publicar o backend com a pagina "Meus enderecos", execute no
+phpMyAdmin o arquivo:
+
+- `hostinguer/ATUALIZACAO_BANCO_ENDERECOS_MYSQL.sql`
+
+Ele cria as tabelas `estados`, `cidades` e `enderecos_usuario`. Depois envie a
+pasta `hostinguer/nodejs` atualizada e reinicie a aplicacao Node.js.
+
 ## Testes
 
 Depois de reiniciar o app Node, acesse:

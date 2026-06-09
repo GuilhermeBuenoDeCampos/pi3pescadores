@@ -149,16 +149,44 @@ const StockManagement = () => {
 
   const handleFiles = (files) => {
     const allowedImageExtensions = ['.jpg', '.jpeg', '.jpe', '.jfif', '.pjpeg', '.png', '.webp', '.avif'];
-    const newImages = files
-      .filter(file => {
+    const maxImageSize = 15 * 1024 * 1024;
+    const maxImageCount = 10;
+    const validFiles = [];
+    const rejectedFiles = [];
+
+    files.forEach((file) => {
         const fileName = file.name.toLowerCase();
-        return file.type.startsWith('image/') || allowedImageExtensions.some((extension) => fileName.endsWith(extension));
-      })
+        const isImage = file.type.startsWith('image/')
+          || allowedImageExtensions.some((extension) => fileName.endsWith(extension));
+
+        if (!isImage) {
+          rejectedFiles.push(`${file.name}: formato nao permitido`);
+        } else if (file.size > maxImageSize) {
+          rejectedFiles.push(`${file.name}: excede 15 MB`);
+        } else {
+          validFiles.push(file);
+        }
+      });
+
+    const currentFileCount = selectedImages.filter((image) => image.file instanceof File).length;
+    const availableSlots = Math.max(0, maxImageCount - currentFileCount);
+    const acceptedFiles = validFiles.slice(0, availableSlots);
+
+    if (validFiles.length > availableSlots) {
+      rejectedFiles.push(`O limite e de ${maxImageCount} imagens por envio.`);
+    }
+
+    const newImages = acceptedFiles
       .map(file => ({
         file,
         preview: URL.createObjectURL(file)
       }));
+
     setSelectedImages(prev => [...prev, ...newImages]);
+
+    if (rejectedFiles.length > 0) {
+      alert(`Algumas imagens nao foram adicionadas:\n${rejectedFiles.join('\n')}`);
+    }
   };
 
   const removeImage = (index) => {
@@ -688,7 +716,7 @@ const StockManagement = () => {
                       <div className={styles.dropzoneText}>
                         <strong>Arraste as imagens aqui</strong> ou clique para selecionar
                       </div>
-                      <span className={styles.hint}>Suporta múltiplas imagens (JPG, JFIF, PNG, WEBP, AVIF).</span>
+                      <span className={styles.hint}>Ate 10 imagens JPG, JFIF, PNG, WEBP ou AVIF, com no maximo 15 MB cada.</span>
                     </div>
 
                     {/* Previews das Imagens */}

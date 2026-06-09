@@ -13,6 +13,7 @@ const kpiConfigRoutes = require('./kpiConfig');
 const faturamentoCompletoRoutes = require('./faturamentoCompleto');
 const leadtimeRoutes = require('./leadtime');
 const dashboardRoutes = require('./dashboard');
+const enderecosRoutes = require('./enderecos');
 
 const router = Router();
 
@@ -30,5 +31,6 @@ router.use('/kpi-config', kpiConfigRoutes);
 router.use('/faturamento-completo', faturamentoCompletoRoutes);
 router.use('/leadtime', leadtimeRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/enderecos', enderecosRoutes);
 
 module.exports = router;

@@ -381,6 +381,81 @@ export async function fetchCategories() {
   return result.data || [];
 }
 
+export async function fetchAddresses() {
+  const response = await apiFetch(`${API_URL}/enderecos`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel carregar os enderecos.'));
+  }
+
+  const result = await response.json();
+  return result.data || [];
+}
+
+export async function getUserAddresses() {
+  return fetchAddresses();
+}
+
+export async function createAddress(payload) {
+  const response = await apiFetch(`${API_URL}/enderecos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel criar o endereco.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function updateAddress(id, payload) {
+  const response = await apiFetch(`${API_URL}/enderecos/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel atualizar o endereco.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function deleteAddress(id) {
+  const response = await apiFetch(`${API_URL}/enderecos/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel excluir o endereco.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function setPrimaryAddress(id) {
+  const response = await apiFetch(`${API_URL}/enderecos/${id}/principal`, {
+    method: 'PATCH',
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel definir o endereco principal.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
 /**
  * Atualiza o status ativo de um produto
  * 

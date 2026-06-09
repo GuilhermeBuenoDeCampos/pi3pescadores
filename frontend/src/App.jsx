@@ -29,7 +29,14 @@ function App() {
         <Route path="/carrinho" element={<CartPage />} />
         <Route path="/meus-pedidos" element={<AccountPage type="orders" />} />
         <Route path="/meus-pedidos/:id" element={<OrderDetailsPage />} />
-        <Route path="/meus-enderecos" element={<AccountPage type="addresses" />} />
+        <Route
+          path="/meus-enderecos"
+          element={
+            <ProtectedRoute roles={['cliente']} redirectTo="/login">
+              <AccountPage type="addresses" />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/estoque"
           element={
