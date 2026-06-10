@@ -19,6 +19,12 @@ module.exports = (sequelize, DataTypes) => {
         as: 'enderecoEntrega',
         foreignKey: 'id_endereco_entrega',
       });
+
+      Pedido.hasOne(models.Avaliacao, {
+        as: 'avaliacao',
+        foreignKey: 'pedido_id',
+      });
+
     }
   }
 

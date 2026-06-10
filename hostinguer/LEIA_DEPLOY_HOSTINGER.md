@@ -70,6 +70,17 @@ phpMyAdmin o arquivo:
 Ele cria as tabelas `estados`, `cidades` e `enderecos_usuario`. Depois envie a
 pasta `hostinguer/nodejs` atualizada e reinicie a aplicacao Node.js.
 
+## Pesquisa de satisfacao
+
+Antes de publicar o backend com a pesquisa de satisfacao, execute no
+phpMyAdmin o arquivo:
+
+- `hostinguer/ATUALIZACAO_BANCO_AVALIACOES_MYSQL.sql`
+
+Ele cria a tabela `avaliacoes`, usada no detalhe do pedido e nos indicadores
+de satisfacao do painel administrativo. Depois envie a pasta
+`hostinguer/nodejs` atualizada e reinicie a aplicacao Node.js.
+
 ## Testes
 
 Depois de reiniciar o app Node, acesse:

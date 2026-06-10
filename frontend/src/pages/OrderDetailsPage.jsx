@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { FiStar } from 'react-icons/fi';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';

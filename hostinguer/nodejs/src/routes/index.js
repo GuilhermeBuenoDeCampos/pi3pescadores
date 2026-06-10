@@ -14,6 +14,8 @@ const faturamentoCompletoRoutes = require('./faturamentoCompleto');
 const leadtimeRoutes = require('./leadtime');
 const dashboardRoutes = require('./dashboard');
 const enderecosRoutes = require('./enderecos');
+const avaliacoesRoutes = require('./avaliacoes');
+const adminKpisRoutes = require('./adminKpis');
 
 const router = Router();
 
@@ -28,6 +30,8 @@ router.use('/usuarios', usuariosRoutes);
 router.use('/pedidos', pedidosRoutes);
 router.use('/visitante-evento', visitanteEventoRoutes);
 router.use('/kpi-config', kpiConfigRoutes);
+router.use('/avaliacoes', avaliacoesRoutes);
+router.use('/admin/kpis', adminKpisRoutes);
 router.use('/faturamento-completo', faturamentoCompletoRoutes);
 router.use('/leadtime', leadtimeRoutes);
 router.use('/dashboard', dashboardRoutes);

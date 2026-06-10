@@ -2,15 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ArcElement,
   Chart as ChartJS,
-  Filler,
   Legend,
-  LineElement,
-  PointElement,
-  RadialLinearScale,
   Tooltip,
 } from 'chart.js';
-import { Doughnut, Radar } from 'react-chartjs-2';
-import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiShoppingCart, FiUser, FiUsers, FiSettings, FiX } from 'react-icons/fi';
+import { Doughnut } from 'react-chartjs-2';
+import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiShoppingCart, FiStar, FiUser, FiUsers, FiSettings, FiX } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
@@ -44,11 +40,7 @@ import styles from './AdminDashboard.module.css';
 
 ChartJS.register(
   ArcElement,
-  Filler,
   Legend,
-  LineElement,
-  PointElement,
-  RadialLinearScale,
   Tooltip
 );
 
@@ -61,20 +53,6 @@ const chartColors = {
   teal: '#08936f',
   softTeal: '#c8ded6',
   grid: 'rgba(16, 24, 44, 0.08)',
-};
-
-const commonOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      labels: {
-        boxWidth: 14,
-        color: '#5a5a5a',
-        font: { size: 11 },
-      },
-    },
-  },
 };
 
 function roundedRect(ctx, x, y, width, height, radius) {
@@ -600,24 +578,6 @@ function AdminDashboard() {
     return minutes > 0 ? `${hoursRemainder}h ${minutes}min` : `${hoursRemainder}h`;
   };
 
-  const leadtimeEtapas = [
-    ['Entrada -> carrinho', 'visitante_carrinho'],
-    ['Carrinho -> confirmado', 'carrinho_confirmado'],
-    ['Confirmado -> preparando', 'confirmado_preparando'],
-    ['Preparando -> enviado', 'preparando_enviado'],
-    ['Enviado -> concluido', 'enviado_concluido'],
-  ].map(([label, key]) => {
-    const detalhe = leadtime?.detalhes_por_etapa?.[key];
-    const horas = leadtime?.por_etapa?.[key];
-
-    return {
-      key,
-      label,
-      value: detalhe?.label || formatLeadtimeDuration(horas),
-      total: detalhe?.total || 0,
-    };
-  });
-
   // Determine color and image based on accuracy percentage
   const getAccuracyMetrics = (value) => {
     if (value >= 95) {
@@ -795,52 +755,6 @@ function AdminDashboard() {
 
   const satisfactionAverage = Number(satisfactionKpis?.mediaGeral || 0);
   const satisfactionTotal = Number(satisfactionKpis?.totalAvaliacoes || 0);
-  const satisfactionDistribution = satisfactionKpis?.distribuicao || {};
-  const satisfactionRadar = satisfactionKpis?.radar || {};
-  const satisfactionDistributionData = useMemo(() => ({
-    labels: ['5 estrelas', '4 estrelas', '3 estrelas', '2 estrelas', '1 estrela'],
-    datasets: [
-      {
-        label: 'Quantidade de avaliações',
-        data: [
-          Number(satisfactionDistribution[5] || 0),
-          Number(satisfactionDistribution[4] || 0),
-          Number(satisfactionDistribution[3] || 0),
-          Number(satisfactionDistribution[2] || 0),
-          Number(satisfactionDistribution[1] || 0),
-        ],
-        backgroundColor: ['#08936f', '#2fa57f', '#66b99c', '#9ccdb6', '#d8e8df'],
-        borderRadius: 12,
-        borderSkipped: false,
-      },
-    ],
-  }), [satisfactionDistribution]);
-
-  const satisfactionData = useMemo(() => ({
-    labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preço', 'Experiência'],
-    datasets: [
-      {
-        label: 'Satisfação média',
-        data: [
-          Number(satisfactionRadar.atendimento || 0),
-          Number(satisfactionRadar.entrega || 0),
-          Number(satisfactionRadar.qualidade || 0),
-          Number(satisfactionRadar.preco || 0),
-          Number(satisfactionRadar.experiencia || 0),
-        ],
-        borderColor: '#08936f',
-        backgroundColor: 'rgba(8, 147, 111, 0.28)',
-        pointBackgroundColor: '#08936f',
-        pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
-        pointRadius: 6,
-        pointHoverRadius: 9,
-        borderWidth: 3,
-        pointStyle: 'circle',
-      },
-    ],
-  }), [satisfactionRadar]);
-
   const accuracyData = useMemo(() => ({
     labels: ['Acuracidade media', 'Diferenca'],
     datasets: [
@@ -1327,15 +1241,25 @@ function AdminDashboard() {
                     : `${leadtime?.total_pedidos || 0} pedidos analisados`}
                 </small>
               </div>
-              <div className={styles.leadtimeList}>
-                {leadtimeEtapas.map((item) => (
-                  <small key={item.key}>
-                    <span>{item.label}</span>
-                    <b>{item.total > 0 ? item.value : '--'}</b>
-                    <em>{item.total > 0 ? `${item.total} registros` : 'Sem dados'}</em>
-                  </small>
-                ))}
-              </div>
+            </div>
+          </article>
+          <article
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.satisfactionKpi}`}
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate('/admin/satisfacao')}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate('/admin/satisfacao');
+              }
+            }}
+          >
+            <FiStar className={styles.satisfactionKpiIcon} aria-hidden="true" />
+            <div className={styles.revenueKpiContent}>
+              <span>Media de satisfacao</span>
+              <strong>{loadingSatisfaction ? 'Carregando...' : `${satisfactionAverage.toFixed(1)} / 5`}</strong>
+              <small>{loadingSatisfaction ? 'Consultando avaliacoes' : `${satisfactionTotal} avaliacoes registradas`}</small>
             </div>
           </article>
           <article className={styles.accuracyCard}>
@@ -1375,104 +1299,6 @@ function AdminDashboard() {
           </article>
         </section>
 
-        <section className={styles.dashboardGrid}>
-
-
-
-
-          <article className={`${styles.chartBlock} ${styles.satisfacaoCard}`}>
-            <div className={styles.satisfacaoHeader}>
-              <h2>Satisfação</h2>
-              <span className={styles.satisfacaoBadge}>Dados reais do banco</span>
-            </div>
-            <div className={styles.chartCanvas}>
-              {loadingSatisfaction ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
-                  Carregando avaliações...
-                </div>
-              ) : (
-                <Radar
-                  data={satisfactionData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: { display: false },
-                      tooltip: {
-                        callbacks: {
-                          label: (ctx) => `${Number(ctx.parsed.r).toFixed(1)}/5`,
-                        },
-                      },
-                    },
-                    scales: {
-                      r: {
-                        min: 0,
-                        max: 5,
-                        ticks: {
-                          stepSize: 1,
-                          backdropColor: 'transparent',
-                          color: '#08936f',
-                          font: { size: 8, weight: '600' },
-                          callback: (v) => `${v}/5`,
-                        },
-                        grid: {
-                          color: 'rgba(8, 147, 111, 0.55)',
-                          lineWidth: 1.2,
-                        },
-                        angleLines: {
-                          color: 'rgba(8, 147, 111, 0.35)',
-                          lineWidth: 1,
-                        },
-                        pointLabels: {
-                          color: '#0f172a',
-                          font: { size: 11, weight: '700' },
-                        },
-                      },
-                    },
-                  }}
-                />
-              )}
-            </div>
-          </article>
-
-          <article className={`${styles.chartBlock} ${styles.satisfactionOverview}`}>
-            <div className={styles.satisfactionHeader}>
-              <h2>Média geral e distribuição</h2>
-              <span className={styles.satisfacaoBadge}>{satisfactionTotal} avaliações</span>
-            </div>
-            <div className={styles.satisfactionSummary}>
-              <div className={styles.satisfactionMetric}>
-                <span>Média geral</span>
-                <strong>{loadingSatisfaction ? '--' : `${satisfactionAverage.toFixed(1)} / 5`}</strong>
-              </div>
-              <div className={styles.satisfactionMetric}>
-                <span>Total de avaliações</span>
-                <strong>{loadingSatisfaction ? '--' : satisfactionTotal}</strong>
-              </div>
-            </div>
-            <div className={styles.chartCanvas}>
-              {loadingSatisfaction ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
-                  Carregando distribuição...
-                </div>
-              ) : (
-                <Bar
-                  data={satisfactionDistributionData}
-                  options={{
-                    ...commonOptions,
-                    indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      x: { beginAtZero: true, grid: { color: chartColors.grid } },
-                      y: { grid: { display: false } },
-                    },
-                  }}
-                />
-              )}
-            </div>
-          </article>
-
-        </section>
       </section>
 
       <KpiConfigModal

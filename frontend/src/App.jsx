@@ -13,6 +13,7 @@ import AdminUsers from './pages/AdminUsers';
 import CartAbandonmentDashboard from './pages/CartAbandonmentDashboard';
 import FaturamentoCompleto from './pages/FaturamentoCompleto';
 import LeadtimeDetalhado from './pages/LeadtimeDetalhado';
+import SatisfacaoDetalhada from './pages/SatisfacaoDetalhada';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import styles from './App.module.css';
@@ -90,6 +91,14 @@ function App() {
           element={
             <ProtectedRoute roles={['admin', 'funcionario']}>
               <LeadtimeDetalhado />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/satisfacao"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <SatisfacaoDetalhada />
             </ProtectedRoute>
           }
         />
