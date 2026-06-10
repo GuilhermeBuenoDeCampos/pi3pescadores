@@ -14,13 +14,21 @@ import CartAbandonmentDashboard from './pages/CartAbandonmentDashboard';
 import FaturamentoCompleto from './pages/FaturamentoCompleto';
 import LeadtimeDetalhado from './pages/LeadtimeDetalhado';
 import SatisfacaoDetalhada from './pages/SatisfacaoDetalhada';
+import ComportamentoDetalhado from './pages/ComportamentoDetalhado';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import useUserTracking from './hooks/useUserTracking';
 import styles from './App.module.css';
+
+function TrackingLayer() {
+  useUserTracking({ enabled: true });
+  return null;
+}
 
 function App() {
   return (
     <div className={styles.appWrapper}>
+      <TrackingLayer />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -99,6 +107,14 @@ function App() {
           element={
             <ProtectedRoute roles={['admin']}>
               <SatisfacaoDetalhada />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/comportamento"
+          element={
+            <ProtectedRoute roles={['admin', 'funcionario']}>
+              <ComportamentoDetalhado />
             </ProtectedRoute>
           }
         />

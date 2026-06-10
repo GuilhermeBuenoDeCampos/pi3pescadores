@@ -3,9 +3,12 @@ import {
   ArcElement,
   Chart as ChartJS,
   Legend,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
   Tooltip,
 } from 'chart.js';
-import { Doughnut } from 'react-chartjs-2';
+import { Doughnut, Radar } from 'react-chartjs-2';
 import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiShoppingCart, FiStar, FiUser, FiUsers, FiSettings, FiX } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
@@ -32,15 +35,20 @@ import conversaoBaixaImg from '../assets/admin/SBruim.png';
 import conversaoMediaImg from '../assets/admin/SBnormal.png';
 import conversaoAltaImg from '../assets/admin/conversao-alta.png';
 import saoPedroImg from '../assets/admin/saopedro.png';
+import basilicaImg from '../assets/admin/basilica-aparecida.jpg';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import { obterMediaLeadtime } from '../services/leadtime';
 import KpiConfigModal from '../components/KpiConfigModal';
+import { obterTempoPorPagina, obterPaginasEngajamento, obterEstatisticasComportamento } from '../services/analytics';
 import styles from './AdminDashboard.module.css';
 
 ChartJS.register(
   ArcElement,
   Legend,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
   Tooltip
 );
 
@@ -340,6 +348,10 @@ const kpiCalculations = {
     title: 'Lead time medio',
     description: 'Calcula a media entre os horarios registrados no funil: entrada no site, primeiro item no carrinho, pagamento confirmado, preparando, enviado e concluido.',
   },
+  comportamento: {
+    title: 'Comportamento do Usuário',
+    description: 'Monitora o tempo medio de permanencia por pagina, total de cliques e hover, para identificar dificuldades na navegacao e pontos de maior engajamento.',
+  },
 };
 
 function CalculationHelpButton({ calculation, onOpen, withSettings = false }) {
@@ -408,6 +420,9 @@ function AdminDashboard() {
   const [showVisitanteModal, setShowVisitanteModal] = useState(false);
   const [showConversaoModal, setShowConversaoModal] = useState(false);
   const [calculationHelp, setCalculationHelp] = useState(null);
+  const [behaviorStats, setBehaviorStats] = useState(null);
+  const [loadingBehavior, setLoadingBehavior] = useState(true);
+  const [behaviorPages, setBehaviorPages] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -422,6 +437,7 @@ function AdminDashboard() {
         setLoadingTicketMedio(true);
         setLoadingLeadtime(true);
         setLoadingSatisfaction(true);
+        setLoadingBehavior(true);
         setAccuracyError('');
         
         const authToken = getAuthToken();
@@ -433,7 +449,19 @@ function AdminDashboard() {
           faturamentoHeaders['Authorization'] = `Bearer ${authToken}`;
         }
 
-        const [accuracyData, searchesData, taxaData, faturamentoData, taxaRecompraData, ticketMedioData, leadtimeData, configData, satisfactionData] = await Promise.all([
+        const [
+          accuracyData,
+          searchesData,
+          taxaData,
+          faturamentoData,
+          taxaRecompraData,
+          ticketMedioData,
+          leadtimeData,
+          configData,
+          satisfactionData,
+          behaviorStatsData,
+          behaviorPagesData,
+        ] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
           obterTaxaConversao(),
@@ -467,6 +495,8 @@ function AdminDashboard() {
           obterMediaLeadtime().catch(() => null),
           obterKpiConfig(),
           fetchKpiSatisfacao().catch(() => null),
+          obterEstatisticasComportamento().catch(() => null),
+          obterTempoPorPagina().catch(() => []),
         ]);
 
         if (isMounted) {
@@ -479,6 +509,8 @@ function AdminDashboard() {
           setLeadtime(leadtimeData);
           setKpiConfig(configData);
           setSatisfactionKpis(satisfactionData);
+          setBehaviorStats(behaviorStatsData);
+          setBehaviorPages(behaviorPagesData?.paginas || behaviorPagesData || []);
         }
       } catch (error) {
         if (isMounted) {
@@ -495,6 +527,7 @@ function AdminDashboard() {
           setLoadingTicketMedio(false);
           setLoadingLeadtime(false);
           setLoadingSatisfaction(false);
+          setLoadingBehavior(false);
         }
       }
     }
@@ -755,6 +788,24 @@ function AdminDashboard() {
 
   const satisfactionAverage = Number(satisfactionKpis?.mediaGeral || 0);
   const satisfactionTotal = Number(satisfactionKpis?.totalAvaliacoes || 0);
+  const satisfactionData = useMemo(() => ({
+    labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preco', 'Experiencia'],
+    datasets: [
+      {
+        label: 'Satisfacao',
+        data: [0.75, 0.78, 0.92, 0.68, 0.82],
+        borderColor: '#08936f',
+        backgroundColor: 'rgba(8, 147, 111, 0.28)',
+        pointBackgroundColor: '#08936f',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 9,
+        borderWidth: 3,
+        pointStyle: 'circle',
+      },
+    ],
+  }), []);
   const accuracyData = useMemo(() => ({
     labels: ['Acuracidade media', 'Diferenca'],
     datasets: [
@@ -1299,6 +1350,120 @@ function AdminDashboard() {
           </article>
         </section>
 
+        <section className={styles.dashboardGrid}>
+          <article className={styles.behaviorCard}
+            style={{
+              backgroundColor: 'transparent',
+              color: '#ffffff',
+              '--bg-url': `url(${basilicaImg})`,
+              cursor: 'pointer',
+            }}
+            onClick={() => navigate('/admin/comportamento')}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate('/admin/comportamento'); } }}
+            role="button"
+            tabIndex={0}
+            aria-label="Ver detalhes de comportamento do usuário"
+          >
+            <div className={styles.behaviorHeader}>
+              <span>Comportamento do Usuário</span>
+            </div>
+            <div className={styles.behaviorMetrics}>
+              <div className={styles.behaviorMetric}>
+                <strong>
+                  {loadingBehavior
+                    ? '...'
+                    : behaviorStats?.tempo_medio_por_pagina_segundos
+                      ? `${behaviorStats.tempo_medio_por_pagina_segundos}s`
+                      : '0s'}
+                </strong>
+                <span>Tempo médio/página</span>
+              </div>
+              <div className={styles.behaviorMetric}>
+                <strong>
+                  {loadingBehavior ? '...' : behaviorStats?.sessoes_unicas || 0}
+                </strong>
+                <span>Sessões</span>
+              </div>
+              <div className={styles.behaviorMetric}>
+                <strong>
+                  {loadingBehavior ? '...' : behaviorStats?.total_clicks || 0}
+                </strong>
+                <span>Cliques</span>
+              </div>
+              <div className={styles.behaviorMetric}>
+                <strong>
+                  {loadingBehavior ? '...' : behaviorStats?.total_page_views || 0}
+                </strong>
+                <span>Páginas vistas</span>
+              </div>
+            </div>
+            {!loadingBehavior && behaviorPages.length > 0 && (
+              <div className={styles.behaviorPagesList}>
+                <span className={styles.behaviorPagesLabel}>Páginas com maior tempo:</span>
+                {behaviorPages.slice(0, 4).map((p, i) => (
+                  <div key={i} className={styles.behaviorPageItem}>
+                    <span className={styles.behaviorPageName}>{p.pagina}</span>
+                    <span className={styles.behaviorPageTime}>{p.tempo_medio_segundos}s</span>
+                    <span className={styles.behaviorPageBar}>
+                      <span style={{ width: `${Math.min(100, (p.tempo_medio_segundos / Math.max(...behaviorPages.slice(0, 4).map(x => x.tempo_medio_segundos))) * 100)}%` }} />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <CalculationHelpButton calculation={kpiCalculations.comportamento} onOpen={setCalculationHelp} />
+          </article>
+
+          <article className={`${styles.chartBlock} ${styles.satisfacaoCard}`}>
+            <div className={styles.satisfacaoHeader}>
+              <h2>Satisfação</h2>
+              <span className={styles.satisfacaoBadge}>Rede de Pesca</span>
+            </div>
+            <div className={styles.chartCanvas}>
+                <Radar
+                data={satisfactionData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: (ctx) => `${ctx.parsed.r >= 1 ? 100 : Math.round(ctx.parsed.r * 100)}%`,
+                      },
+                    },
+                  },
+                  scales: {
+                    r: {
+                      min: 0,
+                      max: 1,
+                      ticks: {
+                        stepSize: 0.2,
+                        backdropColor: 'transparent',
+                        color: '#08936f',
+                        font: { size: 8, weight: '600' },
+                        callback: (v) => `${Math.round(v * 100)}%`,
+                      },
+                      grid: {
+                        color: 'rgba(8, 147, 111, 0.55)',
+                        lineWidth: 1.2,
+                      },
+                      angleLines: {
+                        color: 'rgba(8, 147, 111, 0.35)',
+                        lineWidth: 1,
+                      },
+                      pointLabels: {
+                        color: '#0f172a',
+                        font: { size: 11, weight: '700' },
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+          </article>
+
+        </section>
       </section>
 
       <KpiConfigModal
