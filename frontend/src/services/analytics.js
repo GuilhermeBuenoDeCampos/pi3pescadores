@@ -44,6 +44,15 @@ export async function obterPaginasEngajamento(dias = 30) {
   return result.data;
 }
 
+export async function obterUsuariosPorMes(dias = 90) {
+  const response = await apiFetch(`${API_URL}/analytics/usuarios-por-mes?dias=${dias}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!response.ok) throw new Error('Erro ao carregar usuários por mês');
+  const result = await response.json();
+  return result.data;
+}
+
 export async function obterEstatisticasComportamento(dias = 30) {
   const response = await apiFetch(`${API_URL}/analytics/estatisticas?dias=${dias}`, {
     headers: { ...getAuthHeaders() },

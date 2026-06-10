@@ -38,6 +38,12 @@ exports.obterPaginasComMaisCliques = asyncHandler(async (req, res) => {
   res.json({ data });
 });
 
+exports.listarUsuariosPorMes = asyncHandler(async (req, res) => {
+  const { dias = 90 } = req.query;
+  const data = await analyticsService.obterUsuariosPorMes(Number(dias));
+  res.json({ data });
+});
+
 exports.obterEstatisticas = asyncHandler(async (req, res) => {
   const { dias = 30 } = req.query;
   const data = await analyticsService.obterEstatisticasComportamento(Number(dias));

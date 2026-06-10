@@ -137,6 +137,61 @@ exports.obterPaginasComMaisCliques = async (dias = 30) => {
   }));
 };
 
+exports.obterUsuariosPorMes = async (dias = 90) => {
+  const dataLimite = new Date();
+  dataLimite.setDate(dataLimite.getDate() - dias);
+
+  let registros;
+  try {
+    registros = await db.sequelize.query(
+      `SELECT
+        DATE_TRUNC('month', ac.criado_em) AS mes,
+        ac.usuario_id,
+        u.nome,
+        u.email,
+        COUNT(*) AS total_eventos,
+        MAX(ac.criado_em) AS ultimo_acesso
+      FROM analytics_comportamento ac
+      LEFT JOIN usuarios u ON u.id = ac.usuario_id
+      WHERE ac.criado_em >= :dataLimite
+        AND ac.usuario_id IS NOT NULL
+      GROUP BY DATE_TRUNC('month', ac.criado_em), ac.usuario_id, u.nome, u.email
+      ORDER BY mes DESC, ultimo_acesso DESC`,
+      {
+        replacements: { dataLimite },
+        type: db.Sequelize.QueryTypes.SELECT,
+      }
+    );
+  } catch (err) {
+    console.error('[AnalyticsService] obterUsuariosPorMes error:', err.message);
+    return [];
+  }
+
+  const meses = {};
+  for (const r of registros) {
+    let chave;
+    if (typeof r.mes === 'string') {
+      chave = r.mes.slice(0, 7);
+    } else if (r.mes instanceof Date) {
+      chave = r.mes.toISOString().slice(0, 7);
+    } else {
+      chave = new Date(r.mes).toISOString().slice(0, 7);
+    }
+    if (!meses[chave]) meses[chave] = [];
+    meses[chave].push({
+      usuario_id: r.usuario_id,
+      nome: r.nome || '—',
+      email: r.email || '—',
+      total_eventos: Number(r.total_eventos),
+      ultimo_acesso: r.ultimo_acesso,
+    });
+  }
+
+  return Object.entries(meses)
+    .map(([mes, usuarios]) => ({ mes, usuarios }))
+    .sort((a, b) => b.mes.localeCompare(a.mes));
+};
+
 exports.obterEstatisticasComportamento = async (dias = 30) => {
   const dataLimite = new Date();
   dataLimite.setDate(dataLimite.getDate() - dias);

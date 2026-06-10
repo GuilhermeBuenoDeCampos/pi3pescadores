@@ -408,86 +408,6 @@ function CalculationHelpModal({ calculation, onClose }) {
   );
 }
 
-function BehaviorModal({ isOpen, onClose, stats, pages }) {
-  if (!isOpen) return null;
-
-  const maxTime = pages.length > 0 ? Math.max(...pages.map(p => p.tempo_medio_segundos)) : 1;
-
-  return (
-    <div className={styles.calculationOverlay} onClick={onClose}>
-      <div
-        className={`${styles.calculationModal} ${styles.behaviorModal}`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="behavior-modal-title"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button className={styles.calculationCloseButton} type="button" onClick={onClose} aria-label="Fechar">
-          <FiX size={18} />
-        </button>
-        <h2 id="behavior-modal-title">Comportamento do Usuário</h2>
-        <p>Mapeamento de navegação para identificar dificuldades e melhorar a experiência.</p>
-
-        <div className={styles.behaviorModalStats}>
-          <div>
-            <strong>{stats?.sessoes_unicas || 0}</strong>
-            <span>Sessões únicas</span>
-          </div>
-          <div>
-            <strong>{stats?.total_page_views || 0}</strong>
-            <span>Páginas visitadas</span>
-          </div>
-          <div>
-            <strong>{stats?.total_clicks || 0}</strong>
-            <span>Cliques</span>
-          </div>
-          <div>
-            <strong>{stats?.total_hovers || 0}</strong>
-            <span>Hovers</span>
-          </div>
-          <div>
-            <strong>
-              {stats?.tempo_medio_por_pagina_segundos
-                ? `${stats.tempo_medio_por_pagina_segundos}s`
-                : '0s'}
-            </strong>
-            <span>Tempo médio/página</span>
-          </div>
-        </div>
-
-        <h3 className={styles.behaviorModalSubtitle}>Tempo médio por página</h3>
-        <div className={styles.behaviorModalChart}>
-          {pages.length === 0 && <p className={styles.behaviorEmpty}>Nenhum dado disponível ainda. Os dados serão coletados à medida que os usuários navegarem no site.</p>}
-          {pages.map((p, i) => (
-            <div key={i} className={styles.behaviorModalBarRow}>
-              <span className={styles.behaviorModalBarLabel}>{p.pagina}</span>
-              <span className={styles.behaviorModalBarTrack}>
-                <span
-                  className={styles.behaviorModalBarFill}
-                  style={{ width: `${(p.tempo_medio_segundos / maxTime) * 100}%` }}
-                />
-              </span>
-              <span className={styles.behaviorModalBarValue}>{p.tempo_medio_segundos}s</span>
-              <span className={styles.behaviorModalBarCount}>{p.total_visualizacoes} visitas</span>
-            </div>
-          ))}
-        </div>
-
-        <h3 className={styles.behaviorModalSubtitle}>Mapa de calor de interações</h3>
-        <p className={styles.behaviorHeatmapHint}>
-          Os cliques e hovers são registrados com coordenadas para identificar as regiões de maior interesse em cada página.
-          Acesse a página específica para visualizar o heatmap detalhado.
-        </p>
-        <div className={styles.behaviorHeatmapLegend}>
-          <span className={styles.heatmapDot} style={{ background: '#ef4444' }} /> Alta intensidade
-          <span className={styles.heatmapDot} style={{ background: '#f97316' }} /> Média
-          <span className={styles.heatmapDot} style={{ background: '#eab308' }} /> Baixa
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function AdminDashboard() {
   const navigate = useNavigate();
   const [accuracy, setAccuracy] = useState(null);
@@ -515,7 +435,6 @@ function AdminDashboard() {
   const [behaviorStats, setBehaviorStats] = useState(null);
   const [loadingBehavior, setLoadingBehavior] = useState(true);
   const [behaviorPages, setBehaviorPages] = useState([]);
-  const [showBehaviorModal, setShowBehaviorModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -1437,18 +1356,16 @@ function AdminDashboard() {
               backgroundColor: 'transparent',
               color: '#ffffff',
               '--bg-url': `url(${basilicaImg})`,
+              cursor: 'pointer',
             }}
+            onClick={() => navigate('/admin/comportamento')}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate('/admin/comportamento'); } }}
+            role="button"
+            tabIndex={0}
+            aria-label="Ver detalhes de comportamento do usuário"
           >
             <div className={styles.behaviorHeader}>
               <span>Comportamento do Usuário</span>
-              <button
-                type="button"
-                className={styles.behaviorDetailsButton}
-                onClick={() => setShowBehaviorModal(true)}
-                title="Ver detalhes de comportamento"
-              >
-                Ver detalhes
-              </button>
             </div>
             <div className={styles.behaviorMetrics}>
               <div className={styles.behaviorMetric}>
@@ -1584,12 +1501,6 @@ function AdminDashboard() {
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
       <CalculationHelpModal calculation={calculationHelp} onClose={() => setCalculationHelp(null)} />
-      <BehaviorModal
-        isOpen={showBehaviorModal}
-        onClose={() => setShowBehaviorModal(false)}
-        stats={behaviorStats}
-        pages={behaviorPages}
-      />
     </main>
   );
 }
