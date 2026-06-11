@@ -216,7 +216,13 @@ function ComportamentoDetalhado() {
                   </thead>
                   <tbody>
                     {mes.usuarios.map((u) => (
-                      <tr key={u.usuario_id}>
+                      <tr
+                        key={u.usuario_id || u.email}
+                        className={u.usuario_id ? styles.clickableRow : ''}
+                        onClick={() => u.usuario_id && navigate(`/admin/comportamento/usuario/${u.usuario_id}`)}
+                        role={u.usuario_id ? 'button' : undefined}
+                        tabIndex={u.usuario_id ? 0 : undefined}
+                      >
                         <td>{u.nome || '—'}</td>
                         <td>{u.email}</td>
                         <td>{new Date(u.ultimo_acesso).toLocaleString('pt-BR')}</td>

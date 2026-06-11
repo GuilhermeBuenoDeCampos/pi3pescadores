@@ -1,0 +1,1219 @@
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/cart
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/cart
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+[dev] GET /api/analytics/estatisticas?dias=30
+AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+[AnalyticsService] obterUsuariosPorMes error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/cart
+[dev] POST /api/analytics/track
+[dev] GET /api/analytics/estatisticas?dias=30
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/analytics/page-time?dias=30
+AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+[dev] GET /api/cart
+Error
+    at Query.run (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\query.js:52:25)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MySQLQueryInterface.select (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\query-interface.js:407:12)
+    at async Usuario.findAll (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\model.js:1140:21)
+    at async Usuario.findOne (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\model.js:1240:12)
+    at async Usuario.findByPk (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\model.js:1221:12)
+    at async C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticate.js:35:19 {
+  name: 'SequelizeDatabaseError',
+  parent: Error: read ECONNRESET
+      at TCP.onStreamRead (node:internal/stream_base_commons:216:20) {
+    errno: -4077,
+    code: 'ECONNRESET',
+    syscall: 'read',
+    fatal: true,
+    sql: "SELECT `ativo` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`id` = '8bf8e56f-6c55-4a07-aa4b-44d6d44c7874';",
+    parameters: undefined
+  },
+  original: Error: read ECONNRESET
+      at TCP.onStreamRead (node:internal/stream_base_commons:216:20) {
+    errno: -4077,
+    code: 'ECONNRESET',
+    syscall: 'read',
+    fatal: true,
+    sql: "SELECT `ativo` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`id` = '8bf8e56f-6c55-4a07-aa4b-44d6d44c7874';",
+    parameters: undefined
+  },
+  sql: "SELECT `ativo` FROM `usuarios` AS `Usuario` WHERE `Usuario`.`id` = '8bf8e56f-6c55-4a07-aa4b-44d6d44c7874';",
+  parameters: {}
+}
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] POST /api/visitante-evento
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] GET /api/cart
+[dev] GET /api/cart
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/visitante-evento/taxa-conversao
+[dev] GET /api/kpi-config
+[dev] GET /api/leadtime
+[dev] GET /api/auditoria/acuracidade-media
+[dev] GET /api/pesquisas/mais-pesquisadas?limit=5
+[dev] GET /api/visitante-evento/taxa-conversao
+[visitanteEventoService] Erro ao calcular taxa de conversão: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+[kpiConfigService] erro ao obter config: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+Erro ao calcular média de leadtime: AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+[visitanteEventoService] Erro ao calcular taxa de conversão: connect ETIMEDOUT
+ConnectionError [SequelizeConnectionError]: connect ETIMEDOUT
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:102:17)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runNextTicks (node:internal/process/task_queues:69:3)
+    at listOnTimeout (node:internal/timers:549:9)
+    at process.processTimers (node:internal/timers:523:7)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: connect ETIMEDOUT
+      at Connection._handleTimeoutError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:244:17)
+      at listOnTimeout (node:internal/timers:588:17)
+      at process.processTimers (node:internal/timers:523:7) {
+    errorno: 'ETIMEDOUT',
+    code: 'ETIMEDOUT',
+    syscall: 'connect',
+    fatal: true
+  },
+  original: Error: connect ETIMEDOUT
+      at Connection._handleTimeoutError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:244:17)
+      at listOnTimeout (node:internal/timers:588:17)
+      at process.processTimers (node:internal/timers:523:7) {
+    errorno: 'ETIMEDOUT',
+    code: 'ETIMEDOUT',
+    syscall: 'connect',
+    fatal: true
+  }
+}
+ConnectionError [SequelizeConnectionError]: connect ETIMEDOUT
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:102:17)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runNextTicks (node:internal/process/task_queues:69:3)
+    at listOnTimeout (node:internal/timers:549:9)
+    at process.processTimers (node:internal/timers:523:7)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: connect ETIMEDOUT
+      at Connection._handleTimeoutError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:244:17)
+      at listOnTimeout (node:internal/timers:588:17)
+      at process.processTimers (node:internal/timers:523:7) {
+    errorno: 'ETIMEDOUT',
+    code: 'ETIMEDOUT',
+    syscall: 'connect',
+    fatal: true
+  },
+  original: Error: connect ETIMEDOUT
+      at Connection._handleTimeoutError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:244:17)
+      at listOnTimeout (node:internal/timers:588:17)
+      at process.processTimers (node:internal/timers:523:7) {
+    errorno: 'ETIMEDOUT',
+    code: 'ETIMEDOUT',
+    syscall: 'connect',
+    fatal: true
+  }
+}
+[dev] GET /api/leadtime
+[dev] GET /api/kpi-config
+[dev] GET /api/analytics/page-time?dias=30
+Erro ao calcular média de leadtime: ConnectionError [SequelizeConnectionError]: connect ETIMEDOUT
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:102:17)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runNextTicks (node:internal/process/task_queues:69:3)
+    at process.processTimers (node:internal/timers:520:9)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: connect ETIMEDOUT
+      at Connection._handleTimeoutError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:244:17)
+      at listOnTimeout (node:internal/timers:588:17)
+      at process.processTimers (node:internal/timers:523:7) {
+    errorno: 'ETIMEDOUT',
+    code: 'ETIMEDOUT',
+    syscall: 'connect',
+    fatal: true
+  },
+  original: Error: connect ETIMEDOUT
+      at Connection._handleTimeoutError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:244:17)
+      at listOnTimeout (node:internal/timers:588:17)
+      at process.processTimers (node:internal/timers:523:7) {
+    errorno: 'ETIMEDOUT',
+    code: 'ETIMEDOUT',
+    syscall: 'connect',
+    fatal: true
+  }
+}
+ConnectionError [SequelizeConnectionError]: connect ETIMEDOUT
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:102:17)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runNextTicks (node:internal/process/task_queues:69:3)
+    at process.processTimers (node:internal/timers:520:9)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: connect ETIMEDOUT
+      at Connection._handleTimeoutError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:244:17)
+      at listOnTimeout (node:internal/timers:588:17)
+      at process.processTimers (node:internal/timers:523:7) {
+    errorno: 'ETIMEDOUT',
+    code: 'ETIMEDOUT',
+    syscall: 'connect',
+    fatal: true
+  },
+  original: Error: connect ETIMEDOUT
+      at Connection._handleTimeoutError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:244:17)
+      at listOnTimeout (node:internal/timers:588:17)
+      at process.processTimers (node:internal/timers:523:7) {
+    errorno: 'ETIMEDOUT',
+    code: 'ETIMEDOUT',
+    syscall: 'connect',
+    fatal: true
+  }
+}
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/visitante-evento/taxa-conversao
+[dev] GET /api/leadtime
+[dev] GET /api/kpi-config
+[dev] GET /api/visitante-evento/taxa-conversao
+[dev] GET /api/leadtime
+[dev] GET /api/kpi-config
+[dev] GET /api/auditoria/acuracidade-media
+[dev] GET /api/pesquisas/mais-pesquisadas?limit=5
+[dev] GET /api/pedidos/admin/faturamento-mensal?meses=12
+[dev] GET /api/pedidos/admin/taxa-recompra-anual
+[dev] GET /api/pedidos/admin/ticket-medio
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/cart
+[dev] GET /api/auditoria/acuracidade-media
+[dev] GET /api/pesquisas/mais-pesquisadas?limit=5
+[dev] GET /api/pedidos/admin/faturamento-mensal?meses=12
+[dev] GET /api/pedidos/admin/taxa-recompra-anual
+[dev] GET /api/pedidos/admin/ticket-medio
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/cart
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/cart
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] POST /api/auth/login
+[dev] GET /api/cart
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] POST /api/visitante-evento
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/produtos/nome/vela-de-soja-frankincenso
+[dev] GET /api/produtos
+[dev] GET /api/produtos/nome/vela-de-soja-frankincenso
+[dev] GET /api/produtos
+[dev] POST /api/visitante-evento
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/cart
+[dev] POST /api/auth/login
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] GET /api/cart
+[dev] POST /api/visitante-evento
+[dev] GET /api/visitante-evento/taxa-conversao
+[dev] GET /api/leadtime
+[dev] GET /api/kpi-config
+[dev] GET /api/auditoria/acuracidade-media
+[dev] GET /api/pesquisas/mais-pesquisadas?limit=5
+[dev] GET /api/pedidos/admin/faturamento-mensal?meses=12
+[dev] GET /api/pedidos/admin/taxa-recompra-anual
+[dev] GET /api/pedidos/admin/ticket-medio
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/visitante-evento/taxa-conversao
+[dev] GET /api/leadtime
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/kpi-config
+[dev] GET /api/auditoria/acuracidade-media
+[dev] GET /api/pesquisas/mais-pesquisadas?limit=5
+[dev] GET /api/pedidos/admin/faturamento-mensal?meses=12
+[dev] GET /api/pedidos/admin/taxa-recompra-anual
+[dev] GET /api/pedidos/admin/ticket-medio
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/cart
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/cart
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/cart
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/cart
+[dev] GET /api/cart
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/cart
+[dev] GET /api/cart
+[dev] GET /api/cart
+[dev] GET /api/cart
+[dev] POST /api/auth/login
+[dev] GET /api/cart
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] GET /api/produtos
+[dev] POST /api/visitante-evento
+[dev] GET /api/categorias
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/produtos/nome/vela-mirra
+[dev] GET /api/produtos
+[dev] GET /api/produtos/nome/vela-mirra
+[dev] GET /api/produtos
+[dev] POST /api/visitante-evento
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] POST /api/visitante-evento
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/produtos/nome/vela-mirra
+[dev] GET /api/produtos
+[dev] GET /api/produtos/nome/vela-mirra
+[dev] GET /api/produtos
+[dev] POST /api/visitante-evento
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] POST /api/visitante-evento
+[dev] GET /api/produtos/nome/vela-incenso
+[dev] GET /api/produtos
+[dev] GET /api/produtos/nome/vela-incenso
+[dev] GET /api/produtos
+[dev] POST /api/visitante-evento
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] POST /api/visitante-evento
+AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24) {
+  parent: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+      at Packet.asError (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packets\packet.js:791:17)
+      at ClientHandshake.execute (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\commands\command.js:29:26)
+      at Connection.handlePacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+      at PacketParser.onPacket (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+      at PacketParser.executeStart (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+      at Socket.<anonymous> (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5) {
+    code: 'ER_ACCESS_DENIED_ERROR',
+    errno: 1045,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)",
+    sql: undefined
+  }
+}
+[visitanteEventoService] Erro ao registrar evento: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+[visitanteEventoService] Stack: SequelizeAccessDeniedError: Access denied for user 'u355040490_Guibuenooo'@'187.34.113.214' (using password: YES)
+    at ConnectionManager.connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:94:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24)
+[visitante-evento POST] Falha ao registrar evento: visitou_home
+[dev] GET /api/cart
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] POST /api/auth/login
+[dev] GET /api/cart
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] POST /api/visitante-evento
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/produtos/nome/biblia-anotada
+[dev] GET /api/produtos
+[dev] GET /api/produtos/nome/biblia-anotada
+[dev] GET /api/produtos
+[dev] POST /api/visitante-evento
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/cart
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] POST /api/auth/login
+[dev] GET /api/cart
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] GET /api/produtos
+[dev] GET /api/categorias
+[dev] POST /api/visitante-evento
+[dev] GET /api/visitante-evento/taxa-conversao
+[dev] GET /api/leadtime
+[dev] GET /api/kpi-config
+[dev] GET /api/visitante-evento/taxa-conversao
+[dev] GET /api/leadtime
+[dev] GET /api/kpi-config
+[dev] GET /api/auditoria/acuracidade-media
+[dev] GET /api/pesquisas/mais-pesquisadas?limit=5
+[dev] GET /api/pedidos/admin/faturamento-mensal?meses=12
+[dev] GET /api/pedidos/admin/taxa-recompra-anual
+[dev] GET /api/pedidos/admin/ticket-medio
+[dev] GET /api/pesquisas/mais-pesquisadas?limit=5
+[dev] GET /api/pedidos/admin/faturamento-mensal?meses=12
+[dev] GET /api/pedidos/admin/taxa-recompra-anual
+[dev] GET /api/pedidos/admin/ticket-medio
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] POST /api/analytics/track
+[dev] GET /api/analytics/estatisticas?dias=30
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/auditoria/acuracidade-media
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] POST /api/analytics/track
+ReferenceError: usuario_id is not defined
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:21:17
+    at Array.map (<anonymous>)
+    at exports.registrarEventos (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\services\analyticsService.js:10:29)
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\controllers\analyticsController.js:19:46
+    at C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\utils\asyncHandler.js:3:21
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\src\middlewares\authenticateOptional.js:22:10)
+    at Layer.handleRequest (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\ADMIN\Documents\AASistemasElaborados\pitrespescadores\PI3Pescadores\backend\node_modules\router\lib\route.js:157:13)
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/cart
+[dev] GET /api/analytics/estatisticas?dias=30
+[dev] GET /api/analytics/page-time?dias=30
+[dev] GET /api/analytics/usuarios-por-mes?dias=90
+[dev] GET /api/cart

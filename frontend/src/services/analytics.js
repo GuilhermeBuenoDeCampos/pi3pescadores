@@ -61,3 +61,22 @@ export async function obterEstatisticasComportamento(dias = 30) {
   const result = await response.json();
   return result.data;
 }
+
+export async function obterPaginasPorUsuario(usuarioId, dias = 90) {
+  const response = await apiFetch(`${API_URL}/analytics/usuarios/${encodeURIComponent(usuarioId)}/paginas?dias=${dias}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!response.ok) throw new Error('Erro ao carregar páginas do usuário');
+  const result = await response.json();
+  return result.data;
+}
+
+export async function obterHeatmapPorUsuarioPagina(usuarioId, pagina, dias = 90) {
+  const params = new URLSearchParams({ pagina, dias });
+  const response = await apiFetch(`${API_URL}/analytics/usuarios/${encodeURIComponent(usuarioId)}/heatmap?${params}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!response.ok) throw new Error('Erro ao carregar heatmap do usuário');
+  const result = await response.json();
+  return result.data;
+}

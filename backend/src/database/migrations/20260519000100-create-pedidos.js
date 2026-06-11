@@ -51,7 +51,7 @@ module.exports = {
         defaultValue: 0,
       },
       endereco_entrega: {
-        type: Sequelize.JSONB,
+        type: Sequelize.JSON,
         allowNull: false,
       },
       metodo_pagamento: {
@@ -145,6 +145,5 @@ module.exports = {
   async down(queryInterface) {
     await queryInterface.dropTable('pedido_itens');
     await queryInterface.dropTable('pedidos');
-    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_pedidos_status";');
   },
 };

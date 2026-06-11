@@ -14,6 +14,7 @@ import CartAbandonmentDashboard from './pages/CartAbandonmentDashboard';
 import FaturamentoCompleto from './pages/FaturamentoCompleto';
 import LeadtimeDetalhado from './pages/LeadtimeDetalhado';
 import ComportamentoDetalhado from './pages/ComportamentoDetalhado';
+import ComportamentoUsuario from './pages/ComportamentoUsuario';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import useUserTracking from './hooks/useUserTracking';
@@ -106,6 +107,14 @@ function App() {
           element={
             <ProtectedRoute roles={['admin', 'funcionario']}>
               <ComportamentoDetalhado />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/comportamento/usuario/:usuarioId"
+          element={
+            <ProtectedRoute roles={['admin', 'funcionario']}>
+              <ComportamentoUsuario />
             </ProtectedRoute>
           }
         />

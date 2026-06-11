@@ -1,11 +1,13 @@
 'use strict';
 
 async function columnExists(queryInterface, Sequelize, tableName, columnName) {
+  const dialect = process.env.DB_DIALECT || 'mysql';
+  const q = dialect === 'mysql' ? '`' : '"';
   const result = await queryInterface.sequelize.query(
     `SELECT EXISTS (
-      SELECT FROM information_schema.columns
+      SELECT 1 FROM information_schema.columns
       WHERE table_name = :tableName AND column_name = :columnName
-    ) AS "exists"`,
+    ) AS ${q}exists${q}`,
     {
       replacements: { tableName, columnName },
       type: Sequelize.QueryTypes.SELECT,
@@ -16,11 +18,13 @@ async function columnExists(queryInterface, Sequelize, tableName, columnName) {
 }
 
 async function tableExists(queryInterface, Sequelize, tableName) {
+  const dialect = process.env.DB_DIALECT || 'mysql';
+  const q = dialect === 'mysql' ? '`' : '"';
   const result = await queryInterface.sequelize.query(
     `SELECT EXISTS (
-      SELECT FROM information_schema.tables
+      SELECT 1 FROM information_schema.tables
       WHERE table_name = :tableName
-    ) AS "exists"`,
+    ) AS ${q}exists${q}`,
     {
       replacements: { tableName },
       type: Sequelize.QueryTypes.SELECT,

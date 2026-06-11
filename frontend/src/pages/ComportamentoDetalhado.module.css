@@ -356,6 +356,74 @@
   margin-right: 4px;
 }
 
+.heatmapCanvas {
+  margin-top: 18px;
+}
+
+.heatmapFrame {
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid #eaecf0;
+  overflow: hidden;
+}
+
+.heatmapPoint {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+}
+
+.heatmapStats {
+  margin-top: 16px;
+}
+
+.heatmapStats ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.heatmapStats li {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f8fbff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+.pageActionButton {
+  border: 1px solid #d0d5dd;
+  background: #ffffff;
+  color: #101828;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.pageActionButton:hover {
+  background: #f8fafc;
+  border-color: #a7b6d9;
+}
+
+.clickableRow {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clickableRow:hover {
+  background: #f8fafc;
+}
+
 .usersSection {
   margin-bottom: 24px;
 }
@@ -483,6 +551,114 @@
   }
 }
 
+.heatmapLegendContainer {
+  margin: 20px 0;
+  padding: 16px;
+  background: #f0f4f8;
+  border-radius: 12px;
+  border: 1px solid #e0e7ff;
+}
+
+.heatmapLegendRow h4 {
+  margin: 0 0 12px;
+  color: #10182c;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.intensityLegend {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.intensityItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: #475467;
+}
+
+.intensityBox {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.heatmapTabsContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.heatmapTab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.heatmapTabTitle {
+  margin: 0;
+  color: #10182c;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.elementsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.elementCard {
+  padding: 14px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e7ff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.elementCard:hover {
+  border-color: #5366aa;
+  box-shadow: 0 4px 12px rgba(83, 102, 170, 0.1);
+}
+
+.elementBadge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: center;
+  width: fit-content;
+}
+
+.elementCard strong {
+  color: #10182c;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.elementCard span {
+  color: #667085;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 @media (max-width: 900px) {
   .container {
     flex-direction: column;
@@ -538,10 +714,26 @@
   .pageRow {
     grid-template-columns: 1fr 1fr auto;
   }
+
+  .heatmapTabsContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .intensityLegend {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 680px) {
   .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .elementsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .intensityLegend {
     grid-template-columns: repeat(2, 1fr);
   }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import { API_URL, getAuthToken } from '../services/api';
 import { enviarEventosAnalytics } from '../services/analytics';
 
 const SESSION_KEY = 'analytics_session_id';
@@ -38,16 +39,26 @@ export default function useUserTracking({ enabled = true } = {}) {
     enviarEventosAnalytics(batch);
   }, []);
 
+  const trackPageEnter = useCallback((path) => {
+    buffer.current.push({
+      sessao_id: sessaoId.current,
+      tipo: 'page_view',
+      pagina: path,
+      origem: getPageOrigin(),
+    });
+  }, []);
+
   useEffect(() => {
     if (!enabled) return;
 
     const interval = setInterval(flush, FLUSH_INTERVAL);
+    window.addEventListener('auth-session-changed', flush);
     const flushOnUnload = () => {
       if (buffer.current.length > 0) {
         const payload = buffer.current.splice(0);
         navigator.sendBeacon(
-          `${import.meta.env.VITE_API_URL || ''}/analytics/track`,
-          new Blob([JSON.stringify({ eventos: payload })], { type: 'application/json' })
+          `${API_URL}/analytics/track`,
+          new Blob([JSON.stringify({ eventos: payload, auth_token: getAuthToken() })], { type: 'application/json' })
         );
       }
     };
@@ -55,6 +66,7 @@ export default function useUserTracking({ enabled = true } = {}) {
 
     return () => {
       clearInterval(interval);
+      window.removeEventListener('auth-session-changed', flush);
       window.removeEventListener('beforeunload', flushOnUnload);
       flush();
     };
@@ -75,11 +87,14 @@ export default function useUserTracking({ enabled = true } = {}) {
         duracao_ms: elapsed,
         origem: getPageOrigin(),
       });
+      flush();
     }
 
     pagePath.current = location.pathname;
     pageStartTime.current = now;
-  }, [location.pathname, enabled]);
+    trackPageEnter(location.pathname);
+    flush();
+  }, [location.pathname, enabled, flush, trackPageEnter]);
 
   useEffect(() => {
     if (!enabled) return;
