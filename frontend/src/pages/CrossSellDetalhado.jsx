@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { FiArrowLeft, FiBox, FiLink, FiRefreshCw, FiShoppingBag } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
+import { FiBox, FiLink, FiRefreshCw, FiShoppingBag } from 'react-icons/fi';
 import { fetchCrossSell } from '../services/api';
+import AdminSidebar from '../components/AdminSidebar';
 import styles from './CrossSellDetalhado.module.css';
 
 function CrossSellDetalhado() {
-  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -43,16 +42,15 @@ function CrossSellDetalhado() {
   const combinacoes = data?.combinacoes || [];
 
   return (
-    <main className={styles.page}>
-      <header className={styles.header}>
-        <button type="button" className={styles.backButton} onClick={() => navigate('/admin')}>
-          <FiArrowLeft /> Voltar
-        </button>
-        <div>
-          <h1>Cross-sell</h1>
-          <p>Produtos que aparecem juntos com maior frequencia em pedidos validos.</p>
-        </div>
-      </header>
+    <div className={styles.container}>
+      <AdminSidebar />
+      <div className={styles.mainArea}>
+        <header className={styles.header}>
+          <div>
+            <h1>Cross-sell</h1>
+            <p>Produtos que aparecem juntos com maior frequencia em pedidos validos.</p>
+          </div>
+        </header>
 
       <section className={styles.summaryGrid}>
         <article className={styles.heroCard}>
@@ -134,7 +132,8 @@ function CrossSellDetalhado() {
           </div>
         )}
       </section>
-    </main>
+      </div>
+    </div>
   );
 }
 

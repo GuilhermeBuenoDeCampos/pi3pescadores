@@ -2,41 +2,33 @@ import { useState, useEffect } from 'react';
 import {
   BACKEND_URL,
   apiFetch,
-  clearAuthSession,
   fetchCategories,
   fetchProducts,
   fetchProductById,
   fetchTodosPedidos,
   getAuthHeaders,
-  getAuthUser,
   getImageUrl,
   updateProductStatus,
 } from '../services/api';
 import {
   FiAlertTriangle,
   FiArchive,
-  FiArrowLeft,
-  FiBarChart2,
+
   FiCheck,
   FiClipboard,
   FiEdit2,
-  FiGrid,
-  FiHome,
   FiLayers,
-  FiLogOut,
   FiPackage,
   FiPlus,
   FiSearch,
   FiSettings,
-  FiShoppingBag,
   FiSliders,
   FiTag,
   FiTrash2,
-  FiUser,
   FiX,
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/logo/logo.png';
+import AdminSidebar from '../components/AdminSidebar';
 import AuditoriaModal from '../components/AuditoriaModal';
 import styles from './StockManagement.module.css';
 
@@ -411,60 +403,7 @@ const StockManagement = () => {
 
   return (
     <div className={styles.container}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <img src={logo} alt="Tres Pescadores Store Logo" className={styles.logo} />
-          <div>
-            <strong>Tres Pescadores</strong>
-            <span>Admin Console</span>
-          </div>
-        </div>
-
-        <nav className={styles.sidebarNav} aria-label="Menu de estoque">
-          <span className={styles.navLabel}>Principal</span>
-          <button className={`${styles.navItem} ${styles.navItemActive}`} type="button">
-            <FiGrid /> Visão geral
-          </button>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/vendas')}>
-            <FiBarChart2 /> Vendas
-            {pendingOrdersCount > 0 && <span className={styles.navBadge}>{pendingOrdersCount}</span>}
-          </button>
-          {getAuthUser()?.tipo_usuario === 'admin' && (
-            <button className={styles.navItem} type="button" onClick={() => navigate('/admin')}>
-              <FiHome /> Painel admin
-            </button>
-          )}
-          <button className={styles.navItem} type="button" onClick={() => navigate('/')}>
-            <FiShoppingBag /> Loja
-          </button>
-          <span className={styles.navLabel}>Operações</span>
-          <button className={styles.navItem} type="button" onClick={() => setActiveModal('categorias')}>
-            <FiTag /> Categorias
-          </button>
-          <button className={styles.navItem} type="button" onClick={() => setActiveModal('lancamento-massa')}>
-            <FiLayers /> Lançamento
-          </button>
-          <button className={styles.navItem} type="button" onClick={() => setIsAuditoriaOpen(true)}>
-            <FiClipboard /> Auditoria
-          </button>
-          <button className={styles.navItem} type="button" onClick={() => setActiveModal('configuracoes')}>
-            <FiSettings /> Configurações
-          </button>
-        </nav>
-
-        <div className={styles.sidebarFooter}>
-          <div className={styles.userCard}>
-            <FiUser />
-            <div>
-              <strong>{getAuthUser()?.nome || 'Usuário'}</strong>
-              <span>Equipe de estoque</span>
-            </div>
-          </div>
-          <button className={styles.logoutButton} type="button" onClick={() => { clearAuthSession(); navigate('/login'); }}>
-            <FiLogOut /> Sair
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       <div className={styles.mainArea}>
         <header className={styles.header}>
@@ -474,9 +413,6 @@ const StockManagement = () => {
             <div className={styles.subtitle}>Acompanhe produtos, entradas e disponibilidade do inventário.</div>
           </div>
           <div className={styles.headerActions}>
-            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => navigate('/admin')}>
-              <FiArrowLeft /> Voltar
-            </button>
             <button className={`${styles.btn} ${styles.btnBlue}`} onClick={() => { setEditProduct(null); setSelectedImages([]); setActiveModal('novo-produto'); }}>
               <FiPlus /> Novo Produto
             </button>

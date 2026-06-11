@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FiArrowLeft, FiBarChart2, FiCheckCircle, FiClock, FiGrid, FiHome, FiLogOut, FiPackage, FiSearch, FiShoppingBag, FiTruck, FiUser, FiX } from 'react-icons/fi';
+import { FiCheckCircle, FiClock, FiPackage, FiSearch, FiShoppingBag, FiTruck, FiX } from 'react-icons/fi';
 import {
   fetchTodosPedidos,
   fetchPedidoAdmin,
-  getAuthUser,
-  clearAuthSession,
   atualizarStatusPedido,
 } from '../services/api';
-import logo from '../assets/logo/logo.png';
+import AdminSidebar from '../components/AdminSidebar';
 import styles from './SalesManagement.module.css';
 
 const ORDER_FLOW = ['pendente', 'confirmado', 'preparando', 'enviado', 'concluido'];
@@ -161,43 +159,7 @@ const SalesManagement = () => {
 
   return (
     <div className={styles.container}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <img src={logo} alt="Tres Pescadores Store Logo" className={styles.logo} />
-          <div>
-            <strong>Tres Pescadores</strong>
-            <span>Admin Console</span>
-          </div>
-        </div>
-
-        <nav className={styles.sidebarNav} aria-label="Menu de vendas">
-          <span className={styles.navLabel}>Principal</span>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/estoque')}>
-            <FiGrid /> Estoque
-          </button>
-          <button className={`${styles.navItem} ${styles.navItemActive}`} type="button">
-            <FiBarChart2 /> Vendas
-          </button>
-          {getAuthUser()?.tipo_usuario === 'admin' && (
-            <button className={styles.navItem} type="button" onClick={() => navigate('/admin')}>
-              <FiHome /> Painel admin
-            </button>
-          )}
-        </nav>
-
-        <div className={styles.sidebarFooter}>
-          <div className={styles.userCard}>
-            <FiUser />
-            <div>
-              <strong>{getAuthUser()?.nome || 'Usuario'}</strong>
-              <span>Equipe de vendas</span>
-            </div>
-          </div>
-          <button className={styles.logoutButton} type="button" onClick={() => { clearAuthSession(); navigate('/login'); }}>
-            <FiLogOut /> Sair
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       <div className={styles.mainArea}>
         {/* Header */}
@@ -207,36 +169,7 @@ const SalesManagement = () => {
             <h1>Gerenciamento de Vendas</h1>
             <div className={styles.subtitle}>Acompanhe pedidos, clientes e andamento das entregas.</div>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b' }}>
-              <FiUser size={14} />
-              {getAuthUser()?.nome || 'Usuário'}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button
-                onClick={() => navigate('/admin')}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#5366aa', background: '#f0f2f8', border: 'none', cursor: 'pointer',
-                }}
-              >
-                <FiArrowLeft size={14} />
-                Voltar
-              </button>
-              <button
-                onClick={() => { clearAuthSession(); navigate('/login'); }}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  color: '#b91c1c', background: '#fef2f2', border: 'none', cursor: 'pointer',
-                }}
-              >
-                <FiLogOut size={14} />
-                Sair
-              </button>
-            </div>
-          </div>
+
         </header>
 
         {/* Main Content */}

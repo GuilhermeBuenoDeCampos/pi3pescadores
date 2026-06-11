@@ -11,8 +11,7 @@ import {
   FiAlertCircle,
   FiUsers,
   FiLoader,
-  FiArrowLeft,
-  FiLogOut,
+
   FiDownload,
   FiFileText,
   FiGrid,
@@ -20,7 +19,6 @@ import {
   FiBriefcase,
   FiChevronDown,
   FiClock,
-  FiHome,
   FiKey,
   FiLock,
   FiMoreVertical,
@@ -31,7 +29,6 @@ import {
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import {
-  clearAuthSession,
   fetchUsuarios,
   criarUsuario,
   atualizarUsuario,
@@ -39,6 +36,7 @@ import {
   getAuthUser,
 } from '../services/api';
 import logo from '../assets/logo/logo.png';
+import AdminSidebar from '../components/AdminSidebar';
 import styles from './AdminUsers.module.css';
 import { exportToPDF, exportToSVG, exportToXLSX } from '../utils/exportUtils';
 
@@ -370,33 +368,7 @@ function crudApp() {
 
   return (
     <div className={styles.container}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <img src={logo} alt="Tres Pescadores Store Logo" className={styles.logo} />
-          <div>
-            <strong>Tres Pescadores</strong>
-            <span>Admin Console</span>
-          </div>
-        </div>
-        <nav className={styles.nav} aria-label="Administração de usuários">
-          <span className={styles.navLabel}>Painel</span>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/admin')}><FiHome /> Visão geral</button>
-          <span className={styles.navLabel}>Usuários</span>
-          <button className={`${styles.navItem} ${styles.navActive}`} type="button"><FiUsers /> Todos os usuários</button>
-        </nav>
-        <div className={styles.sidebarFooter}>
-          <div className={styles.signedUser}>
-            <FiUser />
-            <div>
-              <strong>{getAuthUser()?.nome || 'Usuário'}</strong>
-              <span>Administrador</span>
-            </div>
-          </div>
-          <button className={styles.logout} type="button" onClick={() => { clearAuthSession(); navigate('/login'); }}>
-            <FiLogOut /> Sair
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       <div className={styles.mainArea}>
         <header className={styles.header}>
@@ -406,9 +378,6 @@ function crudApp() {
             <p className={styles.subtitle}>Gerencie usuários, cargos e permissões do sistema</p>
           </div>
           <div className={styles.headerActions}>
-            <button className={`${styles.btn} ${styles.btnLight}`} type="button" onClick={() => navigate('/admin')}>
-              <FiArrowLeft /> Voltar
-            </button>
             <div className={styles.downloadContainer} ref={downloadRef}>
               <button className={`${styles.btn} ${styles.btnLight}`} type="button" onClick={() => setDownloadOpen(open => !open)}>
                 <FiDownload /> Exportar <FiChevronDown />
