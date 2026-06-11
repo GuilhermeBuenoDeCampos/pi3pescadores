@@ -9,8 +9,20 @@ function parseDate(value) {
     return null;
   }
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (!match) {
+    throw new AppError(400, 'Data invalida. Use o formato YYYY-MM-DD.');
+  }
+
+  const [, year, month, day] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+  if (
+    date.getFullYear() !== Number(year) ||
+    date.getMonth() !== Number(month) - 1 ||
+    date.getDate() !== Number(day)
+  ) {
     throw new AppError(400, 'Data invalida. Use o formato YYYY-MM-DD.');
   }
 

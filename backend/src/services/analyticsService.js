@@ -18,7 +18,7 @@ exports.registrarEventos = async (eventos, usuarioId = null) => {
     largura_tela: e.largura_tela || null,
     altura_tela: e.altura_tela || null,
     origem: e.origem || null,
-    usuario_id: usuario_id,
+    usuario_id: usuarioId,
     criado_em: now,
   }));
 
@@ -140,22 +140,26 @@ exports.obterPaginasComMaisCliques = async (dias = 30) => {
 exports.obterUsuariosPorMes = async (dias = 90) => {
   const dataLimite = new Date();
   dataLimite.setDate(dataLimite.getDate() - dias);
+  const dialect = db.sequelize.getDialect();
+  const monthExpression = dialect === 'mysql' || dialect === 'mariadb'
+    ? "DATE_FORMAT(ac.created_at, '%Y-%m-01')"
+    : "DATE_TRUNC('month', ac.created_at)";
 
   let registros;
   try {
     registros = await db.sequelize.query(
       `SELECT
-        DATE_TRUNC('month', ac.criado_em) AS mes,
+        ${monthExpression} AS mes,
         ac.usuario_id,
         u.nome,
         u.email,
         COUNT(*) AS total_eventos,
-        MAX(ac.criado_em) AS ultimo_acesso
+        MAX(ac.created_at) AS ultimo_acesso
       FROM analytics_comportamento ac
       LEFT JOIN usuarios u ON u.id = ac.usuario_id
-      WHERE ac.criado_em >= :dataLimite
+      WHERE ac.created_at >= :dataLimite
         AND ac.usuario_id IS NOT NULL
-      GROUP BY DATE_TRUNC('month', ac.criado_em), ac.usuario_id, u.nome, u.email
+      GROUP BY ${monthExpression}, ac.usuario_id, u.nome, u.email
       ORDER BY mes DESC, ultimo_acesso DESC`,
       {
         replacements: { dataLimite },

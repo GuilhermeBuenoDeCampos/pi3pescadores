@@ -3,19 +3,16 @@ import {
   ArcElement,
   Chart as ChartJS,
   Legend,
-  LineElement,
-  PointElement,
-  RadialLinearScale,
   Tooltip,
 } from 'chart.js';
-import { Doughnut, Radar } from 'react-chartjs-2';
-import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLogOut, FiPackage, FiRefreshCw, FiShoppingCart, FiStar, FiUser, FiUsers, FiSettings, FiX } from 'react-icons/fi';
+import { Doughnut } from 'react-chartjs-2';
+import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLink, FiLogOut, FiPackage, FiRefreshCw, FiShoppingCart, FiStar, FiUser, FiUsers, FiSettings, FiX, FiXCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { apiFetch, clearAuthSession, fetchKpiSatisfacao, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
+import { apiFetch, clearAuthSession, fetchCrossSell, fetchKpiSatisfacao, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaCancelamento, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
 import clockTowerBar from '../assets/admin/clock-tower-bar.png';
 import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
@@ -39,6 +36,7 @@ import basilicaImg from '../assets/admin/basilica-aparecida.jpg';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import { obterMediaLeadtime } from '../services/leadtime';
+import { fetchCarrinhoAbandonoDashboard } from '../services/carrinhoAbandonoService';
 import KpiConfigModal from '../components/KpiConfigModal';
 import { obterTempoPorPagina, obterPaginasEngajamento, obterEstatisticasComportamento } from '../services/analytics';
 import styles from './AdminDashboard.module.css';
@@ -46,9 +44,6 @@ import styles from './AdminDashboard.module.css';
 ChartJS.register(
   ArcElement,
   Legend,
-  LineElement,
-  PointElement,
-  RadialLinearScale,
   Tooltip
 );
 
@@ -352,6 +347,22 @@ const kpiCalculations = {
     title: 'Comportamento do Usuário',
     description: 'Monitora o tempo medio de permanencia por pagina, total de cliques e hover, para identificar dificuldades na navegacao e pontos de maior engajamento.',
   },
+  abandono: {
+    title: 'Taxa de abandono de carrinho',
+    description: 'Divide a quantidade de carrinhos abandonados pelo total de carrinhos dos ultimos 30 dias e multiplica por 100. Um carrinho ativo e marcado como abandonado depois de 24 horas sem atividade.',
+  },
+  crossSell: {
+    title: 'Cross-sell',
+    description: 'Analisa pedidos confirmados, em preparacao, enviados ou concluidos. Cada par de produtos diferentes conta uma vez por pedido, e as combinacoes sao ordenadas pela quantidade de compras em que apareceram juntas.',
+  },
+  cancelamento: {
+    title: 'Taxa de cancelamento',
+    description: 'Divide a quantidade de pedidos cancelados pelo total de pedidos criados no mes atual e multiplica por 100. Todos os status entram no total do periodo.',
+  },
+  satisfacao: {
+    title: 'Media de satisfacao',
+    description: 'Calcula a media geral das notas registradas nas avaliacoes dos clientes, considerando a escala de 1 a 5.',
+  },
 };
 
 function CalculationHelpButton({ calculation, onOpen, withSettings = false }) {
@@ -367,6 +378,23 @@ function CalculationHelpButton({ calculation, onOpen, withSettings = false }) {
       aria-label={`Mostrar como ${calculation.title.toLowerCase()} é calculado`}
     >
       <FiHelpCircle size={18} />
+    </button>
+  );
+}
+
+function KpiSettingsButton({ title, onOpen }) {
+  return (
+    <button
+      className={styles.kpiSettingsButton}
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        onOpen();
+      }}
+      title={title}
+      aria-label={title}
+    >
+      <FiSettings size={18} />
     </button>
   );
 }
@@ -419,10 +447,19 @@ function AdminDashboard() {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [showVisitanteModal, setShowVisitanteModal] = useState(false);
   const [showConversaoModal, setShowConversaoModal] = useState(false);
+  const [showAbandonoModal, setShowAbandonoModal] = useState(false);
+  const [showCancelamentoModal, setShowCancelamentoModal] = useState(false);
+  const [showSatisfacaoModal, setShowSatisfacaoModal] = useState(false);
   const [calculationHelp, setCalculationHelp] = useState(null);
   const [behaviorStats, setBehaviorStats] = useState(null);
   const [loadingBehavior, setLoadingBehavior] = useState(true);
   const [behaviorPages, setBehaviorPages] = useState([]);
+  const [cartAbandonment, setCartAbandonment] = useState(null);
+  const [loadingCartAbandonment, setLoadingCartAbandonment] = useState(true);
+  const [crossSell, setCrossSell] = useState(null);
+  const [loadingCrossSell, setLoadingCrossSell] = useState(true);
+  const [cancellationRate, setCancellationRate] = useState(null);
+  const [loadingCancellationRate, setLoadingCancellationRate] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -438,6 +475,9 @@ function AdminDashboard() {
         setLoadingLeadtime(true);
         setLoadingSatisfaction(true);
         setLoadingBehavior(true);
+        setLoadingCartAbandonment(true);
+        setLoadingCrossSell(true);
+        setLoadingCancellationRate(true);
         setAccuracyError('');
         
         const authToken = getAuthToken();
@@ -461,6 +501,9 @@ function AdminDashboard() {
           satisfactionData,
           behaviorStatsData,
           behaviorPagesData,
+          cartAbandonmentData,
+          crossSellData,
+          cancellationRateData,
         ] = await Promise.all([
           fetchMediaAcuracidade(),
           fetchPalavrasMaisPesquisadas(5),
@@ -497,6 +540,9 @@ function AdminDashboard() {
           fetchKpiSatisfacao().catch(() => null),
           obterEstatisticasComportamento().catch(() => null),
           obterTempoPorPagina().catch(() => []),
+          fetchCarrinhoAbandonoDashboard().catch(() => null),
+          fetchCrossSell(5).catch(() => null),
+          fetchTaxaCancelamento().catch(() => null),
         ]);
 
         if (isMounted) {
@@ -511,6 +557,9 @@ function AdminDashboard() {
           setSatisfactionKpis(satisfactionData);
           setBehaviorStats(behaviorStatsData);
           setBehaviorPages(behaviorPagesData?.paginas || behaviorPagesData || []);
+          setCartAbandonment(cartAbandonmentData);
+          setCrossSell(crossSellData);
+          setCancellationRate(cancellationRateData);
         }
       } catch (error) {
         if (isMounted) {
@@ -528,6 +577,9 @@ function AdminDashboard() {
           setLoadingLeadtime(false);
           setLoadingSatisfaction(false);
           setLoadingBehavior(false);
+          setLoadingCartAbandonment(false);
+          setLoadingCrossSell(false);
+          setLoadingCancellationRate(false);
         }
       }
     }
@@ -788,24 +840,36 @@ function AdminDashboard() {
 
   const satisfactionAverage = Number(satisfactionKpis?.mediaGeral || 0);
   const satisfactionTotal = Number(satisfactionKpis?.totalAvaliacoes || 0);
-  const satisfactionData = useMemo(() => ({
-    labels: ['Atendimento', 'Entrega', 'Qualidade', 'Preco', 'Experiencia'],
-    datasets: [
-      {
-        label: 'Satisfacao',
-        data: [0.75, 0.78, 0.92, 0.68, 0.82],
-        borderColor: '#08936f',
-        backgroundColor: 'rgba(8, 147, 111, 0.28)',
-        pointBackgroundColor: '#08936f',
-        pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
-        pointRadius: 6,
-        pointHoverRadius: 9,
-        borderWidth: 3,
-        pointStyle: 'circle',
-      },
-    ],
-  }), []);
+  const abandonmentValue = Number(cartAbandonment?.taxaAbandono || 0);
+  const cancellationValue = Number(cancellationRate?.taxaCancelamento || 0);
+
+  const getLowerIsBetterClass = (value, low, high) => {
+    if (value < Number(low)) return styles.kpiLevelGood;
+    if (value > Number(high)) return styles.kpiLevelCritical;
+    return styles.kpiLevelWarning;
+  };
+
+  const getHigherIsBetterClass = (value, low, high) => {
+    if (value < Number(low)) return styles.kpiLevelCritical;
+    if (value > Number(high)) return styles.kpiLevelGood;
+    return styles.kpiLevelWarning;
+  };
+
+  const abandonmentLevel = getLowerIsBetterClass(
+    abandonmentValue,
+    kpiConfig?.abandonobaixa ?? 30,
+    kpiConfig?.abandonoalta ?? 60
+  );
+  const cancellationLevel = getLowerIsBetterClass(
+    cancellationValue,
+    kpiConfig?.cancelamentobaixa ?? 5,
+    kpiConfig?.cancelamentoalta ?? 15
+  );
+  const satisfactionLevel = getHigherIsBetterClass(
+    satisfactionAverage,
+    kpiConfig?.satisfacaobaixa ?? 3,
+    kpiConfig?.satisfacaoalta ?? 4
+  );
   const accuracyData = useMemo(() => ({
     labels: ['Acuracidade media', 'Diferenca'],
     datasets: [
@@ -1295,7 +1359,100 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.satisfactionKpi}`}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.abandonmentKpi} ${abandonmentLevel}`}
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate('/admin/carrinho-abandono')}
+            onKeyDown={(event) => {
+              if (event.currentTarget !== event.target) return;
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate('/admin/carrinho-abandono');
+              }
+            }}
+          >
+            <FiShoppingCart className={styles.abandonmentKpiIcon} aria-hidden="true" />
+            <KpiSettingsButton title="Configurar limites da taxa de abandono" onOpen={() => setShowAbandonoModal(true)} />
+            <CalculationHelpButton calculation={kpiCalculations.abandono} onOpen={setCalculationHelp} withSettings />
+            <div className={styles.revenueKpiContent}>
+              <span>Taxa de abandono</span>
+              <strong>
+                {loadingCartAbandonment
+                  ? 'Carregando...'
+                  : `${abandonmentValue.toFixed(1).replace('.', ',')}%`}
+              </strong>
+              <small>
+                {loadingCartAbandonment
+                  ? 'Consultando ultimos 30 dias'
+                  : `${cartAbandonment?.carrinhosAbandonados || 0} de ${cartAbandonment?.totalCarrinhos || 0} carrinhos`}
+              </small>
+            </div>
+          </article>
+          <article
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.crossSellKpi}`}
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate('/admin/cross-sell')}
+            onKeyDown={(event) => {
+              if (event.currentTarget !== event.target) return;
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate('/admin/cross-sell');
+              }
+            }}
+          >
+            <FiLink className={styles.crossSellKpiIcon} aria-hidden="true" />
+            <CalculationHelpButton calculation={kpiCalculations.crossSell} onOpen={setCalculationHelp} />
+            <div className={styles.revenueKpiContent}>
+              <span>Cross-sell</span>
+              <strong className={styles.crossSellPair}>
+                {loadingCrossSell
+                  ? 'Carregando...'
+                  : crossSell?.topCombinacao
+                    ? `${crossSell.topCombinacao.produtoA.nome} + ${crossSell.topCombinacao.produtoB.nome}`
+                    : 'Sem combinacoes'}
+              </strong>
+              <small>
+                {loadingCrossSell
+                  ? 'Analisando pedidos'
+                  : crossSell?.topCombinacao
+                    ? `${crossSell.topCombinacao.pedidosJuntos} pedidos juntos`
+                    : 'Aguardando pedidos com varios produtos'}
+              </small>
+            </div>
+          </article>
+          <article
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.cancellationKpi} ${cancellationLevel}`}
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate('/vendas?status=cancelado')}
+            onKeyDown={(event) => {
+              if (event.currentTarget !== event.target) return;
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate('/vendas?status=cancelado');
+              }
+            }}
+          >
+            <FiXCircle className={styles.cancellationKpiIcon} aria-hidden="true" />
+            <KpiSettingsButton title="Configurar limites da taxa de cancelamento" onOpen={() => setShowCancelamentoModal(true)} />
+            <CalculationHelpButton calculation={kpiCalculations.cancelamento} onOpen={setCalculationHelp} withSettings />
+            <div className={styles.revenueKpiContent}>
+              <span>Taxa de cancelamento</span>
+              <strong>
+                {loadingCancellationRate
+                  ? 'Carregando...'
+                  : `${cancellationValue.toFixed(1).replace('.', ',')}%`}
+              </strong>
+              <small>
+                {loadingCancellationRate
+                  ? 'Consultando pedidos'
+                  : `${cancellationRate?.pedidosCancelados || 0} de ${cancellationRate?.totalPedidos || 0} pedidos no mes`}
+              </small>
+            </div>
+          </article>
+          <article
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.satisfactionKpi} ${satisfactionLevel}`}
             role="link"
             tabIndex={0}
             onClick={() => navigate('/admin/satisfacao')}
@@ -1307,6 +1464,8 @@ function AdminDashboard() {
             }}
           >
             <FiStar className={styles.satisfactionKpiIcon} aria-hidden="true" />
+            <KpiSettingsButton title="Configurar limites da media de satisfacao" onOpen={() => setShowSatisfacaoModal(true)} />
+            <CalculationHelpButton calculation={kpiCalculations.satisfacao} onOpen={setCalculationHelp} withSettings />
             <div className={styles.revenueKpiContent}>
               <span>Media de satisfacao</span>
               <strong>{loadingSatisfaction ? 'Carregando...' : `${satisfactionAverage.toFixed(1)} / 5`}</strong>
@@ -1414,55 +1573,6 @@ function AdminDashboard() {
             <CalculationHelpButton calculation={kpiCalculations.comportamento} onOpen={setCalculationHelp} />
           </article>
 
-          <article className={`${styles.chartBlock} ${styles.satisfacaoCard}`}>
-            <div className={styles.satisfacaoHeader}>
-              <h2>Satisfação</h2>
-              <span className={styles.satisfacaoBadge}>Rede de Pesca</span>
-            </div>
-            <div className={styles.chartCanvas}>
-                <Radar
-                data={satisfactionData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                      callbacks: {
-                        label: (ctx) => `${ctx.parsed.r >= 1 ? 100 : Math.round(ctx.parsed.r * 100)}%`,
-                      },
-                    },
-                  },
-                  scales: {
-                    r: {
-                      min: 0,
-                      max: 1,
-                      ticks: {
-                        stepSize: 0.2,
-                        backdropColor: 'transparent',
-                        color: '#08936f',
-                        font: { size: 8, weight: '600' },
-                        callback: (v) => `${Math.round(v * 100)}%`,
-                      },
-                      grid: {
-                        color: 'rgba(8, 147, 111, 0.55)',
-                        lineWidth: 1.2,
-                      },
-                      angleLines: {
-                        color: 'rgba(8, 147, 111, 0.35)',
-                        lineWidth: 1,
-                      },
-                      pointLabels: {
-                        color: '#0f172a',
-                        font: { size: 11, weight: '700' },
-                      },
-                    },
-                  },
-                }}
-              />
-            </div>
-          </article>
-
         </section>
       </section>
 
@@ -1498,6 +1608,27 @@ function AdminDashboard() {
         onClose={() => setShowConversaoModal(false)}
         config={kpiConfig}
         type="conversao"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showAbandonoModal}
+        onClose={() => setShowAbandonoModal(false)}
+        config={kpiConfig}
+        type="abandono"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showCancelamentoModal}
+        onClose={() => setShowCancelamentoModal(false)}
+        config={kpiConfig}
+        type="cancelamento"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showSatisfacaoModal}
+        onClose={() => setShowSatisfacaoModal(false)}
+        config={kpiConfig}
+        type="satisfacao"
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
       <CalculationHelpModal calculation={calculationHelp} onClose={() => setCalculationHelp(null)} />

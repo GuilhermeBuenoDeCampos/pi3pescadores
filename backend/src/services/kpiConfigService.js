@@ -15,6 +15,12 @@ const DEFAULT_CONFIG = {
   visitantealto: 500,
   conversaobaixa: 2,
   conversaoalta: 8,
+  abandonobaixa: 30,
+  abandonoalta: 60,
+  cancelamentobaixa: 5,
+  cancelamentoalta: 15,
+  satisfacaobaixa: 3,
+  satisfacaoalta: 4,
 };
 
 const DB_KEYS = {
@@ -28,6 +34,12 @@ const DB_KEYS = {
   visitantealto: 'visitante_alto',
   conversaobaixa: 'conversao_baixa',
   conversaoalta: 'conversao_alta',
+  abandonobaixa: 'abandono_baixa',
+  abandonoalta: 'abandono_alta',
+  cancelamentobaixa: 'cancelamento_baixa',
+  cancelamentoalta: 'cancelamento_alta',
+  satisfacaobaixa: 'satisfacao_baixa',
+  satisfacaoalta: 'satisfacao_alta',
 };
 
 const DESCRIPTIONS = {
@@ -41,6 +53,12 @@ const DESCRIPTIONS = {
   visitantealto: 'Visitantes maximo',
   conversaobaixa: 'Taxa de conversao baixa %',
   conversaoalta: 'Taxa de conversao alta %',
+  abandonobaixa: 'Taxa de abandono baixa %',
+  abandonoalta: 'Taxa de abandono alta %',
+  cancelamentobaixa: 'Taxa de cancelamento baixa %',
+  cancelamentoalta: 'Taxa de cancelamento alta %',
+  satisfacaobaixa: 'Media de satisfacao baixa',
+  satisfacaoalta: 'Media de satisfacao alta',
 };
 
 function toNumber(value, fallback) {
@@ -129,6 +147,12 @@ exports.atualizarConfig = async (body) => {
     visitantealto: toNumber(body.visitantealto, current.visitantealto),
     conversaobaixa: toNumber(body.conversaobaixa, current.conversaobaixa),
     conversaoalta: toNumber(body.conversaoalta, current.conversaoalta),
+    abandonobaixa: toNumber(body.abandonobaixa, current.abandonobaixa),
+    abandonoalta: toNumber(body.abandonoalta, current.abandonoalta),
+    cancelamentobaixa: toNumber(body.cancelamentobaixa, current.cancelamentobaixa),
+    cancelamentoalta: toNumber(body.cancelamentoalta, current.cancelamentoalta),
+    satisfacaobaixa: toNumber(body.satisfacaobaixa, current.satisfacaobaixa),
+    satisfacaoalta: toNumber(body.satisfacaoalta, current.satisfacaoalta),
   };
 
   validateRange(payload.faturamento_baixo, payload.faturamento_alto, 'faturamento_baixo', 'faturamento_alto');
@@ -136,6 +160,17 @@ exports.atualizarConfig = async (body) => {
   validateRange(payload.recomprabaixa, payload.recompraalta, 'recomprabaixa', 'recompraalta');
   validateRange(payload.visitantebaixo, payload.visitantealto, 'visitantebaixo', 'visitantealto');
   validateRange(payload.conversaobaixa, payload.conversaoalta, 'conversaobaixa', 'conversaoalta');
+  validateRange(payload.abandonobaixa, payload.abandonoalta, 'abandonobaixa', 'abandonoalta');
+  validateRange(payload.cancelamentobaixa, payload.cancelamentoalta, 'cancelamentobaixa', 'cancelamentoalta');
+  validateRange(payload.satisfacaobaixa, payload.satisfacaoalta, 'satisfacaobaixa', 'satisfacaoalta');
+
+  if (payload.abandonoalta > 100 || payload.cancelamentoalta > 100) {
+    throw new AppError(400, 'As taxas devem estar entre 0 e 100');
+  }
+
+  if (payload.satisfacaoalta > 5) {
+    throw new AppError(400, 'A satisfacao deve estar entre 0 e 5');
+  }
 
   await db.sequelize.transaction(async (transaction) => {
     await ensureConfigRows(transaction);

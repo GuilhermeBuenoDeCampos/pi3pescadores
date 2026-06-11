@@ -758,6 +758,32 @@ export async function fetchTaxaRecompraAnual(ano) {
   return result.data;
 }
 
+export async function fetchCrossSell(limit = 20) {
+  const response = await apiFetch(`${API_URL}/pedidos/admin/cross-sell?limit=${encodeURIComponent(limit)}`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel carregar o cross-sell.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function fetchTaxaCancelamento() {
+  const response = await apiFetch(`${API_URL}/pedidos/admin/taxa-cancelamento`, {
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, 'Nao foi possivel carregar a taxa de cancelamento.'));
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
 export async function fetchPedidoAdmin(id) {
   const response = await apiFetch(`${API_URL}/pedidos/${id}`, {
     headers: { ...getAuthHeaders() },

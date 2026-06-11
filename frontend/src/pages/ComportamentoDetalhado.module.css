@@ -337,15 +337,79 @@
   margin: 0 0 16px;
 }
 
+.heatmapControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.7fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.heatmapControls label {
+  display: grid;
+  gap: 5px;
+  color: #667085;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.heatmapControls select {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  color: #344054;
+  background: #ffffff;
+}
+
+.heatmapCanvasWrap {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #10182c;
+}
+
+.heatmapCanvasWrap canvas {
+  display: block;
+  width: 100%;
+}
+
+.heatmapEmpty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.72);
+  text-align: center;
+}
+
 .heatmapLegend {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 20px;
   font-size: 0.8rem;
   color: #475467;
+  margin-top: 10px;
   padding: 12px 16px;
   border-radius: 8px;
   background: #f7f8fc;
+}
+
+.heatmapLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.heatmapLegend strong {
+  margin-left: auto;
+  color: #10182c;
 }
 
 .heatmapDot {
@@ -353,7 +417,47 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  margin-right: 4px;
+}
+
+.hotspotList {
+  display: grid;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.hotspotList > span {
+  color: #667085;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hotspotList > div {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: #f7f8fc;
+}
+
+.hotspotList b {
+  color: #5366aa;
+}
+
+.hotspotList code {
+  overflow: hidden;
+  color: #475467;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hotspotList strong {
+  color: #10182c;
+  font-size: 0.8rem;
 }
 
 .usersSection {
@@ -543,5 +647,14 @@
 @media (max-width: 680px) {
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .heatmapControls {
+    grid-template-columns: 1fr;
+  }
+
+  .heatmapLegend strong {
+    width: 100%;
+    margin-left: 0;
   }
 }

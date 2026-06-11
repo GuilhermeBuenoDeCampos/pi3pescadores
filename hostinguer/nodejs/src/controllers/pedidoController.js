@@ -88,3 +88,20 @@ exports.ticketMedio = asyncHandler(async (req, res) => {
   });
 });
 
+exports.taxaCancelamento = asyncHandler(async (req, res) => {
+  const taxaCancelamento = await pedidoService.obterTaxaCancelamento();
+
+  res.json({
+    data: taxaCancelamento,
+  });
+});
+
+exports.crossSell = asyncHandler(async (req, res) => {
+  const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 100);
+  const crossSell = await pedidoService.obterCrossSell(limit);
+
+  res.json({
+    data: crossSell,
+  });
+});
+

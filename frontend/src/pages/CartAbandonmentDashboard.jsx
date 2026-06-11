@@ -25,14 +25,21 @@ function formatPercent(value) {
   return `${Number(value || 0).toFixed(1)}%`;
 }
 
+function formatLocalDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function getDefaultStartDate() {
   const date = new Date();
   date.setDate(date.getDate() - 29);
-  return date.toISOString().slice(0, 10);
+  return formatLocalDate(date);
 }
 
 function getToday() {
-  return new Date().toISOString().slice(0, 10);
+  return formatLocalDate(new Date());
 }
 
 function CartAbandonmentDashboard() {

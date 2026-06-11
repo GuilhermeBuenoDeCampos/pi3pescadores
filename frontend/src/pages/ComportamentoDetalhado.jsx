@@ -1,10 +1,101 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FiBarChart2, FiClock, FiDollarSign, FiGrid, FiLogOut, FiPackage, FiRefreshCw, FiShoppingCart, FiUser, FiArrowLeft } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
 import { clearAuthSession, getAuthUser } from '../services/api';
-import { obterTempoPorPagina, obterEstatisticasComportamento, obterUsuariosPorMes } from '../services/analytics';
+import { obterEstatisticasComportamento, obterHeatmap, obterTempoPorPagina, obterUsuariosPorMes } from '../services/analytics';
 import styles from './ComportamentoDetalhado.module.css';
+
+function HeatmapCanvas({ points }) {
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return undefined;
+
+    const draw = () => {
+      const rect = container.getBoundingClientRect();
+      const width = Math.max(320, Math.round(rect.width));
+      const height = Math.max(280, Math.round(width * 0.58));
+      const pixelRatio = window.devicePixelRatio || 1;
+
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      const context = canvas.getContext('2d');
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      context.clearRect(0, 0, width, height);
+
+      const background = context.createLinearGradient(0, 0, width, height);
+      background.addColorStop(0, '#10182c');
+      background.addColorStop(0.58, '#25355f');
+      background.addColorStop(1, '#405394');
+      context.fillStyle = background;
+      context.fillRect(0, 0, width, height);
+
+      context.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      context.lineWidth = 1;
+      for (let x = 0; x <= width; x += width / 12) {
+        context.beginPath();
+        context.moveTo(x, 0);
+        context.lineTo(x, height);
+        context.stroke();
+      }
+      for (let y = 0; y <= height; y += height / 8) {
+        context.beginPath();
+        context.moveTo(0, y);
+        context.lineTo(width, y);
+        context.stroke();
+      }
+
+      const maxTotal = Math.max(1, ...points.map((point) => Number(point.total || 1)));
+      context.globalCompositeOperation = 'screen';
+
+      points.forEach((point) => {
+        const sourceWidth = Number(point.largura_tela || 0);
+        const sourceHeight = Number(point.altura_tela || 0);
+        if (!sourceWidth || !sourceHeight) return;
+
+        const x = Math.min(width, Math.max(0, (Number(point.coordenada_x) / sourceWidth) * width));
+        const y = Math.min(height, Math.max(0, (Number(point.coordenada_y) / sourceHeight) * height));
+        const intensity = Math.max(0.18, Number(point.total || 1) / maxTotal);
+        const radius = 22 + intensity * 38;
+        const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+
+        gradient.addColorStop(0, `rgba(239, 68, 68, ${0.82 * intensity})`);
+        gradient.addColorStop(0.28, `rgba(249, 115, 22, ${0.68 * intensity})`);
+        gradient.addColorStop(0.58, `rgba(234, 179, 8, ${0.42 * intensity})`);
+        gradient.addColorStop(1, 'rgba(234, 179, 8, 0)');
+
+        context.fillStyle = gradient;
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.fill();
+      });
+
+      context.globalCompositeOperation = 'source-over';
+    };
+
+    draw();
+    const observer = new ResizeObserver(draw);
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, [points]);
+
+  return (
+    <div className={styles.heatmapCanvasWrap} ref={containerRef}>
+      <canvas ref={canvasRef} aria-label="Mapa de calor das interacoes no site" />
+      {points.length === 0 && (
+        <div className={styles.heatmapEmpty}>Nenhuma interacao registrada para este filtro.</div>
+      )}
+    </div>
+  );
+}
 
 function ComportamentoDetalhado() {
   const navigate = useNavigate();
@@ -12,6 +103,9 @@ function ComportamentoDetalhado() {
   const [stats, setStats] = useState(null);
   const [pages, setPages] = useState([]);
   const [usuariosPorMes, setUsuariosPorMes] = useState([]);
+  const [heatmap, setHeatmap] = useState([]);
+  const [selectedPage, setSelectedPage] = useState('');
+  const [interactionType, setInteractionType] = useState('todos');
   const [periodo, setPeriodo] = useState(30);
   const [loading, setLoading] = useState(true);
 
@@ -21,16 +115,18 @@ function ComportamentoDetalhado() {
     async function loadData() {
       try {
         setLoading(true);
-        const [statsData, pagesData, usuariosData] = await Promise.all([
+        const [statsData, pagesData, usuariosData, heatmapData] = await Promise.all([
           obterEstatisticasComportamento(periodo).catch(() => null),
           obterTempoPorPagina(periodo).catch(() => []),
           obterUsuariosPorMes(90).catch(() => []),
+          obterHeatmap(null, periodo).catch(() => []),
         ]);
 
         if (mounted) {
           setStats(statsData);
           setPages(pagesData?.paginas || pagesData || []);
           setUsuariosPorMes(usuariosData || []);
+          setHeatmap(Array.isArray(heatmapData) ? heatmapData : []);
         }
       } finally {
         if (mounted) setLoading(false);
@@ -55,6 +151,33 @@ function ComportamentoDetalhado() {
   }, [periodo]);
 
   const maxTime = pages.length > 0 ? Math.max(...pages.map(p => p.tempo_medio_segundos)) : 1;
+  const heatmapPages = useMemo(
+    () => Array.from(new Set(heatmap.map((point) => point.pagina).filter(Boolean))).sort(),
+    [heatmap]
+  );
+  const activeHeatmapPage = selectedPage && heatmapPages.includes(selectedPage)
+    ? selectedPage
+    : heatmapPages[0] || '';
+  const filteredHeatmap = useMemo(
+    () => heatmap.filter((point) => (
+      point.pagina === activeHeatmapPage &&
+      (interactionType === 'todos' || point.tipo === interactionType)
+    )),
+    [activeHeatmapPage, heatmap, interactionType]
+  );
+  const hotspots = useMemo(() => {
+    const grouped = new Map();
+
+    filteredHeatmap.forEach((point) => {
+      const key = point.elemento || 'Elemento nao identificado';
+      grouped.set(key, (grouped.get(key) || 0) + Number(point.total || 1));
+    });
+
+    return Array.from(grouped.entries())
+      .map(([elemento, total]) => ({ elemento, total }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5);
+  }, [filteredHeatmap]);
 
   const handleLogout = () => {
     clearAuthSession();
@@ -173,16 +296,48 @@ function ComportamentoDetalhado() {
           <article className={styles.panel}>
             <div className={styles.panelHeader}>
               <h2>Heatmap de interações</h2>
+              {loading && <FiRefreshCw className={styles.loadingIcon} />}
             </div>
-            <p className={styles.heatmapHint}>
-              Os cliques e hovers são registrados com coordenadas para identificar as regiões de maior interesse em cada página.
-              Acesse a página específica para visualizar o heatmap detalhado.
-            </p>
+            <div className={styles.heatmapControls}>
+              <label>
+                Página
+                <select
+                  value={activeHeatmapPage}
+                  onChange={(event) => setSelectedPage(event.target.value)}
+                  disabled={heatmapPages.length === 0}
+                >
+                  {heatmapPages.length === 0 && <option value="">Sem dados</option>}
+                  {heatmapPages.map((page) => <option key={page} value={page}>{page}</option>)}
+                </select>
+              </label>
+              <label>
+                Interação
+                <select value={interactionType} onChange={(event) => setInteractionType(event.target.value)}>
+                  <option value="todos">Cliques e hovers</option>
+                  <option value="click">Somente cliques</option>
+                  <option value="hover">Somente hovers</option>
+                </select>
+              </label>
+            </div>
+            <HeatmapCanvas points={filteredHeatmap} />
             <div className={styles.heatmapLegend}>
-              <span className={styles.heatmapDot} style={{ background: '#ef4444' }} /> Alta intensidade
-              <span className={styles.heatmapDot} style={{ background: '#f97316' }} /> Média
-              <span className={styles.heatmapDot} style={{ background: '#eab308' }} /> Baixa
+              <span><i className={styles.heatmapDot} style={{ background: '#ef4444' }} /> Alta</span>
+              <span><i className={styles.heatmapDot} style={{ background: '#f97316' }} /> Média</span>
+              <span><i className={styles.heatmapDot} style={{ background: '#eab308' }} /> Baixa</span>
+              <strong>{filteredHeatmap.reduce((total, point) => total + Number(point.total || 1), 0)} interações</strong>
             </div>
+            {hotspots.length > 0 && (
+              <div className={styles.hotspotList}>
+                <span>Elementos mais acionados</span>
+                {hotspots.map((item, index) => (
+                  <div key={item.elemento}>
+                    <b>{index + 1}</b>
+                    <code>{item.elemento}</code>
+                    <strong>{item.total}</strong>
+                  </div>
+                ))}
+              </div>
+            )}
           </article>
         </section>
 

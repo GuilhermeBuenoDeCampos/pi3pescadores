@@ -687,8 +687,10 @@ exports.atualizarStatusPedido = async (idPedido, status) => {
     }
 
     if (pedido.status !== 'cancelado' && novoStatus === 'cancelado') {
+      const itens = pedido.get('itens') || [];
+
       await db.EstoqueMovimentacao.bulkCreate(
-        pedido.itens.map((item) => ({
+        itens.map((item) => ({
           id_produto: item.id_produto,
           tipo: 'entrada',
           quantidade: item.quantidade,
@@ -880,4 +882,129 @@ exports.obterTicketMedio = async () => {
   }
 };
 
+exports.obterTaxaCancelamento = async () => {
+  const hoje = new Date();
+  const partesMesAtual = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: 'numeric',
+  }).formatToParts(hoje);
+  const anoAtual = Number(partesMesAtual.find((parte) => parte.type === 'year')?.value);
+  const mesAtual = Number(partesMesAtual.find((parte) => parte.type === 'month')?.value);
+  const proximoMes = new Date(Date.UTC(anoAtual, mesAtual, 1));
+  const inicioMes = new Date(`${anoAtual}-${String(mesAtual).padStart(2, '0')}-01T00:00:00-03:00`);
+  const inicioProximoMes = new Date(
+    `${proximoMes.getUTCFullYear()}-${String(proximoMes.getUTCMonth() + 1).padStart(2, '0')}-01T00:00:00-03:00`
+  );
+  const periodo = {
+    criado_em: {
+      [Op.gte]: inicioMes,
+      [Op.lt]: inicioProximoMes,
+    },
+  };
+
+  const [totalPedidos, pedidosCancelados] = await Promise.all([
+    db.Pedido.count({ where: periodo }),
+    db.Pedido.count({ where: { ...periodo, status: 'cancelado' } }),
+  ]);
+  const taxaCancelamento = totalPedidos > 0 ? (pedidosCancelados / totalPedidos) * 100 : 0;
+
+  return {
+    taxaCancelamento: Number(taxaCancelamento.toFixed(2)),
+    pedidosCancelados,
+    totalPedidos,
+    mesReferencia: `${String(mesAtual).padStart(2, '0')}/${anoAtual}`,
+  };
+};
+
+function calcularCrossSell(pedidos = [], limit = 20) {
+  const combinacoes = new Map();
+  let pedidosComMultiplosItens = 0;
+
+  pedidos.forEach((pedido) => {
+    const produtosUnicos = new Map();
+
+    (pedido.itens || []).forEach((item) => {
+      const produto = item.produto || {};
+      const id = String(item.id_produto || produto.id || '');
+
+      if (!id) return;
+
+      produtosUnicos.set(id, {
+        id,
+        nome: produto.nome || `Produto #${id}`,
+      });
+    });
+
+    const produtos = Array.from(produtosUnicos.values())
+      .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+
+    if (produtos.length < 2) return;
+
+    pedidosComMultiplosItens += 1;
+
+    for (let primeiro = 0; primeiro < produtos.length - 1; primeiro += 1) {
+      for (let segundo = primeiro + 1; segundo < produtos.length; segundo += 1) {
+        const produtoA = produtos[primeiro];
+        const produtoB = produtos[segundo];
+        const chave = `${produtoA.id}:${produtoB.id}`;
+        const atual = combinacoes.get(chave);
+
+        combinacoes.set(chave, {
+          produtoA,
+          produtoB,
+          pedidosJuntos: (atual?.pedidosJuntos || 0) + 1,
+        });
+      }
+    }
+  });
+
+  const ranking = Array.from(combinacoes.values())
+    .sort((a, b) => (
+      b.pedidosJuntos - a.pedidosJuntos ||
+      a.produtoA.nome.localeCompare(b.produtoA.nome) ||
+      a.produtoB.nome.localeCompare(b.produtoB.nome)
+    ))
+    .slice(0, limit);
+
+  return {
+    totalPedidosAnalisados: pedidos.length,
+    pedidosComMultiplosItens,
+    combinacoesUnicas: combinacoes.size,
+    topCombinacao: ranking[0] || null,
+    combinacoes: ranking,
+    statusConsiderados: SALE_STATUSES,
+  };
+}
+
+exports.obterCrossSell = async (limit = 20) => {
+  const pedidos = await db.Pedido.findAll({
+    where: {
+      status: {
+        [Op.in]: SALE_STATUSES,
+      },
+    },
+    attributes: ['id'],
+    include: [
+      {
+        model: db.PedidoItem,
+        as: 'itens',
+        required: true,
+        attributes: ['id_produto'],
+        include: [
+          {
+            model: db.Produto,
+            as: 'produto',
+            required: false,
+            attributes: ['id', 'nome'],
+          },
+        ],
+      },
+    ],
+  });
+
+  return calcularCrossSell(pedidos, limit);
+};
+
+exports.calcularCrossSell = calcularCrossSell;
 exports.getUserId = getUserId;

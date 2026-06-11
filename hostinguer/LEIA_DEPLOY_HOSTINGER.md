@@ -81,6 +81,18 @@ Ele cria a tabela `avaliacoes`, usada no detalhe do pedido e nos indicadores
 de satisfacao do painel administrativo. Depois envie a pasta
 `hostinguer/nodejs` atualizada e reinicie a aplicacao Node.js.
 
+## Comportamento de usuarios
+
+Antes de publicar o backend com o painel de comportamento, execute no
+phpMyAdmin o arquivo:
+
+- `hostinguer/ATUALIZACAO_BANCO_ANALYTICS_MYSQL.sql`
+
+Ele cria a tabela `analytics_comportamento`, usada para registrar visualizacoes,
+cliques, hovers e tempo de permanencia. Depois envie as pastas
+`hostinguer/nodejs` e `hostinguer/public_html` atualizadas e reinicie a
+aplicacao Node.js.
+
 ## Testes
 
 Depois de reiniciar o app Node, acesse:

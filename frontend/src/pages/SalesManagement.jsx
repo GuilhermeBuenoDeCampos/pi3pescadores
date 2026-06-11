@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FiArrowLeft, FiBarChart2, FiCheckCircle, FiClock, FiGrid, FiHome, FiLogOut, FiPackage, FiSearch, FiShoppingBag, FiTruck, FiUser, FiX } from 'react-icons/fi';
 import {
   fetchTodosPedidos,
@@ -11,10 +11,26 @@ import {
 import logo from '../assets/logo/logo.png';
 import styles from './SalesManagement.module.css';
 
+const ORDER_FLOW = ['pendente', 'confirmado', 'preparando', 'enviado', 'concluido'];
+const STATUS_LABELS = {
+  pendente: 'Pendente',
+  confirmado: 'Confirmado',
+  preparando: 'Preparando',
+  enviado: 'Enviado',
+  concluido: 'Concluído',
+  cancelado: 'Cancelado',
+};
+
 const SalesManagement = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialStatus = searchParams.get('status') || '';
   const [pedidos, setPedidos] = useState([]);
-  const [filtroStatus, setFiltroStatus] = useState('');
+  const [filtroStatus, setFiltroStatus] = useState(
+    ['pendente', 'confirmado', 'preparando', 'enviado', 'concluido', 'cancelado'].includes(initialStatus)
+      ? initialStatus
+      : ''
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -22,8 +38,9 @@ const SalesManagement = () => {
   const [selectedPedido, setSelectedPedido] = useState(null);
   const [pedidoDetalhe, setPedidoDetalhe] = useState(null);
   const [loadingDetalhe, setLoadingDetalhe] = useState(false);
+  const [updatingStatusId, setUpdatingStatusId] = useState(null);
 
-  const statuses = ['pendente', 'confirmado', 'preparando', 'enviado', 'concluido', 'cancelado'];
+  const statuses = [...ORDER_FLOW, 'cancelado'];
 
   const loadPedidos = async (page = 1, status = '', search = '') => {
     try {
@@ -63,7 +80,7 @@ const SalesManagement = () => {
   };
 
   useEffect(() => {
-    loadPedidos(pagination.page, filtroStatus, searchTerm);
+    loadPedidos(1, filtroStatus, searchTerm);
 
     const refreshWhenVisible = () => {
       if (document.visibilityState === 'visible') {
@@ -93,14 +110,24 @@ const SalesManagement = () => {
 
   const handleStatusChange = async (pedidoId, novoStatus) => {
     try {
+      setUpdatingStatusId(pedidoId);
+      setError(null);
       await atualizarStatusPedido(pedidoId, novoStatus);
-      loadPedidos(pagination.page, filtroStatus, searchTerm);
+      await loadPedidos(pagination.page, filtroStatus, searchTerm);
       if (selectedPedido?.id === pedidoId) {
-        loadPedidoDetalhe(pedidoId);
+        await loadPedidoDetalhe(pedidoId);
       }
     } catch (err) {
-      alert('Erro ao atualizar status: ' + err.message);
+      setError(err.message || 'Erro ao atualizar status do pedido');
+      await loadPedidos(pagination.page, filtroStatus, searchTerm);
+    } finally {
+      setUpdatingStatusId(null);
     }
+  };
+
+  const getNextStatus = (status) => {
+    const currentIndex = ORDER_FLOW.indexOf(status);
+    return currentIndex >= 0 ? ORDER_FLOW[currentIndex + 1] || null : null;
   };
 
   const handleVerDetalhes = (pedido) => {
@@ -279,7 +306,7 @@ const SalesManagement = () => {
                 onClick={() => handleFiltroStatus(status)}
                 style={filtroStatus === status ? { backgroundColor: getStatusBadgeColor(status), color: 'white' } : {}}
               >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {STATUS_LABELS[status]}
               </button>
             ))}
           </div>
@@ -327,18 +354,30 @@ const SalesManagement = () => {
                           <td>{pedido.itens?.length || 0}</td>
                           <td>R$ {parseFloat(pedido.valor_total || 0).toFixed(2)}</td>
                           <td>
-                            <select
-                              value={pedido.status}
-                              onChange={(e) => handleStatusChange(pedido.id, e.target.value)}
-                              className={styles.statusSelect}
-                              style={{ borderColor: getStatusBadgeColor(pedido.status) }}
-                            >
-                              {statuses.map((status) => (
-                                <option key={status} value={status}>
-                                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                                </option>
-                              ))}
-                            </select>
+                            <div className={styles.statusActions}>
+                              <span
+                                className={styles.statusBadge}
+                                style={{
+                                  borderColor: getStatusBadgeColor(pedido.status),
+                                  color: getStatusBadgeColor(pedido.status),
+                                }}
+                              >
+                                {STATUS_LABELS[pedido.status] || pedido.status}
+                              </span>
+                              {getNextStatus(pedido.status) && (
+                                <button
+                                  type="button"
+                                  className={styles.advanceStatusBtn}
+                                  onClick={() => handleStatusChange(pedido.id, getNextStatus(pedido.status))}
+                                  disabled={updatingStatusId === pedido.id}
+                                  aria-label={`Marcar pedido ${pedido.numero_pedido} como ${STATUS_LABELS[getNextStatus(pedido.status)]}`}
+                                >
+                                  {updatingStatusId === pedido.id
+                                    ? 'Atualizando...'
+                                    : `Marcar como ${STATUS_LABELS[getNextStatus(pedido.status)].toLowerCase()}`}
+                                </button>
+                              )}
+                            </div>
                           </td>
                           <td className={styles.dataCol}>
                             {new Date(pedido.criado_em).toLocaleDateString('pt-BR')}

@@ -8,6 +8,8 @@ const asyncHandler = require('../src/utils/asyncHandler');
 const AppError = require('../src/middlewares/appError');
 const errorHandler = require('../src/middlewares/errorHandler');
 const notFound = require('../src/middlewares/notFound');
+const carrinhoAbandonoDTO = require('../src/dtos/carrinhoAbandonoDTO');
+const pedidoService = require('../src/services/pedidoService');
 
 const tests = [];
 
@@ -111,6 +113,48 @@ test('AppError stores status and message', () => {
   assert.equal(error.name, 'AppError');
   assert.equal(error.statusCode, 404);
   assert.equal(error.message, 'Route not found');
+});
+
+test('cart abandonment date range preserves local calendar dates', () => {
+  const range = carrinhoAbandonoDTO.getRangeFromQuery({
+    dataInicio: '2026-05-12',
+    dataFim: '2026-06-10',
+  });
+
+  assert.equal(range.start.getFullYear(), 2026);
+  assert.equal(range.start.getMonth(), 4);
+  assert.equal(range.start.getDate(), 12);
+  assert.equal(range.start.getHours(), 0);
+  assert.equal(range.end.getFullYear(), 2026);
+  assert.equal(range.end.getMonth(), 5);
+  assert.equal(range.end.getDate(), 10);
+  assert.equal(range.end.getHours(), 23);
+});
+
+test('cross-sell counts each product pair once per order', () => {
+  const result = pedidoService.calcularCrossSell([
+    {
+      itens: [
+        { id_produto: 1, produto: { id: 1, nome: 'Produto A' } },
+        { id_produto: 2, produto: { id: 2, nome: 'Produto B' } },
+        { id_produto: 2, produto: { id: 2, nome: 'Produto B' } },
+      ],
+    },
+    {
+      itens: [
+        { id_produto: 1, produto: { id: 1, nome: 'Produto A' } },
+        { id_produto: 2, produto: { id: 2, nome: 'Produto B' } },
+        { id_produto: 3, produto: { id: 3, nome: 'Produto C' } },
+      ],
+    },
+  ], 10);
+
+  assert.equal(result.totalPedidosAnalisados, 2);
+  assert.equal(result.pedidosComMultiplosItens, 2);
+  assert.equal(result.topCombinacao.produtoA.nome, 'Produto A');
+  assert.equal(result.topCombinacao.produtoB.nome, 'Produto B');
+  assert.equal(result.topCombinacao.pedidosJuntos, 2);
+  assert.equal(result.combinacoesUnicas, 3);
 });
 
 test('notFound creates a 404 AppError', () => {

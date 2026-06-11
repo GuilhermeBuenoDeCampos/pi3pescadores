@@ -15,6 +15,7 @@ import FaturamentoCompleto from './pages/FaturamentoCompleto';
 import LeadtimeDetalhado from './pages/LeadtimeDetalhado';
 import SatisfacaoDetalhada from './pages/SatisfacaoDetalhada';
 import ComportamentoDetalhado from './pages/ComportamentoDetalhado';
+import CrossSellDetalhado from './pages/CrossSellDetalhado';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import useUserTracking from './hooks/useUserTracking';
@@ -115,6 +116,14 @@ function App() {
           element={
             <ProtectedRoute roles={['admin', 'funcionario']}>
               <ComportamentoDetalhado />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/cross-sell"
+          element={
+            <ProtectedRoute roles={['admin', 'funcionario']}>
+              <CrossSellDetalhado />
             </ProtectedRoute>
           }
         />

@@ -14,12 +14,22 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
   const [visitanteAlto, setVisitanteAlto] = useState(config?.visitantealto || 500);
   const [conversaoBaixa, setConversaoBaixa] = useState(config?.conversaobaixa || 2);
   const [conversaoAlta, setConversaoAlta] = useState(config?.conversaoalta || 8);
+  const [abandonoBaixa, setAbandonoBaixa] = useState(config?.abandonobaixa || 30);
+  const [abandonoAlta, setAbandonoAlta] = useState(config?.abandonoalta || 60);
+  const [cancelamentoBaixa, setCancelamentoBaixa] = useState(config?.cancelamentobaixa || 5);
+  const [cancelamentoAlta, setCancelamentoAlta] = useState(config?.cancelamentoalta || 15);
+  const [satisfacaoBaixa, setSatisfacaoBaixa] = useState(config?.satisfacaobaixa || 3);
+  const [satisfacaoAlta, setSatisfacaoAlta] = useState(config?.satisfacaoalta || 4);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const isRecompra = type === 'recompra';
   const isTicket = type === 'ticket';
   const isVisitante = type === 'visitante';
   const isConversao = type === 'conversao';
+  const isAbandono = type === 'abandono';
+  const isCancelamento = type === 'cancelamento';
+  const isSatisfacao = type === 'satisfacao';
+  const isNewRate = isAbandono || isCancelamento || isSatisfacao;
 
   useEffect(() => {
     if (isOpen) {
@@ -33,6 +43,12 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       setVisitanteAlto(config?.visitantealto || 500);
       setConversaoBaixa(config?.conversaobaixa || 2);
       setConversaoAlta(config?.conversaoalta || 8);
+      setAbandonoBaixa(config?.abandonobaixa || 30);
+      setAbandonoAlta(config?.abandonoalta || 60);
+      setCancelamentoBaixa(config?.cancelamentobaixa || 5);
+      setCancelamentoAlta(config?.cancelamentoalta || 15);
+      setSatisfacaoBaixa(config?.satisfacaobaixa || 3);
+      setSatisfacaoAlta(config?.satisfacaoalta || 4);
       setError('');
     }
   }, [config, isOpen]);
@@ -60,7 +76,15 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
-    if (!isRecompra && !isTicket && !isVisitante && !isConversao && (!faturamentoBaixo || !faturamentoAlto)) {
+    const newRateLow = isAbandono ? abandonoBaixa : isCancelamento ? cancelamentoBaixa : satisfacaoBaixa;
+    const newRateHigh = isAbandono ? abandonoAlta : isCancelamento ? cancelamentoAlta : satisfacaoAlta;
+
+    if (isNewRate && (newRateLow === '' || newRateHigh === '')) {
+      setError('Todos os campos sao obrigatorios');
+      return;
+    }
+
+    if (!isRecompra && !isTicket && !isVisitante && !isConversao && !isNewRate && (!faturamentoBaixo || !faturamentoAlto)) {
       setError('Todos os campos sao obrigatorios');
       return;
     }
@@ -85,7 +109,22 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
-    if (!isRecompra && !isTicket && !isVisitante && !isConversao && parseFloat(faturamentoBaixo) >= parseFloat(faturamentoAlto)) {
+    if (isNewRate && parseFloat(newRateLow) >= parseFloat(newRateHigh)) {
+      setError('O limite baixo deve ser menor que o limite alto');
+      return;
+    }
+
+    if ((isAbandono || isCancelamento) && parseFloat(newRateHigh) > 100) {
+      setError('A taxa deve estar entre 0 e 100');
+      return;
+    }
+
+    if (isSatisfacao && parseFloat(newRateHigh) > 5) {
+      setError('A satisfacao deve estar entre 0 e 5');
+      return;
+    }
+
+    if (!isRecompra && !isTicket && !isVisitante && !isConversao && !isNewRate && parseFloat(faturamentoBaixo) >= parseFloat(faturamentoAlto)) {
       setError('Faturamento baixo deve ser menor que faturamento alto');
       return;
     }
@@ -103,6 +142,12 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
         visitantealto: visitanteAlto,
         conversaobaixa: conversaoBaixa,
         conversaoalta: conversaoAlta,
+        abandonobaixa: abandonoBaixa,
+        abandonoalta: abandonoAlta,
+        cancelamentobaixa: cancelamentoBaixa,
+        cancelamentoalta: cancelamentoAlta,
+        satisfacaobaixa: satisfacaoBaixa,
+        satisfacaoalta: satisfacaoAlta,
       });
       onConfigUpdated(updated);
       onClose();
@@ -119,7 +164,7 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>{isRecompra ? 'Configurar Recompra' : isTicket ? 'Configurar Ticket Medio' : isVisitante ? 'Configurar Visitantes' : isConversao ? 'Configurar Conversao' : 'Configurar Faturamento'}</h2>
+          <h2>{isRecompra ? 'Configurar Recompra' : isTicket ? 'Configurar Ticket Medio' : isVisitante ? 'Configurar Visitantes' : isConversao ? 'Configurar Conversao' : isAbandono ? 'Configurar Abandono' : isCancelamento ? 'Configurar Cancelamento' : isSatisfacao ? 'Configurar Satisfacao' : 'Configurar Faturamento'}</h2>
           <button className={styles.closeBtn} onClick={onClose}>
             <FiX size={20} />
           </button>
@@ -128,7 +173,49 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
         <div className={styles.content}>
           {error && <div className={styles.error}>{error}</div>}
 
-          {isRecompra ? (
+          {isNewRate ? (
+            <>
+              <div className={styles.fieldGroup}>
+                <label htmlFor={`${type}-baixo`}>Limite baixo {isSatisfacao ? '(nota)' : '(%)'}</label>
+                <input
+                  id={`${type}-baixo`}
+                  type="number"
+                  min="0"
+                  max={isSatisfacao ? 5 : 100}
+                  step="0.01"
+                  value={isAbandono ? abandonoBaixa : isCancelamento ? cancelamentoBaixa : satisfacaoBaixa}
+                  onChange={(event) => {
+                    if (isAbandono) setAbandonoBaixa(event.target.value);
+                    if (isCancelamento) setCancelamentoBaixa(event.target.value);
+                    if (isSatisfacao) setSatisfacaoBaixa(event.target.value);
+                  }}
+                  disabled={loading}
+                />
+              </div>
+              <div className={styles.fieldGroup}>
+                <label htmlFor={`${type}-alto`}>Limite alto {isSatisfacao ? '(nota)' : '(%)'}</label>
+                <input
+                  id={`${type}-alto`}
+                  type="number"
+                  min="0"
+                  max={isSatisfacao ? 5 : 100}
+                  step="0.01"
+                  value={isAbandono ? abandonoAlta : isCancelamento ? cancelamentoAlta : satisfacaoAlta}
+                  onChange={(event) => {
+                    if (isAbandono) setAbandonoAlta(event.target.value);
+                    if (isCancelamento) setCancelamentoAlta(event.target.value);
+                    if (isSatisfacao) setSatisfacaoAlta(event.target.value);
+                  }}
+                  disabled={loading}
+                />
+              </div>
+              <p className={styles.info}>
+                {isSatisfacao
+                  ? 'Abaixo do limite baixo: critico. Entre os limites: atencao. Acima do limite alto: bom.'
+                  : 'Abaixo do limite baixo: bom. Entre os limites: atencao. Acima do limite alto: critico.'}
+              </p>
+            </>
+          ) : isRecompra ? (
             <>
               <div className={styles.fieldGroup}>
                 <label htmlFor="recompra-baixa">Recompra Baixa (%)</label>

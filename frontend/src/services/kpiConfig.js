@@ -36,6 +36,12 @@ export const atualizarKpiConfig = async (config) => {
         visitantealto: parseFloat(config.visitantealto),
         conversaobaixa: parseFloat(config.conversaobaixa),
         conversaoalta: parseFloat(config.conversaoalta),
+        abandonobaixa: parseFloat(config.abandonobaixa),
+        abandonoalta: parseFloat(config.abandonoalta),
+        cancelamentobaixa: parseFloat(config.cancelamentobaixa),
+        cancelamentoalta: parseFloat(config.cancelamentoalta),
+        satisfacaobaixa: parseFloat(config.satisfacaobaixa),
+        satisfacaoalta: parseFloat(config.satisfacaoalta),
       }),
     });
 
