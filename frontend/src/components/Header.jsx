@@ -51,7 +51,7 @@ function Header() {
         </div>
       </div>
       <nav className={styles.navLinks}>
-        <Link to="/" className={styles.desktopNavLink}>Inicio</Link>
+        <Link to="/" className={styles.desktopNavLink} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Inicio</Link>
         <a href="#categories" className={styles.desktopNavLink}>Categorias</a>
         <a href="#catalog" className={styles.desktopNavLink}>Catalogo</a>
         {user ? (
