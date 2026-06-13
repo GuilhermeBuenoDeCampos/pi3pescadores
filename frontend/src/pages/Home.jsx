@@ -219,7 +219,7 @@ function Home() {
               </button>
             </div>
 
-            <div className={styles.desktopFilters}>
+            <div id="categories" className={styles.desktopFilters}>
               <CategoryFilter
                 categories={categories}
                 activeCategory={activeCategory}

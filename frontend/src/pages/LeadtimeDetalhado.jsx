@@ -8,20 +8,9 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import {
-  FiArrowLeft,
-  FiBarChart2,
-  FiClock,
-  FiGrid,
-  FiLogOut,
-  FiPackage,
-  FiRefreshCw,
-  FiTruck,
-  FiUser,
-} from 'react-icons/fi';
+import { FiArrowLeft, FiRefreshCw } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/logo/logo.png';
-import { clearAuthSession, getAuthUser } from '../services/api';
+import AdminSidebar from '../components/AdminSidebar';
 import { obterLeadtimePorPeriodo, obterMediaLeadtime } from '../services/leadtime';
 import styles from './LeadtimeDetalhado.module.css';
 
@@ -84,7 +73,6 @@ function getPedidoInfo(item) {
 
 function LeadtimeDetalhado() {
   const navigate = useNavigate();
-  const user = getAuthUser();
   const [media, setMedia] = useState(null);
   const [registros, setRegistros] = useState([]);
   const [periodo, setPeriodo] = useState(1);
@@ -172,45 +160,9 @@ function LeadtimeDetalhado() {
     };
   });
 
-  const handleLogout = () => {
-    clearAuthSession();
-    navigate('/login');
-  };
-
   return (
     <main className={styles.container}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <img src={logo} alt="Tres Pescadores Store" className={styles.logo} />
-          <div>
-            <strong>Tres Pescadores</strong>
-            <span>Painel administrativo</span>
-          </div>
-        </div>
-
-        <nav className={styles.sidebarNav} aria-label="Navegacao administrativa">
-          <span className={styles.navLabel}>Operacao</span>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/admin')}><FiGrid /> Dashboard</button>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/estoque')}><FiPackage /> Estoque</button>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/vendas')}><FiTruck /> Vendas</button>
-          <span className={styles.navLabel}>Indicadores</span>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/admin/faturamento-completo')}><FiBarChart2 /> Faturamento</button>
-          <button className={`${styles.navItem} ${styles.navItemActive}`} type="button"><FiClock /> Lead time</button>
-        </nav>
-
-        <div className={styles.sidebarFooter}>
-          <div className={styles.userCard}>
-            <FiUser />
-            <div>
-              <strong>{user?.nome || user?.email || 'Administrador'}</strong>
-              <span>{user?.role || 'admin'}</span>
-            </div>
-          </div>
-          <button className={styles.logoutButton} type="button" onClick={handleLogout}>
-            <FiLogOut /> Sair
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       <section className={styles.mainArea}>
         <header className={styles.header}>

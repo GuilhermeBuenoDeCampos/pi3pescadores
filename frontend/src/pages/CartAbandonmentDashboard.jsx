@@ -9,8 +9,8 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiCheckCircle, FiFilter, FiPercent, FiShoppingCart, FiXCircle } from 'react-icons/fi';
+import { FiCheckCircle, FiFilter, FiPercent, FiShoppingCart, FiXCircle } from 'react-icons/fi';
+import AdminSidebar from '../components/AdminSidebar';
 import CartAbandonmentMetricCard from '../components/CartAbandonmentMetricCard';
 import { EmptyState, ErrorState, LoadingState } from '../components/CartAbandonmentStates';
 import {
@@ -148,17 +148,15 @@ function CartAbandonmentDashboard() {
   }
 
   return (
-    <main className={styles.page}>
-      <header className={styles.topBar}>
-        <div>
-          <Link to="/admin" className={styles.backButton}>
-            <FiArrowLeft size={16} />
-            Voltar
-          </Link>
-          <h1>Abandono de carrinho</h1>
-          <p>Monitore carrinhos ativos, finalizados e abandonados por periodo.</p>
-        </div>
-      </header>
+    <div className={styles.container}>
+      <AdminSidebar />
+      <div className={styles.mainArea}>
+        <header className={styles.topBar}>
+          <div>
+            <h1>Abandono de carrinho</h1>
+            <p>Monitore carrinhos ativos, finalizados e abandonados por periodo.</p>
+          </div>
+        </header>
 
       <form className={styles.filters} onSubmit={handleSubmit}>
         <label>
@@ -235,7 +233,8 @@ function CartAbandonmentDashboard() {
           </section>
         </>
       ) : null}
-    </main>
+      </div>
+    </div>
   );
 }
 

@@ -6,13 +6,14 @@ import {
   Tooltip,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
-import { FiBarChart2, FiDollarSign, FiGrid, FiHelpCircle, FiHome, FiLink, FiLogOut, FiPackage, FiRefreshCw, FiShoppingCart, FiStar, FiUser, FiUsers, FiSettings, FiX, FiXCircle } from 'react-icons/fi';
+import { FiHelpCircle, FiLink, FiRefreshCw, FiShoppingCart, FiStar, FiSettings, FiX, FiXCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/logo.png';
+import AdminSidebar from '../components/AdminSidebar';
 import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
-import { apiFetch, clearAuthSession, fetchCrossSell, fetchKpiSatisfacao, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaCancelamento, fetchTaxaRecompraAnual, getAuthUser, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
+import { apiFetch, fetchCrossSell, fetchKpiSatisfacao, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaCancelamento, fetchTaxaRecompraAnual, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
 import clockTowerBar from '../assets/admin/clock-tower-bar.png';
 import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
@@ -885,40 +886,7 @@ function AdminDashboard() {
 
   return (
     <main className={styles.page}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <img src={logo} alt="Tres Pescadores Store" />
-          <div>
-            <strong>Tres Pescadores</strong>
-            <span>Admin Console</span>
-          </div>
-        </div>
-
-        <nav className={styles.sidebarNav} aria-label="Menu administrativo">
-          <span className={styles.navLabel}>Principal</span>
-          <button className={`${styles.navItem} ${styles.navItemActive}`} type="button"><FiGrid /> Visao geral</button>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/vendas')}><FiBarChart2 /> Vendas</button>
-          <span className={styles.navLabel}>Gestao</span>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/admin/usuarios')}><FiUsers /> Usuarios</button>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/estoque')}><FiPackage /> Estoque</button>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/admin/faturamento-completo')}><FiDollarSign /> Faturamento</button>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/admin/carrinho-abandono')}><FiShoppingCart /> Abandono</button>
-          <button className={styles.navItem} type="button" onClick={() => navigate('/')}><FiHome /> Loja</button>
-        </nav>
-
-        <div className={styles.sidebarFooter}>
-          <div className={styles.userCard}>
-            <FiUser />
-            <div>
-              <strong>{getAuthUser()?.nome || 'Usuario'}</strong>
-              <span>Administrador</span>
-            </div>
-          </div>
-          <button className={styles.logoutButton} type="button" onClick={() => { clearAuthSession(); navigate('/login'); }}>
-            <FiLogOut /> Sair
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       <section className={styles.shell}>
         <header className={styles.hero}>

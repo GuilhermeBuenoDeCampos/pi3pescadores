@@ -13,16 +13,15 @@ import {
 } from 'chart.js';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import {
-  FiArrowLeft, FiBarChart2, FiDownload, FiGrid, FiLogOut,
-  FiPackage, FiPieChart, FiSettings, FiTrendingUp, FiUser, FiDollarSign,
-  FiCalendar, FiTarget, FiCreditCard, FiTruck,
+  FiBarChart2, FiCreditCard, FiDownload, FiDollarSign,
+  FiGrid, FiPackage, FiPieChart, FiTarget, FiTrendingUp, FiCalendar, FiTruck,
 } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import { applyPlugin } from 'jspdf-autotable';
 applyPlugin(jsPDF);
-import logo from '../assets/logo/logo.png';
-import { clearAuthSession, getAuthUser } from '../services/api';
+import { getAuthUser } from '../services/api';
+import AdminSidebar from '../components/AdminSidebar';
 import {
   obterResumoFaturamento,
   obterFaturamentoPorCategoria,
@@ -648,51 +647,7 @@ function FaturamentoCompleto() {
 
   return (
     <div className={styles.container}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <img src={logo} alt="Tres Pescadores" className={styles.logo} />
-          <div>
-            <strong>Tres Pescadores</strong>
-            <span>Admin Console</span>
-          </div>
-        </div>
-
-        <nav className={styles.sidebarNav} aria-label="Menu de faturamento">
-          <span className={styles.navLabel}>Faturamento</span>
-          {sidebarItems.map(item => (
-            <button
-              key={item.id}
-              className={`${styles.navItem} ${activeTab === item.id ? styles.navItemActive : ''}`}
-              onClick={() => setActiveTab(item.id)}
-            >
-              <item.icon /> {item.label}
-            </button>
-          ))}
-          <span className={styles.navLabel}>Navegação</span>
-          <button className={styles.navItem} onClick={() => navigate('/admin')}>
-            <FiSettings /> Painel Admin
-          </button>
-          <button className={styles.navItem} onClick={() => navigate('/vendas')}>
-            <FiBarChart2 /> Vendas
-          </button>
-          <button className={styles.navItem} onClick={() => navigate('/estoque')}>
-            <FiPackage /> Estoque
-          </button>
-        </nav>
-
-        <div className={styles.sidebarFooter}>
-          <div className={styles.userCard}>
-            <FiUser />
-            <div>
-              <strong>{getAuthUser()?.nome || 'Usuário'}</strong>
-              <span>Financeiro</span>
-            </div>
-          </div>
-          <button className={styles.logoutButton} onClick={() => { clearAuthSession(); navigate('/login'); }}>
-            <FiLogOut /> Sair
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       <div className={styles.mainArea}>
         <header className={styles.header}>
@@ -702,9 +657,6 @@ function FaturamentoCompleto() {
             <div className={styles.subtitle}>Análise detalhada de receitas, metas e indicadores financeiros.</div>
           </div>
           <div className={styles.headerActions}>
-            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => navigate('/admin')}>
-              <FiArrowLeft /> Voltar
-            </button>
             <button className={`${styles.btn} ${styles.btnGreenLight}`} onClick={exportToExcel}>
               <FiDownload /> Excel
             </button>
@@ -715,6 +667,17 @@ function FaturamentoCompleto() {
         </header>
 
         <main className={styles.content}>
+          <div className={styles.tabBar}>
+            {sidebarItems.map(item => (
+              <button
+                key={item.id}
+                className={`${styles.tabButton} ${activeTab === item.id ? styles.tabButtonActive : ''}`}
+                onClick={() => setActiveTab(item.id)}
+              >
+                <item.icon /> {item.label}
+              </button>
+            ))}
+          </div>
           {loading ? (
             <div className={styles.loadingState}>Carregando dados de faturamento...</div>
           ) : (
