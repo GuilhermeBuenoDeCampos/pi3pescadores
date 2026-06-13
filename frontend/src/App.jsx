@@ -42,7 +42,7 @@ function App() {
         <Route
           path="/meus-enderecos"
           element={
-            <ProtectedRoute roles={['cliente']} redirectTo="/login">
+            <ProtectedRoute>
               <AccountPage type="addresses" />
             </ProtectedRoute>
           }
