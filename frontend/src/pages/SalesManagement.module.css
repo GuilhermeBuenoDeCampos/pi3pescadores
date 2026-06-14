@@ -218,6 +218,7 @@
   font-weight: 700;
   color: var(--indigo-dark);
   font-size: 0.98rem;
+  font-variant-numeric: lining-nums;
 }
 
 .statusActions {

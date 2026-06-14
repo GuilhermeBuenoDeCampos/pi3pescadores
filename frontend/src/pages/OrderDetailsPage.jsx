@@ -3,6 +3,7 @@ import { FiStar } from 'react-icons/fi';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import OrderNumber from '../components/OrderNumber';
 import OrderStatusBadge from '../components/OrderStatusBadge';
 import CustomerSatisfactionModal from '../components/CustomerSatisfactionModal';
 import { criarAvaliacao, fetchMinhaAvaliacaoPedido, fetchMeuPedido, getAuthToken, getImageUrl } from '../services/api';
@@ -192,7 +193,7 @@ function OrderDetailsPage() {
             <section className={styles.hero}>
               <div>
                 <span className={styles.label}>Pedido</span>
-                <h1>{order.numero_pedido}</h1>
+                <h1><OrderNumber numero={order.numero_pedido} /></h1>
                 <p>Criado em {formatDate(order.criado_em)}</p>
               </div>
               <OrderStatusBadge status={order.status} />

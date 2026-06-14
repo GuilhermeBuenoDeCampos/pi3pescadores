@@ -347,6 +347,10 @@
   font-size: 0.86rem;
 }
 
+.orderCell {
+  font-variant-numeric: lining-nums;
+}
+
 .statusBadge {
   display: inline-flex;
   align-items: center;

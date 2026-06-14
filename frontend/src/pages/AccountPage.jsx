@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { FaEdit, FaMapMarkerAlt, FaPlus, FaSearch, FaStar, FaTimes, FaTrash } from 'react-icons/fa';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import OrderNumber from '../components/OrderNumber';
 import OrderStatusBadge, { STATUS_LABELS } from '../components/OrderStatusBadge';
 import {
   createAddress,
@@ -215,7 +216,7 @@ function OrdersPage() {
                 <div className={styles.orderContent}>
                   <div className={styles.orderTop}>
                     <div>
-                      <span className={styles.orderNumber}>{order.numero_pedido}</span>
+                      <span className={styles.orderNumber}><OrderNumber numero={order.numero_pedido} /></span>
                       <time>{formatDate(order.criado_em)}</time>
                     </div>
                     <OrderStatusBadge status={order.status} />

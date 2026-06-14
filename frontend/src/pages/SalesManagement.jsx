@@ -7,6 +7,7 @@ import {
   atualizarStatusPedido,
 } from '../services/api';
 import AdminSidebar from '../components/AdminSidebar';
+import OrderNumber from '../components/OrderNumber';
 import styles from './SalesManagement.module.css';
 
 const ORDER_FLOW = ['pendente', 'confirmado', 'preparando', 'enviado', 'concluido'];
@@ -282,7 +283,7 @@ const SalesManagement = () => {
                     ) : (
                       pedidos.map((pedido) => (
                         <tr key={pedido.id}>
-                          <td className={styles.pedidoNum}>{pedido.numero_pedido}</td>
+                          <td className={styles.pedidoNum}><OrderNumber numero={pedido.numero_pedido} /></td>
                           <td>{pedido.nome_cliente || 'N/A'}</td>
                           <td>{pedido.itens?.length || 0}</td>
                           <td>R$ {parseFloat(pedido.valor_total || 0).toFixed(2)}</td>
@@ -362,7 +363,7 @@ const SalesManagement = () => {
         <div className={styles.modalOverlay} onClick={handleFecharModal}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2>Detalhes do Pedido #{selectedPedido.numero_pedido}</h2>
+              <h2>Detalhes do Pedido #<OrderNumber numero={selectedPedido.numero_pedido} /></h2>
               <button className={styles.closeBtn} onClick={handleFecharModal}>
                 <FiX size={24} />
               </button>

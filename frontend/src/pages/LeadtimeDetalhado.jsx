@@ -11,6 +11,7 @@ import { Bar } from 'react-chartjs-2';
 import { FiArrowLeft, FiRefreshCw } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
+import OrderNumber from '../components/OrderNumber';
 import { obterLeadtimePorPeriodo, obterMediaLeadtime } from '../services/leadtime';
 import styles from './LeadtimeDetalhado.module.css';
 
@@ -268,7 +269,7 @@ function LeadtimeDetalhado() {
                 )}
                 {tableRows.map((row) => (
                   <tr key={row.id}>
-                    <td>{row.pedido}</td>
+                    <td className={styles.orderCell}><OrderNumber numero={row.pedido} /></td>
                     <td>{row.cliente}</td>
                     <td><span className={styles.statusBadge}>{row.status}</span></td>
                     <td>{formatDate(row.criado)}</td>
