@@ -57,6 +57,7 @@
 .kpiCard {
   min-height: 112px;
   background: #5366aa;
+  border: 3px solid transparent;
   border-radius: 18px;
   color: #ffffff;
   padding: 22px;
@@ -367,13 +368,26 @@
   position: relative;
   min-height: 180px;
   justify-content: flex-end;
-  background: linear-gradient(145deg, #405394 0%, #5366aa 52%, #08936f 100%);
   overflow: hidden;
+}
+
+.satisfactionKpiOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(16, 24, 44, 0.9) 0%,
+    rgba(16, 24, 44, 0.68) 56%,
+    rgba(16, 24, 44, 0.28) 100%
+  );
+  pointer-events: none;
 }
 
 .satisfactionKpi::after {
   position: absolute;
   inset: auto -30px -46px auto;
+  z-index: 1;
   width: 150px;
   height: 150px;
   border: 24px solid rgba(255, 255, 255, 0.1);
@@ -391,6 +405,7 @@
   position: absolute;
   top: 18px;
   right: 18px;
+  z-index: 2;
   width: 32px;
   height: 32px;
   color: #f3d870;
@@ -401,16 +416,27 @@
   min-height: 180px;
   justify-content: flex-end;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 82% 18%, rgba(243, 216, 112, 0.32), transparent 28%),
-    linear-gradient(145deg, #10182c 0%, #405394 56%, #5366aa 100%);
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.abandonmentKpiOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(16, 24, 44, 0.9) 0%,
+    rgba(16, 24, 44, 0.68) 56%,
+    rgba(16, 24, 44, 0.28) 100%
+  );
+  pointer-events: none;
 }
 
 .abandonmentKpi::after {
   position: absolute;
   right: -46px;
   bottom: -62px;
+  z-index: 1;
   width: 180px;
   height: 180px;
   border: 26px solid rgba(255, 255, 255, 0.08);
@@ -435,6 +461,7 @@
   position: absolute;
   top: 18px;
   right: 18px;
+  z-index: 2;
   width: 34px;
   height: 34px;
   color: #f3d870;
@@ -445,16 +472,27 @@
   min-height: 180px;
   justify-content: flex-end;
   overflow: hidden;
-  background:
-    linear-gradient(135deg, rgba(8, 147, 111, 0.96), rgba(64, 83, 148, 0.94)),
-    #08936f;
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.crossSellKpiOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(16, 24, 44, 0.9) 0%,
+    rgba(16, 24, 44, 0.68) 56%,
+    rgba(16, 24, 44, 0.28) 100%
+  );
+  pointer-events: none;
 }
 
 .crossSellKpi::after {
   position: absolute;
   top: -48px;
   left: -38px;
+  z-index: 1;
   width: 154px;
   height: 154px;
   border: 24px solid rgba(255, 255, 255, 0.09);
@@ -479,6 +517,7 @@
   position: absolute;
   top: 18px;
   right: 18px;
+  z-index: 2;
   width: 34px;
   height: 34px;
   color: #f3d870;
@@ -489,16 +528,27 @@
   min-height: 180px;
   justify-content: flex-end;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.2), transparent 28%),
-    linear-gradient(145deg, #611a2b 0%, #b53b4d 58%, #dc6572 100%);
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.cancellationKpiOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(16, 24, 44, 0.9) 0%,
+    rgba(16, 24, 44, 0.68) 56%,
+    rgba(16, 24, 44, 0.28) 100%
+  );
+  pointer-events: none;
 }
 
 .cancellationKpi::after {
   position: absolute;
   right: -48px;
   bottom: -62px;
+  z-index: 1;
   width: 180px;
   height: 180px;
   border: 26px solid rgba(255, 255, 255, 0.08);
@@ -523,27 +573,72 @@
   position: absolute;
   top: 18px;
   right: 18px;
+  z-index: 2;
   width: 34px;
   height: 34px;
   color: #ffd0d5;
 }
 
 .kpiLevelGood {
-  background:
-    radial-gradient(circle at 82% 18%, rgba(243, 216, 112, 0.2), transparent 28%),
-    linear-gradient(145deg, #075f4b 0%, #08936f 58%, #42b58f 100%);
+  --kpi-border: #4ade80;
+  --kpi-border-soft: rgba(74, 222, 128, 0.42);
+  --kpi-glow: rgba(34, 197, 94, 0.34);
+  border-color: var(--kpi-border) !important;
+  outline: 1px solid var(--kpi-border-soft);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 1px rgba(7, 95, 75, 0.32),
+    0 0 22px var(--kpi-glow),
+    0 20px 42px rgba(7, 95, 75, 0.24),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55) !important;
 }
 
 .kpiLevelWarning {
-  background:
-    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.2), transparent 28%),
-    linear-gradient(145deg, #76530c 0%, #c28a18 58%, #dfa93a 100%);
+  --kpi-border: #fde047;
+  --kpi-border-soft: rgba(253, 224, 71, 0.44);
+  --kpi-glow: rgba(250, 204, 21, 0.34);
+  border-color: var(--kpi-border) !important;
+  outline: 1px solid var(--kpi-border-soft);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 1px rgba(118, 83, 12, 0.3),
+    0 0 22px var(--kpi-glow),
+    0 20px 42px rgba(118, 83, 12, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55) !important;
 }
 
 .kpiLevelCritical {
-  background:
-    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.2), transparent 28%),
-    linear-gradient(145deg, #611a2b 0%, #b53b4d 58%, #dc6572 100%);
+  --kpi-border: #fb7185;
+  --kpi-border-soft: rgba(251, 113, 133, 0.44);
+  --kpi-glow: rgba(239, 68, 68, 0.36);
+  border-color: var(--kpi-border) !important;
+  outline: 1px solid var(--kpi-border-soft);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 1px rgba(97, 26, 43, 0.34),
+    0 0 22px var(--kpi-glow),
+    0 20px 42px rgba(97, 26, 43, 0.26),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55) !important;
+}
+
+.kpiLevelGood,
+.kpiLevelWarning,
+.kpiLevelCritical {
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    outline-color 0.22s ease,
+    filter 0.22s ease;
+}
+
+.clickableKpiCard.kpiLevelGood:hover,
+.clickableKpiCard.kpiLevelWarning:hover,
+.clickableKpiCard.kpiLevelCritical:hover {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--kpi-border) 72%, transparent),
+    0 0 30px var(--kpi-glow),
+    0 26px 52px color-mix(in srgb, var(--kpi-border) 24%, transparent),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.68) !important;
 }
 
 .crossSellPair {
@@ -563,6 +658,7 @@
     linear-gradient(rgba(30, 24, 16, 0.38), rgba(30, 24, 16, 0.48)),
     url('https://pi3pescadores.onrender.com/uploads/img/acuracidade.jpeg') center / cover;
   color: #ffffff;
+  border: 3px solid transparent;
   border-radius: 12px;
   box-shadow: 0 16px 34px rgba(47, 58, 98, 0.07);
   padding: 16px;
@@ -588,8 +684,10 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: url('../assets/admin/room-chart-bg.jpg') center / cover no-repeat;
-  opacity: 0.2;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(243, 216, 112, 0.2), transparent 28%),
+    radial-gradient(circle at 82% 78%, rgba(8, 147, 111, 0.16), transparent 30%),
+    linear-gradient(135deg, rgba(83, 102, 170, 0.08), rgba(16, 24, 44, 0.03));
   pointer-events: none;
 }
 
@@ -897,6 +995,7 @@
 
 .behaviorCard {
   min-height: 300px;
+  border: 3px solid transparent;
   border-radius: 12px;
   box-shadow: 0 16px 34px rgba(47, 58, 98, 0.07);
   padding: 18px;

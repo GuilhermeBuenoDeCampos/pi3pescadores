@@ -14,8 +14,6 @@ import nsaVerde from '../assets/logo/nsa-verde.png';
 import nsaAmarelo from '../assets/logo/nsa-amarelo.png';
 import nsaVermelho from '../assets/logo/nsa-vermelho.png';
 import { apiFetch, fetchCrossSell, fetchKpiSatisfacao, fetchMediaAcuracidade, fetchPalavrasMaisPesquisadas, fetchTaxaCancelamento, fetchTaxaRecompraAnual, getAuthToken, API_URL, BACKEND_URL } from '../services/api';
-import clockTowerBar from '../assets/admin/clock-tower-bar.png';
-import cableCarPoint from '../assets/admin/cable-car-point.png';
 import faturamentoBaixoImg from '../assets/admin/faturamentobaixo.jpg';
 import faturamentoMedioImg from '../assets/admin/faturamentomedio.jpg';
 import faturamentoAltoImg from '../assets/admin/faturamentoalto.png';
@@ -34,6 +32,18 @@ import conversaoMediaImg from '../assets/admin/SBnormal.png';
 import conversaoAltaImg from '../assets/admin/conversao-alta.png';
 import saoPedroImg from '../assets/admin/saopedro.png';
 import basilicaImg from '../assets/admin/basilica-aparecida.jpg';
+import abandonoBomImg from '../assets/admin/abandono-bom.png';
+import abandonoRegularImg from '../assets/admin/abandono-regular.png';
+import abandonoRuimImg from '../assets/admin/abandono-ruim.png';
+import crossSellBomImg from '../assets/admin/cross-sell-bom.png';
+import crossSellRegularImg from '../assets/admin/cross-sell-regular.png';
+import crossSellRuimImg from '../assets/admin/cross-sell-ruim.png';
+import cancelamentoBomImg from '../assets/admin/cancelamento-bom.png';
+import cancelamentoRegularImg from '../assets/admin/cancelamento-regular.png';
+import cancelamentoRuimImg from '../assets/admin/cancelamento-ruim.png';
+import satisfacaoBomImg from '../assets/admin/satisfacao-bom.png';
+import satisfacaoRegularImg from '../assets/admin/satisfacao-regular.png';
+import satisfacaoRuimImg from '../assets/admin/satisfacao-ruim.png';
 import { obterTaxaConversao } from '../services/visitanteEvento';
 import { obterKpiConfig } from '../services/kpiConfig';
 import { obterMediaLeadtime } from '../services/leadtime';
@@ -58,258 +68,6 @@ const chartColors = {
   softTeal: '#c8ded6',
   grid: 'rgba(16, 24, 44, 0.08)',
 };
-
-function roundedRect(ctx, x, y, width, height, radius) {
-  const safeRadius = Math.min(radius, width / 2, height / 2);
-
-  ctx.beginPath();
-  ctx.moveTo(x + safeRadius, y);
-  ctx.lineTo(x + width - safeRadius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + safeRadius);
-  ctx.lineTo(x + width, y + height - safeRadius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - safeRadius, y + height);
-  ctx.lineTo(x + safeRadius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - safeRadius);
-  ctx.lineTo(x, y + safeRadius);
-  ctx.quadraticCurveTo(x, y, x + safeRadius, y);
-  ctx.closePath();
-}
-
-function drawFlame(ctx, x, y, size, intensity) {
-  const flameColors = intensity < 0.2
-    ? {
-        middle: '#ff6a45',
-        edge: '#c62828',
-        glow: 'rgba(255, 95, 72, 0.58)',
-        glowSoft: 'rgba(255, 95, 72, 0.22)',
-        stroke: 'rgba(131, 35, 30, 0.26)',
-      }
-    : intensity > 0.9
-      ? {
-          middle: '#9eea8f',
-          edge: '#2f9d59',
-          glow: 'rgba(104, 218, 128, 0.55)',
-          glowSoft: 'rgba(104, 218, 128, 0.2)',
-          stroke: 'rgba(38, 111, 67, 0.24)',
-        }
-      : {
-          middle: '#ffd978',
-          edge: '#f4a43d',
-          glow: 'rgba(255, 210, 98, 0.58)',
-          glowSoft: 'rgba(255, 210, 98, 0.22)',
-          stroke: 'rgba(140, 88, 21, 0.24)',
-        };
-
-  const glow = ctx.createRadialGradient(x, y + size * 0.16, size * 0.12, x, y + size * 0.16, size * 1.45);
-  glow.addColorStop(0, flameColors.glow);
-  glow.addColorStop(0.45, flameColors.glowSoft);
-  glow.addColorStop(1, 'rgba(255, 210, 98, 0)');
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.arc(x, y + size * 0.2, size * 1.35, 0, Math.PI * 2);
-  ctx.fill();
-
-  const flameGradient = ctx.createLinearGradient(x, y - size * 0.9, x, y + size * 0.85);
-  flameGradient.addColorStop(0, '#fff7b8');
-  flameGradient.addColorStop(0.42, flameColors.middle);
-  flameGradient.addColorStop(1, flameColors.edge);
-
-  ctx.fillStyle = flameGradient;
-  ctx.strokeStyle = flameColors.stroke;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(x, y - size * 0.9);
-  ctx.bezierCurveTo(x + size * 0.62, y - size * 0.1, x + size * 0.48, y + size * 0.55, x, y + size * 0.86);
-  ctx.bezierCurveTo(x - size * 0.56, y + size * 0.5, x - size * 0.48, y - size * 0.1, x, y - size * 0.9);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = 'rgba(255, 255, 230, 0.92)';
-  ctx.beginPath();
-  ctx.ellipse(x + size * 0.09, y + size * 0.05, size * 0.18, size * 0.42, 0.15, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-function drawCandle(ctx, x, lineY, baseY, width, valueRatio) {
-  const minBodyHeight = 24;
-  const bodyWidth = width;
-  const bodyX = x - bodyWidth / 2;
-  const availableHeight = Math.max(minBodyHeight, baseY - lineY);
-
-  const flameSize = Math.max(12, Math.min(22, availableHeight * 0.1));
-  const wickHeight = Math.max(10, Math.min(18, availableHeight * 0.06));
-  const candleTop = lineY;
-  const bodyHeight = Math.max(minBodyHeight, baseY - candleTop);
-  const flameCenterY = candleTop - wickHeight - flameSize * 0.5;
-
-  ctx.save();
-  ctx.shadowColor = 'rgba(95, 63, 25, 0.2)';
-  ctx.shadowBlur = 12;
-  ctx.shadowOffsetY = 6;
-
-  const baseGradient = ctx.createLinearGradient(bodyX, baseY - 12, bodyX, baseY + 8);
-  baseGradient.addColorStop(0, '#9f6729');
-  baseGradient.addColorStop(0.5, '#f4ca75');
-  baseGradient.addColorStop(1, '#7c4718');
-  ctx.fillStyle = baseGradient;
-  roundedRect(ctx, bodyX - bodyWidth * 0.18, baseY - 13, bodyWidth * 1.36, 16, 8);
-  ctx.fill();
-
-  const bodyGradient = ctx.createLinearGradient(bodyX, candleTop, bodyX + bodyWidth, candleTop);
-  bodyGradient.addColorStop(0, '#b77a32');
-  bodyGradient.addColorStop(0.14, '#ffe5aa');
-  bodyGradient.addColorStop(0.48, '#fff2c9');
-  bodyGradient.addColorStop(0.78, '#e0a34d');
-  bodyGradient.addColorStop(1, '#8a541e');
-  ctx.fillStyle = bodyGradient;
-  roundedRect(ctx, bodyX, candleTop, bodyWidth, bodyHeight, 9);
-  ctx.fill();
-
-  ctx.shadowColor = 'transparent';
-  ctx.strokeStyle = 'rgba(120, 77, 27, 0.34)';
-  ctx.lineWidth = 1.5;
-  roundedRect(ctx, bodyX + 1, candleTop + 1, bodyWidth - 2, bodyHeight - 2, 8);
-  ctx.stroke();
-
-  ctx.fillStyle = 'rgba(119, 70, 23, 0.22)';
-  ctx.beginPath();
-  ctx.ellipse(x, candleTop + 2, bodyWidth * 0.43, 7, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#ffdf98';
-  roundedRect(ctx, bodyX + bodyWidth * 0.1, candleTop - 3, bodyWidth * 0.8, 8, 5);
-  ctx.fill();
-
-  ctx.strokeStyle = '#332414';
-  ctx.lineWidth = 1.7;
-  ctx.beginPath();
-  ctx.moveTo(x, candleTop - 2);
-  ctx.quadraticCurveTo(x + 2, candleTop - wickHeight * 0.5, x, candleTop - wickHeight);
-  ctx.stroke();
-
-  ctx.fillStyle = 'rgba(143, 80, 28, 0.26)';
-  roundedRect(ctx, bodyX + bodyWidth * 0.14, candleTop + 4, bodyWidth * 0.12, Math.max(14, bodyHeight * 0.18), 6);
-  ctx.fill();
-  if (bodyHeight > 62) {
-    roundedRect(ctx, bodyX + bodyWidth * 0.72, candleTop + 8, bodyWidth * 0.12, Math.max(12, bodyHeight * 0.12), 6);
-    ctx.fill();
-  }
-
-  drawFlame(ctx, x, flameCenterY, flameSize, valueRatio);
-  ctx.restore();
-}
-
-const revenueCandlesPlugin = {
-  id: 'revenueCandles',
-  afterDatasetsDraw(chart) {
-    const meta = chart.getDatasetMeta(0);
-    const yScale = chart.scales.y;
-    const dataset = chart.data.datasets[0];
-
-    if (!meta?.data?.length || !yScale || !dataset?.data?.length) {
-      return;
-    }
-
-    const values = dataset.data.map(Number);
-    const maxValue = Math.max(...values);
-    const baseY = yScale.getPixelForValue(yScale.min);
-    const slotWidth = chart.chartArea.width / values.length;
-    const candleWidth = Math.max(20, Math.min(46, slotWidth * 0.28));
-
-    chart.ctx.save();
-    meta.data.forEach((point, index) => {
-      const value = values[index];
-      const valueRatio = maxValue > 0 ? value / maxValue : 0;
-      drawCandle(chart.ctx, point.x, point.y, baseY - 4, candleWidth, valueRatio);
-    });
-    chart.ctx.restore();
-  },
-};
-
-function createTowerBarsPlugin(imageSrc) {
-  const image = new Image();
-  image.src = imageSrc;
-
-  return {
-    id: 'towerBars',
-    beforeInit(chart) {
-      image.onload = () => chart.draw();
-    },
-    afterDatasetsDraw(chart) {
-      const meta = chart.getDatasetMeta(0);
-      const yScale = chart.scales.y;
-
-      if (!meta?.data?.length || !yScale || !image.complete || image.naturalWidth === 0) {
-        return;
-      }
-
-      const baseY = yScale.getPixelForValue(yScale.min);
-      const sourceX = image.naturalWidth * 0.1;
-      const sourceY = 0;
-      const sourceWidth = image.naturalWidth * 0.8;
-      const sourceHeight = image.naturalHeight;
-      const sourceRatio = sourceWidth / sourceHeight;
-
-      chart.ctx.save();
-      meta.data.forEach((bar) => {
-        const barHeight = Math.max(0, baseY - bar.y);
-        const towerHeight = barHeight * 0.92;
-        const towerWidth = towerHeight * sourceRatio;
-        const towerX = bar.x - towerWidth / 2;
-        const towerY = baseY - towerHeight;
-
-        chart.ctx.drawImage(
-          image,
-          sourceX,
-          sourceY,
-          sourceWidth,
-          sourceHeight,
-          towerX,
-          towerY,
-          towerWidth,
-          towerHeight
-        );
-      });
-      chart.ctx.restore();
-    },
-  };
-}
-
-function createCableCarPointsPlugin(imageSrc) {
-  const image = new Image();
-  image.src = imageSrc;
-
-  return {
-    id: 'cableCarPoints',
-    beforeInit(chart) {
-      image.onload = () => chart.draw();
-    },
-    afterDatasetsDraw(chart) {
-      const meta = chart.getDatasetMeta(0);
-
-      if (!meta?.data?.length || !image.complete || image.naturalWidth === 0) {
-        return;
-      }
-
-      const sourceRatio = image.naturalWidth / image.naturalHeight;
-      const pointHeight = Math.max(46, Math.min(82, chart.chartArea.height * 0.3));
-      const pointWidth = pointHeight * sourceRatio;
-
-      chart.ctx.save();
-      meta.data.forEach((point) => {
-        chart.ctx.drawImage(
-          image,
-          point.x - pointWidth / 2,
-          point.y,
-          pointWidth,
-          pointHeight
-        );
-      });
-      chart.ctx.restore();
-    },
-  };
-}
 
 const kpiCalculations = {
   faturamento: {
@@ -451,6 +209,7 @@ function AdminDashboard() {
   const [showAbandonoModal, setShowAbandonoModal] = useState(false);
   const [showCancelamentoModal, setShowCancelamentoModal] = useState(false);
   const [showSatisfacaoModal, setShowSatisfacaoModal] = useState(false);
+  const [showCombagemModal, setShowCombagemModal] = useState(false);
   const [calculationHelp, setCalculationHelp] = useState(null);
   const [behaviorStats, setBehaviorStats] = useState(null);
   const [loadingBehavior, setLoadingBehavior] = useState(true);
@@ -615,6 +374,10 @@ function AdminDashboard() {
   const ticketBaixo = Number(kpiConfig?.ticketbaixo || 75);
   const ticketAlto = Number(kpiConfig?.ticketalto || 200);
   const ticketValor = Number(ticketMedio?.ticketMedioNumerico || 0);
+  const faturamentoValor = Number(
+    faturamentoMensal?.[faturamentoMensal.length - 1]?.faturamento || 0
+  );
+  const recompraValor = Number(taxaRecompra?.taxa || 0);
 
   let imagemTicket = ticketMedioImg;
   if (ticketValor < ticketBaixo) {
@@ -836,13 +599,55 @@ function AdminDashboard() {
     ],
   }), []);
 
-  const towerBarsPlugin = useMemo(() => createTowerBarsPlugin(clockTowerBar), []);
-  const cableCarPointsPlugin = useMemo(() => createCableCarPointsPlugin(cableCarPoint), []);
-
   const satisfactionAverage = Number(satisfactionKpis?.mediaGeral || 0);
   const satisfactionTotal = Number(satisfactionKpis?.totalAvaliacoes || 0);
   const abandonmentValue = Number(cartAbandonment?.taxaAbandono || 0);
   const cancellationValue = Number(cancellationRate?.taxaCancelamento || 0);
+  const combagemValue = Number(crossSell?.topCombinacao?.pedidosJuntos || 0);
+  const combagemBaixa = Number(kpiConfig?.combagembaixa ?? 2);
+  const combagemAlta = Number(kpiConfig?.combagemalta ?? 5);
+  const abandonoBaixo = Number(kpiConfig?.abandonobaixa ?? 30);
+  const abandonoAlto = Number(kpiConfig?.abandonoalta ?? 60);
+  const cancelamentoBaixo = Number(kpiConfig?.cancelamentobaixa ?? 5);
+  const cancelamentoAlto = Number(kpiConfig?.cancelamentoalta ?? 15);
+  const satisfacaoBaixa = Number(kpiConfig?.satisfacaobaixa ?? 3);
+  const satisfacaoAlta = Number(kpiConfig?.satisfacaoalta ?? 4);
+
+  let imagemAbandono = abandonoRegularImg;
+  if (!loadingCartAbandonment && cartAbandonment) {
+    if (abandonmentValue < abandonoBaixo) {
+      imagemAbandono = abandonoBomImg;
+    } else if (abandonmentValue > abandonoAlto) {
+      imagemAbandono = abandonoRuimImg;
+    }
+  }
+
+  let imagemCrossSell = crossSellRegularImg;
+  if (!loadingCrossSell && crossSell?.topCombinacao) {
+    if (combagemValue < combagemBaixa) {
+      imagemCrossSell = crossSellRuimImg;
+    } else if (combagemValue > combagemAlta) {
+      imagemCrossSell = crossSellBomImg;
+    }
+  }
+
+  let imagemCancelamento = cancelamentoRegularImg;
+  if (!loadingCancellationRate && cancellationRate) {
+    if (cancellationValue < cancelamentoBaixo) {
+      imagemCancelamento = cancelamentoBomImg;
+    } else if (cancellationValue > cancelamentoAlto) {
+      imagemCancelamento = cancelamentoRuimImg;
+    }
+  }
+
+  let imagemSatisfacao = satisfacaoRegularImg;
+  if (!loadingSatisfaction && satisfactionTotal > 0) {
+    if (satisfactionAverage < satisfacaoBaixa) {
+      imagemSatisfacao = satisfacaoRuimImg;
+    } else if (satisfactionAverage > satisfacaoAlta) {
+      imagemSatisfacao = satisfacaoBomImg;
+    }
+  }
 
   const getLowerIsBetterClass = (value, low, high) => {
     if (value < Number(low)) return styles.kpiLevelGood;
@@ -858,19 +663,39 @@ function AdminDashboard() {
 
   const abandonmentLevel = getLowerIsBetterClass(
     abandonmentValue,
-    kpiConfig?.abandonobaixa ?? 30,
-    kpiConfig?.abandonoalta ?? 60
+    abandonoBaixo,
+    abandonoAlto
   );
   const cancellationLevel = getLowerIsBetterClass(
     cancellationValue,
-    kpiConfig?.cancelamentobaixa ?? 5,
-    kpiConfig?.cancelamentoalta ?? 15
+    cancelamentoBaixo,
+    cancelamentoAlto
   );
-  const satisfactionLevel = getHigherIsBetterClass(
-    satisfactionAverage,
-    kpiConfig?.satisfacaobaixa ?? 3,
-    kpiConfig?.satisfacaoalta ?? 4
+  const satisfactionLevel = loadingSatisfaction || satisfactionTotal === 0
+    ? styles.kpiLevelWarning
+    : getHigherIsBetterClass(satisfactionAverage, satisfacaoBaixa, satisfacaoAlta);
+  const combagemLevel = loadingCrossSell || !crossSell?.topCombinacao
+    ? styles.kpiLevelWarning
+    : getHigherIsBetterClass(combagemValue, combagemBaixa, combagemAlta);
+  const faturamentoLevel = getHigherIsBetterClass(
+    faturamentoValor,
+    kpiConfig?.faturamento_baixo ?? 500,
+    kpiConfig?.faturamento_alto ?? 5000
   );
+  const ticketLevel = getHigherIsBetterClass(ticketValor, ticketBaixo, ticketAlto);
+  const recompraLevel = getHigherIsBetterClass(
+    recompraValor,
+    kpiConfig?.recomprabaixa ?? 20,
+    kpiConfig?.recompraalta ?? 50
+  );
+  const conversaoLevel = getHigherIsBetterClass(conversaoValor, conversaoBaixa, conversaoAlta);
+  const visitantesLevel = getHigherIsBetterClass(visitantesValor, visitanteBaixo, visitanteAlto);
+  const accuracyLevel = accuracyValue >= 95
+    ? styles.kpiLevelGood
+    : accuracyValue >= 90
+      ? styles.kpiLevelWarning
+      : styles.kpiLevelCritical;
+  const informationalLevel = styles.kpiLevelWarning;
   const accuracyData = useMemo(() => ({
     labels: ['Acuracidade media', 'Diferenca'],
     datasets: [
@@ -899,7 +724,7 @@ function AdminDashboard() {
 
         <section className={styles.kpiGrid} aria-label="Indicadores principais">
           <article 
-            className={`${styles.kpiCard} ${styles.clickableKpiCard}`}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${faturamentoLevel}`}
             role="link"
             tabIndex={0}
             onClick={() => navigate('/admin/faturamento-completo')}
@@ -979,7 +804,7 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={`${styles.kpiCard} ${styles.clickableKpiCard}`}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${ticketLevel}`}
             role="link"
             tabIndex={0}
             onClick={() => navigate('/vendas')}
@@ -1055,7 +880,7 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={styles.kpiCard}
+            className={`${styles.kpiCard} ${recompraLevel}`}
             style={{
               backgroundImage: `url(${getRecompraBackgroundImage()})`,
               backgroundSize: 'cover',
@@ -1118,7 +943,7 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={`${styles.kpiCard} ${styles.searchKpi}`}
+            className={`${styles.kpiCard} ${styles.searchKpi} ${informationalLevel}`}
             style={{
               backgroundImage: `url(${palavrasPesquisadasImg})`,
               backgroundSize: 'cover',
@@ -1157,7 +982,7 @@ function AdminDashboard() {
 
         <section className={styles.conversionSection} aria-label="Indicadores operacionais">
           <article
-            className={styles.kpiCard}
+            className={`${styles.kpiCard} ${conversaoLevel}`}
             style={{
               backgroundImage: `url(${imagemConversao})`,
               backgroundSize: 'cover',
@@ -1224,7 +1049,7 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={styles.kpiCard}
+            className={`${styles.kpiCard} ${visitantesLevel}`}
             style={{
               backgroundImage: `url(${imagemVisitante})`,
               backgroundSize: 'cover',
@@ -1290,7 +1115,7 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.leadtimeKpi}`}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.leadtimeKpi} ${informationalLevel}`}
             role="link"
             tabIndex={0}
             onClick={() => navigate('/admin/leadtime')}
@@ -1338,7 +1163,14 @@ function AdminDashboard() {
                 navigate('/admin/carrinho-abandono');
               }
             }}
+            style={{
+              backgroundImage: `url(${imagemAbandono})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+            }}
           >
+            <div className={styles.abandonmentKpiOverlay} aria-hidden="true" />
             <FiShoppingCart className={styles.abandonmentKpiIcon} aria-hidden="true" />
             <KpiSettingsButton title="Configurar limites da taxa de abandono" onOpen={() => setShowAbandonoModal(true)} />
             <CalculationHelpButton calculation={kpiCalculations.abandono} onOpen={setCalculationHelp} withSettings />
@@ -1357,7 +1189,7 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.crossSellKpi}`}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.crossSellKpi} ${combagemLevel}`}
             role="link"
             tabIndex={0}
             onClick={() => navigate('/admin/cross-sell')}
@@ -1368,9 +1200,17 @@ function AdminDashboard() {
                 navigate('/admin/cross-sell');
               }
             }}
+            style={{
+              backgroundImage: `url(${imagemCrossSell})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+            }}
           >
+            <div className={styles.crossSellKpiOverlay} aria-hidden="true" />
             <FiLink className={styles.crossSellKpiIcon} aria-hidden="true" />
-            <CalculationHelpButton calculation={kpiCalculations.crossSell} onOpen={setCalculationHelp} />
+            <KpiSettingsButton title="Configurar limites de combagem" onOpen={() => setShowCombagemModal(true)} />
+            <CalculationHelpButton calculation={kpiCalculations.crossSell} onOpen={setCalculationHelp} withSettings />
             <div className={styles.revenueKpiContent}>
               <span>Cross-sell</span>
               <strong className={styles.crossSellPair}>
@@ -1401,7 +1241,14 @@ function AdminDashboard() {
                 navigate('/vendas?status=cancelado');
               }
             }}
+            style={{
+              backgroundImage: `url(${imagemCancelamento})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+            }}
           >
+            <div className={styles.cancellationKpiOverlay} aria-hidden="true" />
             <FiXCircle className={styles.cancellationKpiIcon} aria-hidden="true" />
             <KpiSettingsButton title="Configurar limites da taxa de cancelamento" onOpen={() => setShowCancelamentoModal(true)} />
             <CalculationHelpButton calculation={kpiCalculations.cancelamento} onOpen={setCalculationHelp} withSettings />
@@ -1430,7 +1277,14 @@ function AdminDashboard() {
                 navigate('/admin/satisfacao');
               }
             }}
+            style={{
+              backgroundImage: `url(${imagemSatisfacao})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: 'transparent',
+            }}
           >
+            <div className={styles.satisfactionKpiOverlay} aria-hidden="true" />
             <FiStar className={styles.satisfactionKpiIcon} aria-hidden="true" />
             <KpiSettingsButton title="Configurar limites da media de satisfacao" onOpen={() => setShowSatisfacaoModal(true)} />
             <CalculationHelpButton calculation={kpiCalculations.satisfacao} onOpen={setCalculationHelp} withSettings />
@@ -1440,7 +1294,7 @@ function AdminDashboard() {
               <small>{loadingSatisfaction ? 'Consultando avaliacoes' : `${satisfactionTotal} avaliacoes registradas`}</small>
             </div>
           </article>
-          <article className={styles.accuracyCard}>
+          <article className={`${styles.accuracyCard} ${accuracyLevel}`}>
             <CalculationHelpButton calculation={kpiCalculations.acuracidade} onOpen={setCalculationHelp} />
             <div className={styles.accuracyHeader}>
               <div className={styles.headerContent}>
@@ -1478,7 +1332,7 @@ function AdminDashboard() {
         </section>
 
         <section className={styles.dashboardGrid}>
-          <article className={styles.behaviorCard}
+          <article className={`${styles.behaviorCard} ${informationalLevel}`}
             style={{
               backgroundColor: 'transparent',
               color: '#ffffff',
@@ -1597,6 +1451,13 @@ function AdminDashboard() {
         onClose={() => setShowSatisfacaoModal(false)}
         config={kpiConfig}
         type="satisfacao"
+        onConfigUpdated={(updated) => setKpiConfig(updated)}
+      />
+      <KpiConfigModal
+        isOpen={showCombagemModal}
+        onClose={() => setShowCombagemModal(false)}
+        config={kpiConfig}
+        type="combagem"
         onConfigUpdated={(updated) => setKpiConfig(updated)}
       />
       <CalculationHelpModal calculation={calculationHelp} onClose={() => setCalculationHelp(null)} />

@@ -20,6 +20,8 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
   const [cancelamentoAlta, setCancelamentoAlta] = useState(config?.cancelamentoalta || 15);
   const [satisfacaoBaixa, setSatisfacaoBaixa] = useState(config?.satisfacaobaixa || 3);
   const [satisfacaoAlta, setSatisfacaoAlta] = useState(config?.satisfacaoalta || 4);
+  const [combagemBaixa, setCombagemBaixa] = useState(config?.combagembaixa || 2);
+  const [combagemAlta, setCombagemAlta] = useState(config?.combagemalta || 5);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const isRecompra = type === 'recompra';
@@ -29,6 +31,7 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
   const isAbandono = type === 'abandono';
   const isCancelamento = type === 'cancelamento';
   const isSatisfacao = type === 'satisfacao';
+  const isCombagem = type === 'combagem';
   const isNewRate = isAbandono || isCancelamento || isSatisfacao;
 
   useEffect(() => {
@@ -49,6 +52,8 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       setCancelamentoAlta(config?.cancelamentoalta || 15);
       setSatisfacaoBaixa(config?.satisfacaobaixa || 3);
       setSatisfacaoAlta(config?.satisfacaoalta || 4);
+      setCombagemBaixa(config?.combagembaixa || 2);
+      setCombagemAlta(config?.combagemalta || 5);
       setError('');
     }
   }, [config, isOpen]);
@@ -76,6 +81,11 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
+    if (isCombagem && (combagemBaixa === '' || combagemAlta === '')) {
+      setError('Todos os campos sao obrigatorios');
+      return;
+    }
+
     const newRateLow = isAbandono ? abandonoBaixa : isCancelamento ? cancelamentoBaixa : satisfacaoBaixa;
     const newRateHigh = isAbandono ? abandonoAlta : isCancelamento ? cancelamentoAlta : satisfacaoAlta;
 
@@ -84,7 +94,7 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
-    if (!isRecompra && !isTicket && !isVisitante && !isConversao && !isNewRate && (!faturamentoBaixo || !faturamentoAlto)) {
+    if (!isRecompra && !isTicket && !isVisitante && !isConversao && !isCombagem && !isNewRate && (!faturamentoBaixo || !faturamentoAlto)) {
       setError('Todos os campos sao obrigatorios');
       return;
     }
@@ -109,6 +119,11 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
+    if (isCombagem && parseFloat(combagemBaixa) >= parseFloat(combagemAlta)) {
+      setError('Combagem baixa deve ser menor que combagem alta');
+      return;
+    }
+
     if (isNewRate && parseFloat(newRateLow) >= parseFloat(newRateHigh)) {
       setError('O limite baixo deve ser menor que o limite alto');
       return;
@@ -124,7 +139,7 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
       return;
     }
 
-    if (!isRecompra && !isTicket && !isVisitante && !isConversao && !isNewRate && parseFloat(faturamentoBaixo) >= parseFloat(faturamentoAlto)) {
+    if (!isRecompra && !isTicket && !isVisitante && !isConversao && !isCombagem && !isNewRate && parseFloat(faturamentoBaixo) >= parseFloat(faturamentoAlto)) {
       setError('Faturamento baixo deve ser menor que faturamento alto');
       return;
     }
@@ -148,6 +163,8 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
         cancelamentoalta: cancelamentoAlta,
         satisfacaobaixa: satisfacaoBaixa,
         satisfacaoalta: satisfacaoAlta,
+        combagembaixa: combagemBaixa,
+        combagemalta: combagemAlta,
       });
       onConfigUpdated(updated);
       onClose();
@@ -164,7 +181,7 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>{isRecompra ? 'Configurar Recompra' : isTicket ? 'Configurar Ticket Medio' : isVisitante ? 'Configurar Visitantes' : isConversao ? 'Configurar Conversao' : isAbandono ? 'Configurar Abandono' : isCancelamento ? 'Configurar Cancelamento' : isSatisfacao ? 'Configurar Satisfacao' : 'Configurar Faturamento'}</h2>
+          <h2>{isRecompra ? 'Configurar Recompra' : isTicket ? 'Configurar Ticket Medio' : isVisitante ? 'Configurar Visitantes' : isConversao ? 'Configurar Conversao' : isAbandono ? 'Configurar Abandono' : isCancelamento ? 'Configurar Cancelamento' : isSatisfacao ? 'Configurar Satisfacao' : isCombagem ? 'Configurar Combagem' : 'Configurar Faturamento'}</h2>
           <button className={styles.closeBtn} onClick={onClose}>
             <FiX size={20} />
           </button>
@@ -213,6 +230,40 @@ function KpiConfigModal({ isOpen, onClose, config, onConfigUpdated, type = 'fatu
                 {isSatisfacao
                   ? 'Abaixo do limite baixo: critico. Entre os limites: atencao. Acima do limite alto: bom.'
                   : 'Abaixo do limite baixo: bom. Entre os limites: atencao. Acima do limite alto: critico.'}
+              </p>
+            </>
+          ) : isCombagem ? (
+            <>
+              <div className={styles.fieldGroup}>
+                <label htmlFor="combagem-baixa">Combagem Baixa</label>
+                <input
+                  id="combagem-baixa"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={combagemBaixa}
+                  onChange={(event) => setCombagemBaixa(event.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <div className={styles.fieldGroup}>
+                <label htmlFor="combagem-alta">Combagem Alta</label>
+                <input
+                  id="combagem-alta"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={combagemAlta}
+                  onChange={(event) => setCombagemAlta(event.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <p className={styles.info}>
+                Abaixo de {parseInt(combagemBaixa || 0, 10)} pedidos juntos: ruim.
+                <br />
+                Entre {parseInt(combagemBaixa || 0, 10)} e {parseInt(combagemAlta || 0, 10)} pedidos juntos: regular.
+                <br />
+                Acima de {parseInt(combagemAlta || 0, 10)} pedidos juntos: bom.
               </p>
             </>
           ) : isRecompra ? (
