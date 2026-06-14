@@ -40,7 +40,7 @@ const getSavedAddressState = (address) => (
 );
 
 function CartPage() {
-  const { cart, removeFromCart, clearCart, addToCart, decreaseQuantity, isCartLoading, cartError } = useCart();
+  const { cart, removeFromCart, refreshCart, addToCart, decreaseQuantity, isCartLoading, cartError } = useCart();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [cep, setCep] = useState('');
@@ -351,6 +351,7 @@ function CartPage() {
     try {
       setIsSubmittingOrder(true);
       const pedido = await criarPedido({
+        carrinho_id: cart.id,
         itens: displayItems.map(({ product, quantity }) => ({
           id_produto: product.id,
           quantidade: quantity,
@@ -361,7 +362,7 @@ function CartPage() {
         frete: selectedShipping ? { name: selectedShipping.name } : null,
       });
 
-      clearCart();
+      await refreshCart();
 
       if (openWhatsAppAfterOrder) {
         window.open(

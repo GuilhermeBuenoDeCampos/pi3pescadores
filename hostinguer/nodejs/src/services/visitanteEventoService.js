@@ -1,4 +1,44 @@
 const db = require('../database/models');
+const { Op } = db.Sequelize;
+
+exports.vincularEventosAnonimos = async (ip, usuarioId) => {
+  if (!ip || !usuarioId) return 0;
+
+  const inicioMes = new Date();
+  inicioMes.setDate(1);
+  inicioMes.setHours(0, 0, 0, 0);
+
+  const usuariosNoIp = await db.VisitanteEvento.findAll({
+    attributes: ['usuario_id'],
+    where: {
+      ip,
+      usuario_id: { [Op.ne]: null },
+      criado_em: { [Op.gte]: inicioMes },
+    },
+    group: ['usuario_id'],
+    raw: true,
+  });
+
+  if (
+    usuariosNoIp.length > 1 ||
+    (usuariosNoIp.length === 1 && String(usuariosNoIp[0].usuario_id) !== String(usuarioId))
+  ) {
+    return 0;
+  }
+
+  const [vinculados] = await db.VisitanteEvento.update(
+    { usuario_id: usuarioId },
+    {
+      where: {
+        ip,
+        usuario_id: null,
+        criado_em: { [Op.gte]: inicioMes },
+      },
+    }
+  );
+
+  return vinculados;
+};
 
 /**
  * Registrar um evento de visitante
@@ -31,15 +71,7 @@ exports.registrarEvento = async (evento, ip, dispositivo, usuarioId = null) => {
       console.log(`[visitanteEventoService] Vinculando eventos anteriores do IP ${ip} ao usuário ${usuarioId}`);
       
       // Atualizar eventos sem usuario_id do mesmo IP para adicionar o usuario_id
-      const [updated] = await db.VisitanteEvento.update(
-        { usuario_id: usuarioId },
-        {
-          where: {
-            ip: ip,
-            usuario_id: null, // Apenas eventos sem usuario_id
-          },
-        }
-      );
+      const updated = await exports.vincularEventosAnonimos(ip, usuarioId);
       
       if (updated > 0) {
         console.log(`[visitanteEventoService] ${updated} evento(s) anterior(es) vinculado(s) ao usuário`);
@@ -121,7 +153,31 @@ exports.obterTaxaConversao = async () => {
     const isMysql = db.sequelize.getDialect() === 'mysql';
     const visitanteMes = isMysql ? "DATE_FORMAT(ve.created_at, '%Y-%m-01')" : "DATE_TRUNC('month', ve.created_at)";
     const pedidoMes = isMysql ? "DATE_FORMAT(p.criado_em, '%Y-%m-01')" : "DATE_TRUNC('month', p.criado_em)";
-    const visitanteIdentidade = isMysql ? 'COALESCE(ve.usuario_id, ve.ip)' : 'COALESCE(ve.usuario_id::text, ve.ip)';
+    const visitanteIdentidade = isMysql
+      ? `COALESCE(
+          ve.usuario_id,
+          (
+            SELECT MIN(vinculado.usuario_id)
+            FROM visitante_evento vinculado
+            WHERE vinculado.ip = ve.ip
+              AND vinculado.usuario_id IS NOT NULL
+              AND DATE_FORMAT(vinculado.created_at, '%Y-%m-01') = DATE_FORMAT(ve.created_at, '%Y-%m-01')
+            HAVING COUNT(DISTINCT vinculado.usuario_id) = 1
+          ),
+          ve.ip
+        )`
+      : `COALESCE(
+          ve.usuario_id::text,
+          (
+            SELECT MIN(vinculado.usuario_id::text)
+            FROM visitante_evento vinculado
+            WHERE vinculado.ip = ve.ip
+              AND vinculado.usuario_id IS NOT NULL
+              AND DATE_TRUNC('month', vinculado.created_at) = DATE_TRUNC('month', ve.created_at)
+            HAVING COUNT(DISTINCT vinculado.usuario_id) = 1
+          ),
+          ve.ip
+        )`;
 
     // Query para visitantes únicos que visitaram home (por mês)
     // Conta usuários logados como únicos por usuario_id, e não-logados como únicos por IP

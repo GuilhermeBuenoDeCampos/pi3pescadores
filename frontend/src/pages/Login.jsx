@@ -4,6 +4,7 @@ import { FiEye, FiEyeOff } from 'react-icons/fi';
 import styles from './Auth.module.css';
 import logo from '../assets/logo/logo.png';
 import { loginUser, saveAuthSession } from '../services/api';
+import { vincularIdentidadeVisitante } from '../services/visitanteEvento';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -33,6 +34,7 @@ const Login = () => {
         try {
             const session = await loginUser(form);
             saveAuthSession(session);
+            await vincularIdentidadeVisitante();
             navigate(location.state?.from || '/');
         } catch (err) {
             setError(err.message || 'Email ou senha invalidos.');

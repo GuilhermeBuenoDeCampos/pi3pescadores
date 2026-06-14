@@ -21,6 +21,8 @@ const DEFAULT_CONFIG = {
   cancelamentoalta: 15,
   satisfacaobaixa: 3,
   satisfacaoalta: 4,
+  combagembaixa: 2,
+  combagemalta: 5,
 };
 
 const DB_KEYS = {
@@ -40,6 +42,8 @@ const DB_KEYS = {
   cancelamentoalta: 'cancelamento_alta',
   satisfacaobaixa: 'satisfacao_baixa',
   satisfacaoalta: 'satisfacao_alta',
+  combagembaixa: 'combagem_baixa',
+  combagemalta: 'combagem_alta',
 };
 
 const DESCRIPTIONS = {
@@ -59,6 +63,8 @@ const DESCRIPTIONS = {
   cancelamentoalta: 'Taxa de cancelamento alta %',
   satisfacaobaixa: 'Media de satisfacao baixa',
   satisfacaoalta: 'Media de satisfacao alta',
+  combagembaixa: 'Quantidade baixa de pedidos na principal combinacao de cross-sell',
+  combagemalta: 'Quantidade alta de pedidos na principal combinacao de cross-sell',
 };
 
 function toNumber(value, fallback) {
@@ -117,7 +123,10 @@ async function ensureConfigRows(transaction) {
     }));
 
   if (missingRows.length > 0) {
-    await db.KpiConfig.bulkCreate(missingRows, { transaction });
+    await db.KpiConfig.bulkCreate(missingRows, {
+      ignoreDuplicates: true,
+      transaction,
+    });
     return findAllConfigRows(transaction);
   }
 
@@ -153,6 +162,8 @@ exports.atualizarConfig = async (body) => {
     cancelamentoalta: toNumber(body.cancelamentoalta, current.cancelamentoalta),
     satisfacaobaixa: toNumber(body.satisfacaobaixa, current.satisfacaobaixa),
     satisfacaoalta: toNumber(body.satisfacaoalta, current.satisfacaoalta),
+    combagembaixa: toNumber(body.combagembaixa, current.combagembaixa),
+    combagemalta: toNumber(body.combagemalta, current.combagemalta),
   };
 
   validateRange(payload.faturamento_baixo, payload.faturamento_alto, 'faturamento_baixo', 'faturamento_alto');
@@ -163,6 +174,7 @@ exports.atualizarConfig = async (body) => {
   validateRange(payload.abandonobaixa, payload.abandonoalta, 'abandonobaixa', 'abandonoalta');
   validateRange(payload.cancelamentobaixa, payload.cancelamentoalta, 'cancelamentobaixa', 'cancelamentoalta');
   validateRange(payload.satisfacaobaixa, payload.satisfacaoalta, 'satisfacaobaixa', 'satisfacaoalta');
+  validateRange(payload.combagembaixa, payload.combagemalta, 'combagembaixa', 'combagemalta');
 
   if (payload.abandonoalta > 100 || payload.cancelamentoalta > 100) {
     throw new AppError(400, 'As taxas devem estar entre 0 e 100');

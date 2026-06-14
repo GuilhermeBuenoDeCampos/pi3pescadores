@@ -31,6 +31,23 @@ export async function registrarEventoVisitante(evento) {
   }
 }
 
+export async function vincularIdentidadeVisitante() {
+  try {
+    const response = await apiFetch(`${BACKEND_URL}/api/visitante-evento/vincular-identidade`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('[visitante-evento] Erro ao vincular identidade:', error);
+    return false;
+  }
+}
+
 /**
  * Obter estatísticas de eventos
  */

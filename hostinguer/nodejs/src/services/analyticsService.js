@@ -34,7 +34,7 @@ exports.obterTempoPorPagina = async (dias = 30) => {
       'pagina',
       [fn('AVG', col('duracao_ms')), 'tempo_medio_ms'],
       [fn('COUNT', col('id')), 'total_visualizacoes'],
-      [fn('MAX', col('criado_em')), 'ultima_visualizacao'],
+      [fn('MAX', col('created_at')), 'ultima_visualizacao'],
     ],
     where: {
       tipo: 'page_view',

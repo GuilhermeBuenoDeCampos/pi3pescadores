@@ -40,18 +40,64 @@
   margin: 0;
 }
 
-.kpiGrid {
+.metricsGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
   margin-bottom: 18px;
 }
 
+.kpiGrid,
 .conversionSection {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
-  margin-bottom: 18px;
+  display: contents;
+}
+
+.kpiGrid > article:nth-child(1) {
+  order: 1;
+}
+
+.kpiGrid > article:nth-child(2) {
+  order: 2;
+}
+
+.conversionSection > article:nth-child(1) {
+  order: 3;
+}
+
+.kpiGrid > article:nth-child(3) {
+  order: 4;
+}
+
+.conversionSection > article:nth-child(2) {
+  order: 5;
+}
+
+.kpiGrid > article:nth-child(4) {
+  order: 6;
+}
+
+.conversionSection > article:nth-child(4) {
+  order: 7;
+}
+
+.conversionSection > article:nth-child(6) {
+  order: 8;
+}
+
+.conversionSection > article:nth-child(5) {
+  order: 9;
+}
+
+.conversionSection > article:nth-child(7) {
+  order: 10;
+}
+
+.conversionSection > article:nth-child(3) {
+  order: 11;
+}
+
+.conversionSection > article:nth-child(8) {
+  order: 12;
 }
 
 .kpiCard {
@@ -801,6 +847,10 @@
 }
 
 @media (max-width: 980px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .kpiGrid,
   .conversionSection,
   .wide,
@@ -821,6 +871,10 @@
   .hero {
     border-radius: 12px;
     padding: 18px;
+  }
+
+  .metricsGrid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .kpiGrid,

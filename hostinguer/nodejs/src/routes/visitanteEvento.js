@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const visitanteEventoService = require('../services/visitanteEventoService');
 const asyncHandler = require('../utils/asyncHandler');
+const authenticate = require('../middlewares/authenticate');
 const authenticateOptional = require('../middlewares/authenticateOptional');
 
 const router = Router();
@@ -34,6 +35,19 @@ router.post(
 
     console.log('[visitante-evento POST] Evento registrado com sucesso:', novoEvento.id);
     res.status(201).json(novoEvento);
+  })
+);
+
+router.post(
+  '/vincular-identidade',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    const vinculados = await visitanteEventoService.vincularEventosAnonimos(
+      req.clientIp,
+      req.user?.sub
+    );
+
+    res.json({ data: { vinculados } });
   })
 );
 

@@ -312,9 +312,44 @@ exports.criarPedido = async (usuarioId, payload) => {
   const enderecoEntrega = normalizeAddress(payload.endereco_entrega || payload.enderecoEntrega);
   const metodoPagamento = normalizePaymentMethod(payload.metodo_pagamento || payload.metodoPagamento);
   const observacoes = payload.observacoes ? String(payload.observacoes).trim() : null;
+  const carrinhoId = Number(payload.carrinho_id || payload.carrinhoId || 0) || null;
   const now = new Date();
 
   const pedido = await db.sequelize.transaction(async (transaction) => {
+    let carrinho = null;
+
+    if (carrinhoId) {
+      carrinho = await db.Carrinho.findOne({
+        where: {
+          id: carrinhoId,
+          usuario_id: usuarioId,
+          status: { [Op.in]: ['ativo', 'active'] },
+        },
+        include: [{
+          model: db.CarrinhoItem,
+          as: 'itens',
+          attributes: ['produto_id', 'quantidade'],
+        }],
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+
+      if (!carrinho) {
+        throw new AppError(400, 'Carrinho ativo nao encontrado');
+      }
+
+      const itensCarrinho = new Map(
+        carrinho.itens.map((item) => [Number(item.produto_id), Number(item.quantidade)])
+      );
+      const correspondeAoPedido = items.length === itensCarrinho.size && items.every(
+        (item) => itensCarrinho.get(item.id_produto) === item.quantidade
+      );
+
+      if (!correspondeAoPedido) {
+        throw new AppError(400, 'Os itens do carrinho foram alterados. Atualize a pagina e tente novamente.');
+      }
+    }
+
     const produtos = await db.Produto.findAll({
       where: {
         id: {
@@ -430,6 +465,17 @@ exports.criarPedido = async (usuarioId, payload) => {
       })),
       { transaction }
     );
+
+    if (carrinho) {
+      await carrinho.update(
+        {
+          status: 'finalizado',
+          atualizado_em: now,
+          ultima_interacao_em: now,
+        },
+        { transaction }
+      );
+    }
 
     return createdPedido;
   });

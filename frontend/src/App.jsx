@@ -16,6 +16,7 @@ import LeadtimeDetalhado from './pages/LeadtimeDetalhado';
 import SatisfacaoDetalhada from './pages/SatisfacaoDetalhada';
 import ComportamentoDetalhado from './pages/ComportamentoDetalhado';
 import CrossSellDetalhado from './pages/CrossSellDetalhado';
+import PalavrasPesquisadasDetalhado from './pages/PalavrasPesquisadasDetalhado';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import useUserTracking from './hooks/useUserTracking';
@@ -124,6 +125,14 @@ function App() {
           element={
             <ProtectedRoute roles={['admin', 'funcionario']}>
               <CrossSellDetalhado />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/palavras-pesquisadas"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <PalavrasPesquisadasDetalhado />
             </ProtectedRoute>
           }
         />

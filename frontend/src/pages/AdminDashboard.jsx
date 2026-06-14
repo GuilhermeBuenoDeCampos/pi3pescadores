@@ -722,7 +722,8 @@ function AdminDashboard() {
           </div>
         </header>
 
-        <section className={styles.kpiGrid} aria-label="Indicadores principais">
+        <section className={styles.metricsGrid} aria-label="Indicadores do painel">
+          <section className={styles.kpiGrid} aria-label="Indicadores principais">
           <article 
             className={`${styles.kpiCard} ${styles.clickableKpiCard} ${faturamentoLevel}`}
             role="link"
@@ -943,7 +944,17 @@ function AdminDashboard() {
             </div>
           </article>
           <article
-            className={`${styles.kpiCard} ${styles.searchKpi} ${informationalLevel}`}
+            className={`${styles.kpiCard} ${styles.clickableKpiCard} ${styles.searchKpi} ${informationalLevel}`}
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate('/admin/palavras-pesquisadas')}
+            onKeyDown={(event) => {
+              if (event.currentTarget !== event.target) return;
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate('/admin/palavras-pesquisadas');
+              }
+            }}
             style={{
               backgroundImage: `url(${palavrasPesquisadasImg})`,
               backgroundSize: 'cover',
@@ -967,9 +978,9 @@ function AdminDashboard() {
             <CalculationHelpButton calculation={kpiCalculations.pesquisas} onOpen={setCalculationHelp} />
             <div className={styles.revenueKpiContent}>
               <span>Palavras mais pesquisadas</span>
-              <strong>{loadingSearches ? 'Carregando...' : topSearch?.palavra || 'Sem dados'}</strong>
+              <strong>{loadingSearches ? 'Carregando...' : topSearch ? 'Top 3 buscas' : 'Sem dados'}</strong>
               <div className={styles.searchList}>
-                {topSearches.slice(0, 4).map((item) => (
+                {topSearches.slice(0, 3).map((item) => (
                   <small key={item.palavra}>
                     <span>{item.palavra}</span>
                     <b>{item.total}</b>
@@ -978,9 +989,9 @@ function AdminDashboard() {
               </div>
             </div>
           </article>
-        </section>
+          </section>
 
-        <section className={styles.conversionSection} aria-label="Indicadores operacionais">
+          <section className={styles.conversionSection} aria-label="Indicadores operacionais">
           <article
             className={`${styles.kpiCard} ${conversaoLevel}`}
             style={{
@@ -1329,6 +1340,7 @@ function AdminDashboard() {
             </div>
             {accuracyError && <p className={styles.errorText}>{accuracyError}</p>}
           </article>
+          </section>
         </section>
 
         <section className={styles.dashboardGrid}>
