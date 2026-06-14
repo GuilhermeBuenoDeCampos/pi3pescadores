@@ -14,7 +14,11 @@ import { formatPrice } from '../utils/productUtils';
 
 function ProductPage() {
   const cartContext = useCart();
-  const { addToCart = () => {} } = cartContext || {};
+  const {
+    addToCart = () => {},
+    cart,
+    isCartLoading = false,
+  } = cartContext || {};
   const navigate = useNavigate();
   const [justAdded, setJustAdded] = useState(false);
   const { id, nome } = useParams();
@@ -97,6 +101,13 @@ function ProductPage() {
 
     if (!cartContext) {
       console.error('CartContext indisponivel no ProductPage');
+      return;
+    }
+
+    const cartHasItems = Number(cart?.totalItems || 0) > 0 || Boolean(cart?.items?.length);
+
+    if (shouldNavigate && cartHasItems) {
+      navigate('/carrinho');
       return;
     }
 
@@ -249,9 +260,9 @@ function ProductPage() {
                 type="button"
                 className={`${styles.btn} ${styles.secondaryButton}`}
                 onClick={() => handleAddToCart(true)}
-                disabled={isOutOfStock}
+                disabled={isOutOfStock || isCartLoading}
               >
-                Comprar agora
+                {isCartLoading ? 'Carregando carrinho...' : 'Comprar agora'}
               </button>
             </div>
 

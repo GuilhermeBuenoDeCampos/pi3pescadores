@@ -3,11 +3,11 @@ import { FiStar, FiX } from 'react-icons/fi';
 import styles from './CustomerSatisfactionModal.module.css';
 
 const CRITERIA = [
-  { key: 'atendimento', label: 'Atendimento' },
-  { key: 'entrega', label: 'Entrega' },
-  { key: 'qualidade', label: 'Qualidade' },
-  { key: 'preco', label: 'Preço' },
-  { key: 'experiencia', label: 'Experiência' },
+  { key: 'atendimento', label: 'Você encontrou facilmente o produto que procurava?' },
+  { key: 'experiencia', label: 'Como você avalia sua experiência geral de compra?' },
+  { key: 'preco', label: 'Qual a probabilidade de você comprar novamente na Três Pescadores Store?' },
+  { key: 'qualidade', label: 'Como você avalia a qualidade dos produtos recebidos?' },
+  { key: 'entrega', label: 'O prazo de entrega atendeu às suas expectativas?' },
 ];
 
 function buildInitialRatings() {

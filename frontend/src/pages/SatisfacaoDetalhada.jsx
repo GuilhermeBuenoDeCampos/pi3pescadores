@@ -31,11 +31,11 @@ ChartJS.register(
 );
 
 const criteria = [
-  ['Atendimento', 'atendimento'],
-  ['Entrega', 'entrega'],
-  ['Qualidade', 'qualidade'],
-  ['Preco', 'preco'],
-  ['Experiencia', 'experiencia'],
+  ['Facilidade para encontrar o produto', 'atendimento'],
+  ['Experiencia geral de compra', 'experiencia'],
+  ['Probabilidade de comprar novamente', 'preco'],
+  ['Qualidade dos produtos recebidos', 'qualidade'],
+  ['Prazo de entrega', 'entrega'],
 ];
 
 function SatisfacaoDetalhada() {

@@ -161,7 +161,7 @@ function OrderDetailsPage() {
             <div>
               <span className={styles.reviewKicker}>Satisfação do cliente</span>
               <h2>Conte como foi sua experiência</h2>
-              <p>Uma avaliação rápida ajuda a equipe a melhorar atendimento, entrega, qualidade, preço e experiência.</p>
+              <p>Uma avaliação rápida ajuda a equipe a melhorar a experiência de compra, os produtos e a entrega.</p>
             </div>
             <button type="button" className={styles.reviewPromptButton} onClick={() => setIsReviewModalOpen(true)}>
               Avaliar pedido
